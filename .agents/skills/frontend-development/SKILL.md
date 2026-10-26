@@ -27,7 +27,7 @@ Deliver frontend changes using this repository's existing structure and patterns
 - Server reads go through `src/lib/api/server.ts`; business mutations use feature-owned Server Actions that forward to Express. Browser reconciliation reads and native auth use same-origin `/api/v1`. Keep `API_URL` server-only.
 - Express owns business rules, validation, authorization, persistence, and API contracts. UI visibility and the CRM shell do not grant access. Do not import backend source or database code.
 - Consume generated contract types from `src/lib/api/generated`; never hand-edit them. After a backend OpenAPI change, refresh the affected frontend-local contract snapshot, then run `bun run api:generate` and `bun run api:check`.
-- The current generator reads `docs/contracts/properties.openapi.yaml` and produces `src/lib/api/generated/properties.d.ts`. For a new API domain, coordinate its backend contract and extend snapshot/generator coverage explicitly; the existing command does not automatically generate every endpoint.
+- The current generator reads property and lead OpenAPI snapshots from `docs/contracts` and produces corresponding declarations in `src/lib/api/generated`. For a new API domain, coordinate its backend contract and extend snapshot/generator coverage explicitly.
 - Implement the feature spec's loading, empty, error, success, and permission states. Use the agreed request/response contract rather than inventing endpoints or exposing private fields.
 
 ## 4. UI choices
@@ -37,6 +37,92 @@ Deliver frontend changes using this repository's existing structure and patterns
 - Use semantic tokens and existing component variants for consistent color, spacing, and typography. Follow the established maroon, ivory, and charcoal design direction.
 - Use `FieldError` for field errors, `Alert`/`AlertDescription` for persistent form or action feedback, and shared `Button` variants for actions.
 - Support responsive layouts, keyboard operation, visible focus, associated labels, and accessible feedback. Inspect the affected screens at desktop and mobile widths and exercise meaningful interactive states.
+
+## Shared CRM application components
+
+Use application components before composing primitive markup for CRM lists and ordinary fields. Primitives under src/components/ui remain the foundation. Feature modules provide the content and business state; shared components own repeated presentation.
+
+- Import PageHeader from @/components/layout/page-header. Props: title (string), description (ReactNode), actions (ReactNode), className. It owns the h1/description/action layout; pass permission-filtered links in actions.
+- Import FilterPanel from @/components/layout/filter-panel. Props: children, disabled, busy, fieldsClassName, className, before and after. It owns the card and disabled fieldset/grid. Put feature navigation in before and extra controls in after. Wrap it in a feature-owned form for explicit submit; keep lead debounce/mobile draft logic in the feature. A disabled fieldset affects its children; before/after actions must receive their own disabled rules when needed.
+- Import DataTable and type DataColumn<T> from @/components/crm/data-table. Props: rows, columns, getRowKey, label, empty, optional renderMobile. Each column has stable id, header, cell(row), optional className and headerClassName. rows and columns accept readonly arrays; getRowKey returns a React Key, cell/renderMobile return ReactNode. Supply role-allowed columns only. The component owns table tags, row iteration, mobile wrapping and empty rendering; do not repeat those structures in feature files.
+- Import CollectionPagination from @/components/crm/collection-pagination. Props: page, pageSize, total, href(page), optional showTotal. The feature supplies URL construction; the shared component renders pagination.
+- Import TextField, SelectField and TextareaField from @/components/forms/fields. Each accepts id, label, optional help, error, fieldClassName and native control props including ref. SelectField takes option children. Spread form.register(name) directly; keep schema/form state in the feature. id and label are required. Help and error use generated ids id-help and id-error; blank/absent messages produce no dangling references. Shared fields own label/control/help/error IDs and merge caller aria-describedby rather than replacing it. Use existing Field primitives for specialized controls such as checkboxes, uploads and search pickers.
+
+DataTable has no use-client directive: server-owned columns/functions must be consumed within the server graph. It can also be imported by an existing client feature with client-owned columns. Never pass cell functions from a Server Component into a Client Component boundary. PageHeader/FilterPanel do not fetch or authorize.
+
+Example of a server-compatible results component (contacts is an illustration, not a delivered feature):
+
+```tsx
+import { PageHeader } from "@/components/layout/page-header";
+import { FilterPanel } from "@/components/layout/filter-panel";
+import { TextField } from "@/components/forms/fields";
+import { DataTable } from "@/components/crm/data-table";
+
+type Contact = { id: string; name: string };
+export function ContactResults({ rows }: { rows: Contact[] }) {
+  return (
+    <>
+      <PageHeader title="Contacts" description="Your contacts" />
+      <form action="/crm/contacts">
+        <FilterPanel>
+          <TextField id="contact-q" name="q" label="Search contacts" />
+        </FilterPanel>
+      </form>
+      <DataTable
+        rows={rows}
+        getRowKey={(row) => row.id}
+        label="Contacts"
+        columns={[{ id: "name", header: "Name", cell: (row) => row.name }]}
+        empty={<p>No contacts yet.</p>}
+      />
+    </>
+  );
+}
+```
+
+Real consumers: src/features/properties/crm/property-inventory.tsx and src/features/leads/crm/lead-list.tsx; filter and form-field siblings show controlled and registered fields. Read [shared component specification](../../../specs/shared-crm-components/spec.md) for scope and verification.
+
+## Shared public application components
+
+Public pages share ordinary labelled fields with CRM, while public headings and search panels retain their own visual hierarchy. Start with these existing components rather than copying sections or forcing public layouts into CRM PageHeader/FilterPanel/DataTable.
+
+- Import PublicSectionHeader from @/components/layout/public-section-header. Props: required level (1 or 2) and title (ReactNode); optional id, description, eyebrow, actions and className. level selects the established public h1/h2 typography and spacing. Keep a section's aria-labelledby equal to its heading id. The homepage hero and property detail/gallery heading remain distinct compositions.
+- Import PublicSearchPanel from @/components/layout/public-search-panel. Props: children, treatment (hero or listing), optional className. It owns the two existing public search card treatments, not forms, fieldsets, navigation or validation. PropertyFilters owns the listing panel; the homepage owns the hero panel around PropertyFilters home. Preserve these existing ownership boundaries and do not add a second panel around an already panelled surface.
+- Import PropertyGrid from @/features/properties/public/property-grid. Props: properties (readonly PublicPropertySummary array), optional resultsQuery. It owns PropertyCard iteration and responsive grid classes. Pass resultsQuery on listing results to preserve return-to-results links; omit it on featured collections. Feature callers own empty/error/loading and demo disclosure content.
+- PropertyCard from @/features/properties/public/property-card already owns property card rendering; props property and optional resultsQuery. PropertyFilters from @/features/properties/public/property-filters already shares SearchForm between homepage, desktop results and mobile Sheet; props query (default empty) and home (default false). PropertyPagination remains the feature-owned numbered navigation. Reuse these rather than rebuilding them.
+- Use TextField, SelectField and TextareaField from @/components/forms/fields for ordinary public search/inquiry controls, just as in CRM. Pass register(name), error.message, native props and existing control ids. Let wrapper help use its generated id. Preserve external budget-note aria-describedby; wrapper errors merge with it. Keep radio purpose tabs and inline result sort specialized rather than adding unused generic variants.
+
+Server headings and property grids remain server-compatible. PublicSearchPanel owns no domain imports or client state. The feature retains exact AED conversion, URL/query state, mobile Apply/close behavior and hydration readiness. InquiryCard retains native autofill synchronization, stable receipts, duplicate guards and explicit uncertain-save reconciliation. There is one inquiry form today; create no generic contact form or public table without another real consumer.
+
+Example of composing an existing public collection (rows are already fetched by the feature):
+
+```tsx
+import { PublicSectionHeader } from "@/components/layout/public-section-header";
+import { PropertyGrid } from "@/features/properties/public/property-grid";
+import type { PublicPropertySummary } from "@/features/properties/data/types";
+
+export function PublicCollection({
+  properties,
+  query,
+}: {
+  properties: PublicPropertySummary[];
+  query: string;
+}) {
+  return (
+    <section aria-labelledby="collection-heading">
+      <PublicSectionHeader
+        id="collection-heading"
+        level={2}
+        title="Explore our collection"
+        description="Homes for your next chapter."
+      />
+      <PropertyGrid properties={properties} resultsQuery={query} />
+    </section>
+  );
+}
+```
+
+Real consumers: src/app/(public)/page.tsx, src/app/(public)/properties/page.tsx, src/features/properties/public/property-results.tsx and property-filters.tsx, and src/features/leads/public/inquiry-card.tsx. See [shared public component specification](../../../specs/shared-public-components/spec.md).
 
 ## 5. Forms
 

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/layout/page-header";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -47,25 +48,23 @@ export default async function PropertiesPage({
 
   return (
     <main id="main-content" className="min-w-0 flex-1 px-4 py-10 sm:px-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Properties</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Manage your agency’s property inventory.
-          </p>
-        </div>
-        {staff.role !== "agent" && (
-          <Link
-            href="/crm/properties/new"
-            className={`${buttonVariants()} gap-2`}
-            aria-label="Add property"
-            title="Add property"
-          >
-            <Icon name="plus" />
-            Add property
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Properties"
+        description="Manage your agency’s property inventory."
+        actions={
+          staff.role !== "agent" ? (
+            <Link
+              href="/crm/properties/new"
+              className={`${buttonVariants()} gap-2`}
+              aria-label="Add property"
+              title="Add property"
+            >
+              <Icon name="plus" />
+              Add property
+            </Link>
+          ) : undefined
+        }
+      />
       <div className="space-y-6">
         <PropertyInventoryFilters filters={filters} />
         <Suspense

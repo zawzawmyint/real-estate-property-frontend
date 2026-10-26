@@ -10,6 +10,8 @@ This file defines project-wide scope and boundaries and indexes existing specifi
 
 ## Verified baseline
 
+- Public homepage/listing headings, search panels and property grids share verified application components; ordinary public search and inquiry fields reuse the same labelled fields as CRM. Public hero/gallery and feature coordination remain distinct. See [shared public components](specs/shared-public-components/spec.md). This is maintenance with no new roadmap business-feature completion.
+
 - Public homepage shell at `/` and staff shell at `/crm`, with separate layouts and shared design tokens and UI primitives.
 - Loading, error and not-found handling, responsive foundation navigation and keyboard focus.
 - Server-only backend transport and browser `/api/v1` proxy, verified against the Express health endpoint.
@@ -24,8 +26,9 @@ This file defines project-wide scope and boundaries and indexes existing specifi
 - Poppins is self-hosted for application UI/body text and Lora for public display text and the wordmark. See the [typography specification](specs/typography/spec.md) and [font provenance](src/app/fonts/README.md).
 - Staff property inventory, lifecycle and photo workflows; public search, featured listings, listing results and property detail/gallery routes. CRM property details use the authenticated read-only `/crm/properties/[id]` route for every staff role, with Admin/Manager editing at `/crm/properties/[id]/edit`; Agent edit requests redirect to details. Inventory labels keep CRM details, editing and the public `/properties/[id]` listing distinct, and public navigation appears only for published, available properties. Property reads/types/request handling and server-only mutations are separated; business writes use validated Server Actions and CRM inventory results stream independently. The feature is organized into data, public UI, CRM UI and shared presentation/loading modules without changing those workflows. See the [CRM property details specification](specs/crm-property-details/spec.md), [property-management specification](specs/property-management/spec.md), [data/forms refactor specification](specs/frontend-data-and-form-refactor/spec.md) and [property feature organization specification](specs/property-feature-organization/spec.md).
 - An explicit, local/demo-only seed command adds 15 fictional labelled listings with generated illustrative images. See the [demo-property-data specification](specs/demo-property-data/spec.md).
+- Properties and Leads reuse a verified CRM presentation layer: PageHeader, FilterPanel, typed DataTable<T>, CollectionPagination and labelled ordinary fields. Features retain their data, permission and URL behavior; this is frontend-only maintenance with no API, dependency or roadmap business-feature change. See the [shared CRM components specification](specs/shared-crm-components/spec.md).
 
-Inquiries, leads and dashboards are not implemented. Lead ownership remains future work. The [property-management specification](specs/property-management/spec.md) and [implementation plan](docs/plans/property-management.md) record the delivered scope and exclusions.
+Public property inquiries, staff lead creation and role-scoped lead follow-up are implemented. Admin/Manager distribute active-agent assignments; agents only access their current assignments. See the [lead-management specification](specs/lead-management/spec.md) and its [local contract snapshot](docs/contracts/leads.md).
 
 ## Verified presentation maintenance
 
@@ -37,11 +40,11 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 ## Planned product scope
 
-Remaining work includes website inquiry capture, contact and agent pages, lead management and ownership, pipeline, viewings, follow-up tasks and reporting. Later enhancements and the optional client portal remain subject to the roadmap.
+Remaining work includes contact and agent pages, pipeline Kanban, viewings, follow-up tasks and reporting. Later enhancements and the optional client portal remain subject to the roadmap.
 
-Staff authentication, property management, homepage search and featured results, filtered listings, and property detail/gallery are already delivered within the verified baseline above. The roadmap records partial delivery for broader homepage, detail/inquiry and mobile-layout checklist items; their unchecked status does not make the delivered portions unimplemented.
+Staff authentication, property management, homepage search and featured results, filtered listings, and property detail/gallery are already delivered within the verified baseline above. The roadmap records partial delivery for broader homepage and mobile-layout checklist items; their unchecked status does not make the delivered portions unimplemented.
 
-The [roadmap](ROADMAP.md) owns checklist IDs and progress. The verified [authentication feature spec](specs/staff-authentication-and-roles/spec.md) covers P1-01 and the identity portion of P1-02. P1-03 remains pending because no lead records exist yet.
+The [roadmap](ROADMAP.md) owns checklist IDs and progress. The verified [authentication feature spec](specs/staff-authentication-and-roles/spec.md) covers P1-01 and the identity portion of P1-02; the lead-management feature verifies P1-03–P1-09, P1-20–P1-22 and P1-16.
 
 The auth implementation uses Better Auth 1.7.12's React client in Next.js and native server in Express. SQLite is the only database; Next.js does not run a second auth server or access the database. Provision staff through the backend's trusted operator command; there is no public signup or email-reset flow.
 

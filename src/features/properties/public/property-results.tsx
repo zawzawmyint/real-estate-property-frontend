@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/layout/empty-state";
 import { getPublicProperties } from "@/lib/api/server";
-import { PropertyCard } from "./property-card";
+import { PropertyGrid } from "./property-grid";
 import { PropertySort } from "./property-filters";
 import { PropertyPagination } from "./property-pagination";
 import { PropertyRetry } from "./property-retry";
@@ -39,15 +39,7 @@ export async function PropertyResults({ query }: { query: string }) {
         <PropertySort query={query} />
       </div>
       {result.items.length ? (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {result.items.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              resultsQuery={query}
-            />
-          ))}
-        </div>
+        <PropertyGrid properties={result.items} resultsQuery={query} />
       ) : (
         <EmptyState
           title={result.total ? "No properties on this page" : "No homes found"}

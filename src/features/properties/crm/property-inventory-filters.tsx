@@ -1,4 +1,6 @@
 "use client";
+import { FilterPanel } from "@/components/layout/filter-panel";
+import { TextField, SelectField } from "@/components/forms/fields";
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
@@ -7,13 +9,8 @@ import { useClientReady } from "@/lib/use-client-ready";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Input } from "@/components/ui/input";
 import { Icon } from "@/components/ui/icon";
-import { Field, FieldLabel } from "@/components/ui/field";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+import { NativeSelectOption } from "@/components/ui/native-select";
 import {
   parsePropertyFilters,
   serializePropertyFilters,
@@ -62,22 +59,21 @@ export function PropertyInventoryFilters({
         key={serializePropertyFilters(filters).toString()}
         onSubmit={submit}
         aria-busy={pending}
-        className="rounded-xl border border-border bg-card p-4"
       >
-        <fieldset
+        <FilterPanel
           disabled={!ready || pending}
-          className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          busy={pending}
+          fieldsClassName="sm:grid-cols-2 xl:grid-cols-3"
         >
-          <Field className="sm:col-span-2 xl:col-span-3">
-            <FieldLabel htmlFor="inventory-q">Search inventory</FieldLabel>
-            <Input
-              id="inventory-q"
-              name="q"
-              placeholder="Title, city or community"
-              defaultValue={filters.q}
-              maxLength={160}
-            />
-          </Field>
+          <TextField
+            label="Search inventory"
+            fieldClassName="sm:col-span-2 xl:col-span-3"
+            id="inventory-q"
+            name="q"
+            placeholder="Title, city or community"
+            defaultValue={filters.q}
+            maxLength={160}
+          />
           <InventorySelect
             name="publishingState"
             label="Publishing state"
@@ -116,26 +112,24 @@ export function PropertyInventoryFilters({
               ["rented", "Rented"],
             ]}
           />
-          <Field>
-            <FieldLabel htmlFor="inventory-sort">Sort by</FieldLabel>
-            <NativeSelect
-              id="inventory-sort"
-              name="sort"
-              defaultValue={filters.sort ?? "updated_desc"}
-              className="w-full"
-            >
-              <NativeSelectOption value="updated_desc">
-                Recently updated
-              </NativeSelectOption>
-              <NativeSelectOption value="newest">Newest</NativeSelectOption>
-              <NativeSelectOption value="price_asc">
-                Price: low to high
-              </NativeSelectOption>
-              <NativeSelectOption value="price_desc">
-                Price: high to low
-              </NativeSelectOption>
-            </NativeSelect>
-          </Field>
+          <SelectField
+            label="Sort by"
+            id="inventory-sort"
+            name="sort"
+            defaultValue={filters.sort ?? "updated_desc"}
+            className="w-full"
+          >
+            <NativeSelectOption value="updated_desc">
+              Recently updated
+            </NativeSelectOption>
+            <NativeSelectOption value="newest">Newest</NativeSelectOption>
+            <NativeSelectOption value="price_asc">
+              Price: low to high
+            </NativeSelectOption>
+            <NativeSelectOption value="price_desc">
+              Price: high to low
+            </NativeSelectOption>
+          </SelectField>
           <div className="flex flex-wrap items-end gap-3">
             <Button
               type="submit"
@@ -162,7 +156,7 @@ export function PropertyInventoryFilters({
               Clear filters
             </Link>
           </div>
-        </fieldset>
+        </FilterPanel>
       </form>
       {error && (
         <Alert variant="destructive">
@@ -185,21 +179,19 @@ function InventorySelect({
   options: string[][];
 }) {
   return (
-    <Field>
-      <FieldLabel htmlFor={`inventory-${name}`}>{label}</FieldLabel>
-      <NativeSelect
-        id={`inventory-${name}`}
-        name={name}
-        defaultValue={value ?? ""}
-        className="w-full"
-      >
-        <NativeSelectOption value="">All</NativeSelectOption>
-        {options.map(([key, text]) => (
-          <NativeSelectOption key={key} value={key}>
-            {text}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
-    </Field>
+    <SelectField
+      label={label}
+      id={`inventory-${name}`}
+      name={name}
+      defaultValue={value ?? ""}
+      className="w-full"
+    >
+      <NativeSelectOption value="">All</NativeSelectOption>
+      {options.map(([key, text]) => (
+        <NativeSelectOption key={key} value={key}>
+          {text}
+        </NativeSelectOption>
+      ))}
+    </SelectField>
   );
 }

@@ -8,6 +8,7 @@ import { Icon } from "@/components/ui/icon";
 const destinations = [
   ["/crm", "Overview", "overview"],
   ["/crm/properties", "Properties", "properties"],
+  ["/crm/leads", "Leads", "leads"],
 ] as const;
 
 export function WorkspaceNavigation({

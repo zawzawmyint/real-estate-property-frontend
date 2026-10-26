@@ -1,14 +1,14 @@
 "use client";
+import {
+  TextField,
+  SelectField,
+  TextareaField,
+} from "@/components/forms/fields";
 
 import type { UseFormReturn } from "react-hook-form";
 import type { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { NativeSelectOption } from "@/components/ui/native-select";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { PropertyFormSection } from "./property-form-section";
 import {
   propertyTypes,
@@ -57,8 +57,6 @@ export function PropertyFormFields({
     const properties = {
       ...register(key),
       id: `property-${key}`,
-      "aria-invalid": Boolean(errors[key]),
-      "aria-describedby": errors[key] ? `property-${key}-error` : undefined,
       readOnly: pending,
       maxLength:
         key === "description"
@@ -70,39 +68,31 @@ export function PropertyFormFields({
               : 120,
     };
 
-    return (
-      <Field key={key} data-invalid={Boolean(errors[key])}>
-        <FieldLabel htmlFor={properties.id}>
-          {propertyFieldLabels[key]}
-        </FieldLabel>
-        {multiline ? (
-          <Textarea {...properties} rows={6} />
-        ) : (
-          <Input
-            {...properties}
-            inputMode={
-              ["price", "areaSqft"].includes(key)
-                ? "decimal"
-                : ["bedrooms", "bathrooms"].includes(key)
-                  ? "numeric"
-                  : undefined
-            }
-          />
-        )}
-        {key === "price" && (
-          <p className="text-xs text-muted-foreground">
-            Sale total or annual rent, in AED.
-          </p>
-        )}
-        {key === "bedrooms" && (
-          <p className="text-xs text-muted-foreground">Enter 0 for Studio.</p>
-        )}
-        {errors[key] && (
-          <FieldError id={`property-${key}-error`}>
-            {errors[key]?.message}
-          </FieldError>
-        )}
-      </Field>
+    const common = {
+      ...properties,
+      label: propertyFieldLabels[key],
+      error: errors[key]?.message,
+      help:
+        key === "price"
+          ? "Sale total or annual rent, in AED."
+          : key === "bedrooms"
+            ? "Enter 0 for Studio."
+            : undefined,
+    };
+    return multiline ? (
+      <TextareaField key={key} {...common} rows={6} />
+    ) : (
+      <TextField
+        key={key}
+        {...common}
+        inputMode={
+          ["price", "areaSqft"].includes(key)
+            ? "decimal"
+            : ["bedrooms", "bathrooms"].includes(key)
+              ? "numeric"
+              : undefined
+        }
+      />
     );
   }
 
@@ -112,47 +102,30 @@ export function PropertyFormFields({
         <div className="space-y-5">
           {field("title")}
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="property-purpose">Purpose</FieldLabel>
-              <NativeSelect
-                {...register("purpose")}
-                id="property-purpose"
-                aria-invalid={Boolean(errors.purpose)}
-                aria-describedby={
-                  errors.purpose ? "property-purpose-error" : undefined
-                }
-                className="w-full"
-              >
-                <NativeSelectOption value="sale">Buy / Sale</NativeSelectOption>
-                <NativeSelectOption value="rent">Rent</NativeSelectOption>
-              </NativeSelect>
-              <FieldError id="property-purpose-error">
-                {errors.purpose?.message}
-              </FieldError>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="property-type">Property type</FieldLabel>
-              <NativeSelect
-                {...register("type")}
-                id="property-type"
-                className="w-full"
-                aria-invalid={Boolean(errors.type)}
-                aria-describedby={
-                  errors.type ? "property-type-error" : undefined
-                }
-              >
-                <NativeSelectOption value="">Choose a type</NativeSelectOption>
-                {propertyTypes.map((type) => (
-                  <NativeSelectOption key={type} value={type}>
-                    {type[0]?.toUpperCase()}
-                    {type.slice(1)}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-              <FieldError id="property-type-error">
-                {errors.type?.message}
-              </FieldError>
-            </Field>
+            <SelectField
+              label="Purpose"
+              {...register("purpose")}
+              id="property-purpose"
+              error={errors.purpose?.message}
+            >
+              <NativeSelectOption value="sale">Buy / Sale</NativeSelectOption>
+              <NativeSelectOption value="rent">Rent</NativeSelectOption>
+            </SelectField>
+            <SelectField
+              label="Property type"
+              {...register("type")}
+              id="property-type"
+              className="w-full"
+              error={errors.type?.message}
+            >
+              <NativeSelectOption value="">Choose a type</NativeSelectOption>
+              {propertyTypes.map((type) => (
+                <NativeSelectOption key={type} value={type}>
+                  {type[0]?.toUpperCase()}
+                  {type.slice(1)}
+                </NativeSelectOption>
+              ))}
+            </SelectField>
           </div>
           {field("description", true)}
           <Field>

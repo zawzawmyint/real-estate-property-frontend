@@ -28,6 +28,14 @@ function matches(rule, incoming, url, body) {
     }
   }
 
+  if (rule.name) {
+    try {
+      if (JSON.parse(body.toString()).name !== rule.name) return false;
+    } catch {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -63,9 +71,14 @@ const server = createServer(async (incoming, response) => {
           /^\/api\/v1\/staff\/properties(?:\/[\w-]+(?:\/photos)?)?$/.test(
             rule.path,
           ) ||
-          (rule.method === "GET" && rule.path === "/api/v1/properties")
+          (rule.method === "GET" && rule.path === "/api/v1/properties") ||
+          /^\/api\/v1\/staff\/leads(?:\/[\w-]+(?:\/(?:notes|stage|assignment|activity))?)?$/.test(
+            rule.path,
+          ) ||
+          /^\/api\/v1\/public\/properties\/[\w-]+\/inquiries$/.test(rule.path)
         ) ||
         (!(typeof rule.title === "string" && rule.title.length > 8) &&
+          !(typeof rule.name === "string" && rule.name.length > 8) &&
           !(typeof rule.query?.q === "string" && rule.query.q.length > 8) &&
           !(
             typeof rule.query?.location === "string" &&

@@ -3,6 +3,9 @@ import { isValidElement, Children, type ReactElement } from "react";
 
 const backend = vi.hoisted(() => ({ getPublicProperty: vi.fn() }));
 vi.mock("@/lib/api/server", () => backend);
+vi.mock("@/features/leads/public/inquiry-card", () => ({
+  InquiryCard: () => null,
+}));
 vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Error("NEXT_HTTP_ERROR_FALLBACK;404");
