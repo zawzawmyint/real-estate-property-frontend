@@ -4,6 +4,7 @@ const paths = {
   "chevron-down": "m6 9 6 6 6-6",
   image: "M3 3h18v18H3zM3 17l6-6 4 4 3-3 5 5M16 7h.01",
   overview: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
+  leads: "M4 4h16v16H4zM4 13h4l2 3h4l2-3h4M8 8h8",
   properties:
     "M4 21V7h10v14M14 11h6v10M7 10h4M7 14h4M7 18h4M17 14v1M17 18v1M2 21h20",
   menu: "M4 6h16M4 12h16M4 18h16",

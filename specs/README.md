@@ -8,6 +8,10 @@ The root [project specification](../spec.md) summarizes project-wide scope and t
 
 ## Current and verified maintenance
 
+- [Shared public application components](shared-public-components/spec.md): verified public heading/search-panel/property-grid reuse and shared labelled fields across public search, inquiry and CRM, preserving existing visual hierarchy and behavior.
+
+- [Shared CRM application components](shared-crm-components/spec.md): verified frontend-only reuse of PageHeader, FilterPanel, DataTable<T>, CollectionPagination, and labelled ordinary fields across Properties and Leads. It preserves feature behavior, API contracts, permissions and roadmap completion.
+
 - [Loading and control clarity](loading-and-control-clarity/spec.md): verified frontend presentation maintenance for motion-safe spinner feedback, skyline-only large collection loading, quiet photo states, visible key controls and native SVG select chevrons. Lint, formatting, typecheck, 95 unit tests, the isolated production build and focused desktop/mobile browser checks passed.
 - [Consistent loading feedback](consistent-loading/spec.md): historical verified baseline for shared primary-color building feedback across public discovery and the CRM. Its superseding loading/control presentation is recorded in the current specification above; it does not change API, dependency, permission or roadmap contracts.
 - [Staff account and property image polish](account-and-image-polish/spec.md): verified compact CRM identity/sign-out presentation and shared animated/static property-image placeholders. It does not change roadmap checklist completion.
@@ -21,7 +25,9 @@ The root [project specification](../spec.md) summarizes project-wide scope and t
 
 ## Verified features
 
-- [Staff authentication and roles](staff-authentication-and-roles/spec.md): verified staff login/logout, SQLite-backed database sessions and Admin/Manager/Agent identities. Lead ownership remains separate P1-03 work.
+- [Inquiry capture and lead management](lead-management/spec.md): verified public inquiry card, manager-distributed inbox, role-scoped leads, assignment dialog, stage changes and notes/call activity. [Implementation plan](../docs/superpowers/plans/2026-10-26-lead-management.md); [local contract snapshot](../docs/contracts/leads.md).
+
+- [Staff authentication and roles](staff-authentication-and-roles/spec.md): verified staff login/logout, SQLite-backed database sessions and Admin/Manager/Agent identities. Lead ownership is verified in [lead management](lead-management/spec.md).
 - [Local demo staff login](demo-staff-login/spec.md): verified development-only one-click native sign-in for pre-provisioned Admin, Manager and Agent demo accounts. It is configured locally, omitted from production and test rendering, and does not create accounts or change permissions.
 - [Agency branding](agency-branding/spec.md): Avenor Properties name and architectural A logo assets are integrated across the shared public, login and CRM layouts, with an editable horizontal logo and file-based favicon. It does not change roadmap delivery status.
 

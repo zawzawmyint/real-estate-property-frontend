@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicSectionHeader } from "@/components/layout/public-section-header";
 import { Suspense } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PropertyFilters } from "@/features/properties/public/property-filters";
@@ -37,17 +38,12 @@ export default async function PropertiesPage({
 
   return (
     <main id="main-content" className="public-container py-10 sm:py-14">
-      <div className="mb-8">
-        <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-          Find your next chapter
-        </p>
-        <h1 className="display-heading mt-3 text-4xl leading-tight sm:text-5xl">
-          Homes to make your own.
-        </h1>
-        <p className="mt-4 text-sm leading-7 text-muted-foreground">
-          Explore our collection of homes for sale and rent.
-        </p>
-      </div>
+      <PublicSectionHeader
+        level={1}
+        title="Homes to make your own."
+        eyebrow="Find your next chapter"
+        description="Explore our collection of homes for sale and rent."
+      />
       <PropertyFilters key={`filters-${query}`} query={query} />
       {invalid ? (
         <Alert className="mt-8">

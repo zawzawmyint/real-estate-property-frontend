@@ -33,6 +33,8 @@ Use this repository's verified property workflow as a reference, adapting fields
 
 ## Compose the form
 
+For public search and inquiry as well as CRM, use the application-level TextField, SelectField and TextareaField from @/components/forms/fields for ordinary labelled controls; they own labels, help/error messages and aria IDs. Spread register(name) and pass feature-local error.message, native constraints and disabled/readOnly props. The form coordinator retains validation, dirty state and submission. Read the Shared CRM application components section in [frontend-development](../frontend-development/SKILL.md) before building list/filter/table UI. Keep Field/FieldLabel for specialized controls.
+
 - One coordinator owns React Hook Form, the feature-local Zod schema, defaults, guarded submission and confirmed-result handling. Share typed field components between create/edit; lifecycle controls receive state/callbacks and do not fetch.
 - Use `src/components/ui/submit-button.tsx` for real submit actions, with explicit pending/idle labels and caller-disabled rules. Use ordinary Button variants for other actions.
 - Acquire a synchronous guard before asynchronous validation, combine submission/transition pending state, and release the guard on retryable failures. Preserve native autofill values before validation. Hold the guard through successful navigation or uncertain creation until the form unmounts/reconciliation resolves it.

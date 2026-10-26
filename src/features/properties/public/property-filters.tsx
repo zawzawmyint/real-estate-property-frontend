@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Spinner } from "@/components/ui/spinner";
 import { NavigationPending } from "@/components/ui/navigation-pending";
-import { Input } from "@/components/ui/input";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { TextField, SelectField } from "@/components/forms/fields";
+import { PublicSearchPanel } from "@/components/layout/public-search-panel";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -180,96 +180,64 @@ function SearchForm({
               : "sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1.5fr_1fr_auto]",
           )}
         >
-          <Field>
-            <FieldLabel htmlFor={`${id}-location`}>Location</FieldLabel>
-            <Input
-              id={`${id}-location`}
-              placeholder="City or community"
-              autoComplete="off"
-              {...register("location")}
-              aria-invalid={!!errors.location}
-              aria-describedby={
-                errors.location ? `${id}-location-error` : undefined
-              }
-            />
-            <FieldError id={`${id}-location-error`}>
-              {errors.location?.message}
-            </FieldError>
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${id}-type`}>Property type</FieldLabel>
-            <NativeSelect
-              id={`${id}-type`}
-              {...register("type")}
-              className="w-full [&_select]:min-h-12 [&_select]:bg-card"
-            >
-              <NativeSelectOption value="">Any type</NativeSelectOption>
-              {propertyTypes.map((type) => (
-                <NativeSelectOption key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Field>
+          <TextField
+            id={`${id}-location`}
+            label="Location"
+            placeholder="City or community"
+            autoComplete="off"
+            {...register("location")}
+            error={errors.location?.message}
+          />
+          <SelectField
+            id={`${id}-type`}
+            label="Property type"
+            {...register("type")}
+            error={errors.type?.message}
+            className="w-full [&_select]:min-h-12 [&_select]:bg-card"
+          >
+            <NativeSelectOption value="">Any type</NativeSelectOption>
+            {propertyTypes.map((type) => (
+              <NativeSelectOption key={type} value={type}>
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </NativeSelectOption>
+            ))}
+          </SelectField>
           <div className="grid grid-cols-2 gap-3">
-            <Field>
-              <FieldLabel htmlFor={`${id}-min-price`}>
-                Min. price (AED)
-              </FieldLabel>
-              <Input
-                id={`${id}-min-price`}
-                inputMode="decimal"
-                placeholder="No minimum"
-                {...register("minPrice")}
-                aria-invalid={!!errors.minPrice}
-                aria-describedby={
-                  errors.minPrice
-                    ? `${id}-min-price-error`
-                    : `${id}-budget-note`
-                }
-              />
-              <FieldError id={`${id}-min-price-error`}>
-                {errors.minPrice?.message}
-              </FieldError>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor={`${id}-max-price`}>
-                Max. price (AED)
-              </FieldLabel>
-              <Input
-                id={`${id}-max-price`}
-                inputMode="decimal"
-                placeholder="No maximum"
-                {...register("maxPrice")}
-                aria-invalid={!!errors.maxPrice}
-                aria-describedby={
-                  errors.maxPrice
-                    ? `${id}-max-price-error`
-                    : `${id}-budget-note`
-                }
-              />
-              <FieldError id={`${id}-max-price-error`}>
-                {errors.maxPrice?.message}
-              </FieldError>
-            </Field>
+            <TextField
+              id={`${id}-min-price`}
+              label="Min. price (AED)"
+              inputMode="decimal"
+              placeholder="No minimum"
+              {...register("minPrice")}
+              error={errors.minPrice?.message}
+              aria-describedby={`${id}-budget-note`}
+            />
+            <TextField
+              id={`${id}-max-price`}
+              label="Max. price (AED)"
+              inputMode="decimal"
+              placeholder="No maximum"
+              {...register("maxPrice")}
+              error={errors.maxPrice?.message}
+              aria-describedby={`${id}-budget-note`}
+            />
           </div>
           {!home && (
-            <Field>
-              <FieldLabel htmlFor={`${id}-bedrooms`}>Bedrooms</FieldLabel>
-              <NativeSelect
-                id={`${id}-bedrooms`}
-                {...register("minBedrooms")}
-                className="w-full [&_select]:min-h-12 [&_select]:bg-card"
-              >
-                <NativeSelectOption value="">Any bedrooms</NativeSelectOption>
-                <NativeSelectOption value="0">Studio and up</NativeSelectOption>
-                {Array.from({ length: 20 }, (_, i) => (
-                  <NativeSelectOption key={i + 1} value={String(i + 1)}>
-                    {i + 1}+ {i === 0 ? "bedroom" : "bedrooms"}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </Field>
+            <SelectField
+              id={`${id}-bedrooms`}
+              label="Bedrooms"
+              {...register("minBedrooms")}
+              error={errors.minBedrooms?.message}
+              className="w-full [&_select]:min-h-12 [&_select]:bg-card"
+            >
+              <NativeSelectOption value="">Any bedrooms</NativeSelectOption>
+              <NativeSelectOption value="0">Studio and up</NativeSelectOption>
+              {Array.from({ length: 20 }, (_, i) => (
+                <NativeSelectOption key={i + 1} value={String(i + 1)}>
+                  {i + 1}+ {i === 0 ? "bedroom" : "bedrooms"}
+                </NativeSelectOption>
+              ))}
+            </SelectField>
           )}
           <SubmitButton
             pending={pending}
@@ -319,9 +287,9 @@ export function PropertyFilters({
 
   return (
     <>
-      <div className="hidden rounded-xl border border-border bg-card p-5 lg:block">
+      <PublicSearchPanel treatment="listing" className="hidden lg:block">
         <SearchForm key={query} query={query} id="desktop-filters" />
-      </div>
+      </PublicSearchPanel>
       <div className="lg:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger

@@ -16,6 +16,8 @@ Start frontend work here. This file sits beside [AGENTS.md](AGENTS.md), which ow
 ## Choose the workflow
 
 - **Frontend implementation:** Read [frontend-development](.agents/skills/frontend-development/SKILL.md) for routes, feature organization, UI reuse, API integration and completion checks.
+- **CRM headers, filter panels, tables, pagination and labelled fields:** Use the Shared CRM application components reference in [frontend-development](.agents/skills/frontend-development/SKILL.md) before assembling primitive markup. It documents application-level imports, props and a composition example.
+- **Public headings, search panels, property grids and inquiry fields:** Use the Shared public application components reference in [frontend-development](.agents/skills/frontend-development/SKILL.md); reuse the existing public property components and the same labelled fields as CRM.
 - **Data fetching, mutations and forms:** Also read [frontend-data-forms](.agents/skills/frontend-data-forms/SKILL.md) for Server Actions, shared create/edit fields, submit controls, safe errors and streamed result regions.
 - **Local setup and browser verification:** Follow [development](docs/development.md) and [runtime inspection](docs/agent-tooling.md).
 

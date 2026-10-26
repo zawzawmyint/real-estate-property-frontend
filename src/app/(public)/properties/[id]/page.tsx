@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { InquiryCard } from "@/features/leads/public/inquiry-card";
 import { getPublicProperty } from "@/lib/api/server";
 import { PropertyApiError } from "@/features/properties/data/request";
 import {
@@ -141,35 +141,11 @@ export default async function PropertyPage({
             </p>
           </section>
         </article>
-        <Card className="hidden gap-0 rounded-xl shadow-none lg:block">
-          <CardContent className="space-y-6">
-            <h2 className="display-heading text-2xl">At a glance</h2>
-            <dl className="space-y-4 text-sm">
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted-foreground">
-                  Price{property.purpose === "rent" ? " per year" : ""}
-                </dt>
-                <dd className="font-semibold">
-                  {formatPrice(property.priceFils)}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted-foreground">Home type</dt>
-                <dd className="capitalize">{property.type}</dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted-foreground">Size</dt>
-                <dd>{formatArea(property.areaSqft)}</dd>
-              </div>
-            </dl>
-            <Link
-              href={back}
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-border px-4 py-3 text-sm font-medium text-primary hover:bg-muted"
-            >
-              {resultsQuery ? "Back to results" : "Back to listings"}
-            </Link>
-          </CardContent>
-        </Card>
+        <InquiryCard
+          propertyId={property.id}
+          title={property.title}
+          location={`${property.community}, ${property.city}`}
+        />
       </div>
     </main>
   );

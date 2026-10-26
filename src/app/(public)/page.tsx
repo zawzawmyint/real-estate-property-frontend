@@ -4,7 +4,9 @@ import { BuildingLoader, LoadingState } from "@/components/ui/building-loader";
 import { NavigationPending } from "@/components/ui/navigation-pending";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getPublicProperties } from "@/lib/api/server";
-import { PropertyCard } from "@/features/properties/public/property-card";
+import { PropertyGrid } from "@/features/properties/public/property-grid";
+import { PublicSectionHeader } from "@/components/layout/public-section-header";
+import { PublicSearchPanel } from "@/components/layout/public-search-panel";
 import { PropertyFilters } from "@/features/properties/public/property-filters";
 import { PropertyImage } from "@/features/properties/shared/property-image";
 import { PropertyCardsLoading } from "@/features/properties/shared/property-loading";
@@ -56,9 +58,12 @@ export default function HomePage() {
             <HomeHero featured={featured} />
           </Suspense>
         </div>
-        <div className="relative z-20 mt-6 rounded-2xl border border-border bg-card p-5 shadow-[0_12px_40px_-20px_rgba(37,35,41,0.25)] sm:p-7 lg:mx-5 lg:-mt-10">
+        <PublicSearchPanel
+          treatment="hero"
+          className="relative z-20 mt-6 lg:mx-5 lg:-mt-10"
+        >
           <PropertyFilters home />
-        </div>
+        </PublicSearchPanel>
       </section>
       <Suspense fallback={<PropertyCardsLoading />}>
         <HomeFeatured featured={featured} />
@@ -109,31 +114,22 @@ async function HomeFeatured({ featured }: { featured: FeaturedRequest }) {
       )}
       {!!collection?.items.length && (
         <section aria-labelledby="featured-heading" className="mt-16 sm:mt-24">
-          <div className="mb-7 flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <h2
-                id="featured-heading"
-                className="display-heading text-3xl leading-tight sm:text-4xl"
+          <PublicSectionHeader
+            level={2}
+            id="featured-heading"
+            title="Homes worth a closer look"
+            description="A selection from our property collection."
+            actions={
+              <Link
+                href="/properties?purpose=sale"
+                className="inline-flex min-h-11 items-center gap-3 text-sm font-medium text-primary underline underline-offset-4"
               >
-                Homes worth a closer look
-              </h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                A selection from our property collection.
-              </p>
-            </div>
-            <Link
-              href="/properties?purpose=sale"
-              className="inline-flex min-h-11 items-center gap-3 text-sm font-medium text-primary underline underline-offset-4"
-            >
-              View all properties <span aria-hidden="true">→</span>
-              <NavigationPending />
-            </Link>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {collection.items.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+                View all properties <span aria-hidden="true">→</span>
+                <NavigationPending />
+              </Link>
+            }
+          />
+          <PropertyGrid properties={collection.items} />
           {collection.items.some((property) => property.isDemo) && (
             <p className="mt-5 text-xs leading-6 text-muted-foreground">
               Our sample collection includes demo properties with AI-generated

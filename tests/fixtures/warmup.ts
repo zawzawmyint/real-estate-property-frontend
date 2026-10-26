@@ -54,6 +54,33 @@ export default async function warmup() {
       if (response.status() !== 200)
         throw new Error(`Warmup ${path}: ${response.status()}`);
     }
+
+    const leadResponse = await client.post("/api/v1/staff/leads", {
+      data: {
+        submissionId: randomUUID(),
+        name: `Lead route warmup ${randomUUID()}`,
+        email: "fictional-warmup@example.com",
+        purpose: "sale",
+        source: "call",
+      },
+    });
+
+    if (leadResponse.status() !== 201)
+      throw new Error(`Warmup lead create: ${leadResponse.status()}`);
+
+    const leadId = (await leadResponse.json()).id as string;
+
+    for (const path of [
+      "/crm/leads",
+      "/crm/leads/new",
+      `/crm/leads/${leadId}`,
+      `/crm/leads/${leadId}/edit`,
+    ]) {
+      const response = await client.get(path, { maxRedirects: 0 });
+
+      if (response.status() !== 200)
+        throw new Error(`Warmup ${path}: ${response.status()}`);
+    }
   } finally {
     if (propertyId) {
       await client.patch(`/api/v1/staff/properties/${propertyId}`, {
