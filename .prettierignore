@@ -1,0 +1,11 @@
+node_modules
+.next
+.delivery-work
+# Backend-owned OpenAPI snapshot; keep its source formatting verbatim.
+docs/contracts/properties.openapi.yaml
+out
+coverage
+playwright-report
+test-results
+bun.lock
+next-env.d.ts

@@ -1,0 +1,39 @@
+.fill {
+  clip-path: inset(0);
+}
+
+.windows {
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .building[data-animated="true"] .fill {
+    animation: building-fill 2.4s ease-in-out infinite;
+  }
+
+  .building[data-animated="true"] .windows {
+    animation: window-light 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes building-fill {
+  0%,
+  100% {
+    clip-path: inset(75% 0 0);
+  }
+  55%,
+  75% {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes window-light {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  55%,
+  75% {
+    opacity: 0.95;
+  }
+}

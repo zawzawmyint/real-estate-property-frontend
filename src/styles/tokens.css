@@ -1,0 +1,25 @@
+:root {
+  --background: #faf8f5;
+  --foreground: #252329;
+  --card: #ffffff;
+  --muted: #f0eae6;
+  --muted-foreground: #68616a;
+  --primary: #701f35;
+  --primary-foreground: #ffffff;
+  --border: #ded8d4;
+  --ring: #701f35;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-poppins), sans-serif;
+  --font-display: var(--font-lora), serif;
+}

@@ -1,0 +1,18 @@
+.public-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1264px;
+  padding-inline: 16px;
+}
+
+.public-site .display-heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+@media (min-width: 640px) {
+  .public-container {
+    padding-inline: 32px;
+  }
+}

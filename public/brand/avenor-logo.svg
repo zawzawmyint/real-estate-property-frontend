@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 84" fill="none">
+  <title>Avenor Properties</title>
+  <g transform="translate(0 10)">
+    <path fill="#701F35" fill-rule="evenodd" d="M32 5 60 57H47L40.5 44h-17L17 57H4L32 5Zm-4.5 30h9L32 25.8 27.5 35Z" clip-rule="evenodd"/>
+  </g>
+  <text x="82" y="43" fill="#252329" font-family="Georgia, 'Times New Roman', serif" font-size="36" letter-spacing="4">AVENOR</text>
+  <text x="84" y="65" fill="#701F35" font-family="Arial, Helvetica, sans-serif" font-size="11" letter-spacing="5">PROPERTIES</text>
+</svg>
