@@ -15,6 +15,10 @@ export default async function warmup() {
       "/login",
       "/missing-page",
       "/properties",
+      "/contact",
+      "/agents",
+      "/agents/amira-hassan",
+      "/agents/unknown-person",
       `/properties/${randomUUID()}`,
     ]) {
       const response = await client.get(path);
@@ -72,6 +76,7 @@ export default async function warmup() {
 
     for (const path of [
       "/crm/leads",
+      "/crm/leads/pipeline",
       "/crm/leads/new",
       `/crm/leads/${leadId}`,
       `/crm/leads/${leadId}/edit`,

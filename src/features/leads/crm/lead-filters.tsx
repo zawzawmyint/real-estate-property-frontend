@@ -17,17 +17,21 @@ import {
 import { useClientReady } from "@/lib/use-client-ready";
 import { stages, stageLabels, sourceLabels } from "../data/input";
 import { leadsHref, type LeadFilters } from "../data/filters";
+import { pipelineHref } from "../data/pipeline";
 import { SearchPicker } from "./search-picker";
 
 export function LeadFilters({
   filters,
   manager,
   checkingSession = false,
+  pipeline = false,
 }: {
   filters: LeadFilters;
   manager: boolean;
   checkingSession?: boolean;
+  pipeline?: boolean;
 }) {
+  const href = pipeline ? pipelineHref : leadsHref;
   const ready = useClientReady();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -50,7 +54,7 @@ export function LeadFilters({
   const [draft, setDraft] = useState(filters);
   function navigate(next: LeadFilters) {
     if (checkingSession) return;
-    startTransition(() => router.push(leadsHref({ ...next, page: 1 })));
+    startTransition(() => router.push(href({ ...next, page: 1 })));
   }
   useEffect(() => {
     if (checkingSession) return;
@@ -58,11 +62,11 @@ export function LeadFilters({
     const timer = setTimeout(() => {
       setSearch((current) => ({ ...current, requested: q.trim() }));
       startTransition(() =>
-        router.push(leadsHref({ ...filters, q: q.trim(), page: 1 })),
+        router.push(href({ ...filters, q: q.trim(), page: 1 })),
       );
     }, 300);
     return () => clearTimeout(timer);
-  }, [q, filters, router, checkingSession]);
+  }, [q, filters, router, checkingSession, href]);
   const count = [filters.stage, filters.source, filters.agentId].filter(
     Boolean,
   ).length;
@@ -73,19 +77,23 @@ export function LeadFilters({
   ) {
     return (
       <>
-        <SelectField
-          label="Stage"
-          id={`lead-stage-${suffix}`}
-          value={value.stage || ""}
-          onChange={(event) => change({ ...value, stage: event.target.value })}
-        >
-          <option value="">All stages</option>
-          {stages.map((stage) => (
-            <option key={stage} value={stage}>
-              {stageLabels[stage]}
-            </option>
-          ))}
-        </SelectField>
+        {!pipeline && (
+          <SelectField
+            label="Stage"
+            id={`lead-stage-${suffix}`}
+            value={value.stage || ""}
+            onChange={(event) =>
+              change({ ...value, stage: event.target.value })
+            }
+          >
+            <option value="">All stages</option>
+            {stages.map((stage) => (
+              <option key={stage} value={stage}>
+                {stageLabels[stage]}
+              </option>
+            ))}
+          </SelectField>
+        )}
         <SelectField
           label="Source"
           id={`lead-source-${suffix}`}
@@ -121,9 +129,38 @@ export function LeadFilters({
     <FilterPanel
       busy={pending}
       disabled={!ready || checkingSession}
-      fieldsClassName="md:grid-cols-[minmax(12rem,2fr)_repeat(3,minmax(8rem,1fr))]"
+      fieldsClassName={
+        pipeline
+          ? "md:grid-cols-[minmax(12rem,2fr)_repeat(2,minmax(8rem,1fr))]"
+          : "md:grid-cols-[minmax(12rem,2fr)_repeat(3,minmax(8rem,1fr))]"
+      }
       before={
         <div className="flex flex-wrap items-center justify-between gap-3">
+          <nav
+            aria-label="Lead display"
+            className="flex rounded-lg border border-border bg-background p-1"
+          >
+            {[
+              [false, "List"],
+              [true, "Pipeline"],
+            ].map(([isPipeline, label]) => (
+              <Link
+                key={String(label)}
+                aria-current={pipeline === isPipeline ? "page" : undefined}
+                href={
+                  isPipeline
+                    ? pipelineHref({
+                        ...filters,
+                        view: manager ? "all" : "mine",
+                      })
+                    : leadsHref(filters)
+                }
+                className={`inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium ${pipeline === isPipeline ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
           <nav
             aria-label="Lead views"
             className="flex min-h-11 gap-6 border-b border-border"
@@ -139,7 +176,7 @@ export function LeadFilters({
             ).map(([view, label]) => (
               <Link
                 key={view}
-                href={leadsHref({
+                href={href({
                   ...filters,
                   view: view as LeadFilters["view"],
                   agentId: undefined,
@@ -152,14 +189,16 @@ export function LeadFilters({
               </Link>
             ))}
           </nav>
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={!ready || pending || checkingSession}
-            onClick={() => startTransition(() => router.refresh())}
-          >
-            Refresh leads
-          </Button>
+          {!pipeline && (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={!ready || pending || checkingSession}
+              onClick={() => startTransition(() => router.refresh())}
+            >
+              Refresh leads
+            </Button>
+          )}
         </div>
       }
       after={
@@ -235,7 +274,7 @@ export function LeadFilters({
             (count > 0 || filters.q || filters.sort !== "newest") && (
               <Link
                 className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
-                href={leadsHref({
+                href={href({
                   view: filters.view,
                   sort: "newest",
                   page: 1,

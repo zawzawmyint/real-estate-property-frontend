@@ -20,4 +20,10 @@ Browser integration requires the isolated backend fixture, rather than a manuall
 
 The disposable backend seeds fictional featured listings by default so public image tests are independent of other test files. Set `STAFF_E2E_SEED_PROPERTIES=0` only for targeted suites that do not need public listing media. Playwright automatically sets `E2E_TEST_RUN=1` on its Next server to hide the floating development indicator, which otherwise overlaps CRM account controls; compile/runtime errors remain enabled. Normal development and production do not require this flag. The long sign-in/refresh/sign-out/back-navigation journeys have a 60-second total budget while individual assertions retain their existing limits.
 
+## Public agency catalog and portraits
+
+The public Contact/Agents content is backend-authored in `backend/src/modules/agency/agency.catalog.ts`; it has no live CMS or Better Auth/staff-account synchronization. Update only approved public fields and `published` flags there. Direct contact values remain absent until approved, and the current catalog is fictional demo content, so Contact, directory and profile pages remain noindex.
+
+Keep each catalog portrait path synchronized with a local file in [`public/images/agents/`](../public/images/agents/). Assets must be 800×1000 WebP files, and their provenance belongs in that directory's `README.md`. Deploy the frontend assets with the backend catalog change so a published path is never missing. Real-business publication requires approved direct contact details, profile/portrait approval and inquiry usage wording, plus review of the demo/indexing flags. See the [public contact and agent specification](../specs/public-contact-and-agents/spec.md) and its [backend-owned contract snapshot](contracts/public-contact-and-agents.md).
+
 Public and CRM shells should remain usable at narrow widths, with keyboard navigation and visible focus. Review screenshots after layout changes. Avoid speculative UI tests that only assert static source wording.

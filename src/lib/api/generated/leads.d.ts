@@ -1,5 +1,25 @@
 /** Generated from docs/contracts/leads.openapi.yaml. Do not edit. */
 export interface paths {
+  "/api/v1/public/inquiries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Capture a property-independent unassigned website lead
+     * @description Exact APP_ORIGIN; trusted inquiry relay; JSON <=16KiB. Required purpose (sale/rent), message and at least one phone/email. Server controls Website/New/unassigned/null property and budget. Atomic lead, created activity and agency_inquiry receipt. Identical canonical replay returns acknowledgement; changed payload or cross-operation ID reuse returns 409. Responses never expose lead IDs or submitted values. Shares one five-attempt / 15-minute budget with property inquiries, including invalid/replayed attempts. Existing signed-client/socket and bounded single-process limiter semantics apply.
+     */
+    post: operations["submitAgencyInquiry"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/properties/{propertyId}/inquiries": {
     parameters: {
       query?: never;
@@ -11,7 +31,7 @@ export interface paths {
     put?: never;
     /**
      * Capture an unassigned website lead
-     * @description Exact APP_ORIGIN and JSON <=16KiB. Forces New/unassigned website lead with property purpose/snapshots. No lead identifiers returned. Same canonical submission replays even after property unavailability. Five attempts per signed client/socket in rolling 15 minutes; invalid attempts and replays count. Single-process bounded limiter; saturated map fails closed. Server relay sends HMAC-SHA256(INQUIRY_RELAY_SECRET, real ingress identity) as x-inquiry-client-key and HMAC-SHA256(secret, clientKey) as x-inquiry-relay-signature. Untrusted relay headers rejected; raw forwarded headers ignored; direct calls use socket identity.
+     * @description Exact APP_ORIGIN and JSON <=16KiB. Forces New/unassigned website lead with property purpose/snapshots. No lead identifiers returned. Same canonical submission replays even after property unavailability. Five attempts shared with POST /api/v1/public/inquiries per signed client/socket in rolling 15 minutes; invalid attempts and replays count. Single-process bounded limiter; saturated map fails closed. Server relay sends HMAC-SHA256(INQUIRY_RELAY_SECRET, real ingress identity) as x-inquiry-client-key and HMAC-SHA256(secret, clientKey) as x-inquiry-relay-signature. Untrusted relay headers rejected; raw forwarded headers ignored; direct calls use socket identity.
      */
     post: operations["submitPropertyInquiry"];
     delete?: never;
@@ -155,6 +175,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    AgencyInquiryInput:
+      | {
+          /** Format: uuid */
+          submissionId: string;
+          name: string;
+          /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
+          phone?: string | null;
+          /** Format: email */
+          email?: string | null;
+          message: string;
+          /** @enum {string} */
+          purpose: "sale" | "rent";
+        }
+      | {
+          phone: string;
+        }
+      | {
+          email: string;
+        };
     /** @enum {string} */
     LeadStage:
       "new" | "contacted" | "viewing_scheduled" | "offer" | "won" | "lost";
@@ -173,7 +212,7 @@ export interface components {
       /** Format: uuid */
       id: string;
       name: string;
-      /** @description Must contain a digit; at least one phone or email required. */
+      /** @description Canonical phone: ASCII spaces only, trimmed, 3-40 characters and at least one digit. Repeated internal spaces are preserved. */
       phone: string | null;
       /** Format: email */
       email: string | null;
@@ -202,7 +241,7 @@ export interface components {
       /** Format: uuid */
       submissionId: string;
       name: string;
-      /** @description Must contain a digit; at least one phone or email required. */
+      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
       phone?: string | null;
       /** Format: email */
       email?: string | null;
@@ -212,7 +251,7 @@ export interface components {
       /** Format: uuid */
       submissionId: string;
       name: string;
-      /** @description Must contain a digit; at least one phone or email required. */
+      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
       phone?: string | null;
       /** Format: email */
       email?: string | null;
@@ -226,7 +265,7 @@ export interface components {
     };
     LeadPatchInput: {
       name?: string;
-      /** @description Must contain a digit; at least one phone or email required. */
+      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
       phone?: string | null;
       /** Format: email */
       email?: string | null;
@@ -270,7 +309,7 @@ export interface components {
       /** Format: uuid */
       id: string;
       name: string;
-      /** @description Must contain a digit; at least one phone or email required. */
+      /** @description Canonical phone: ASCII spaces only, trimmed, 3-40 characters and at least one digit. Repeated internal spaces are preserved. */
       phone: string | null;
       /** Format: email */
       email: string | null;
@@ -365,6 +404,114 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  submitAgencyInquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AgencyInquiryInput"];
+      };
+    };
+    responses: {
+      /** @description Matching submission replay */
+      200: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InquiryReceipt"];
+        };
+      };
+      /** @description Committed inquiry */
+      201: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InquiryReceipt"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      415: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      429: {
+        headers: {
+          "Retry-After"?: number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
   submitPropertyInquiry: {
     parameters: {
       query?: never;

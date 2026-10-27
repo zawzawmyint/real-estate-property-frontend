@@ -3,8 +3,8 @@ import { isValidElement, Children, type ReactElement } from "react";
 
 const backend = vi.hoisted(() => ({ getPublicProperty: vi.fn() }));
 vi.mock("@/lib/api/server", () => backend);
-vi.mock("@/features/leads/public/inquiry-card", () => ({
-  InquiryCard: () => null,
+vi.mock("@/features/leads/public/property-inquiry-card", () => ({
+  PropertyInquiryCard: () => null,
 }));
 vi.mock("next/navigation", () => ({
   notFound: () => {

@@ -74,7 +74,6 @@ export function LeadFormFields({
           {input("phone", "Phone", {
             type: "tel",
             autoComplete: "tel",
-            maxLength: 40,
           })}
           {input("email", "Email", {
             type: "email",

@@ -8,7 +8,13 @@ import { NavigationDrawer } from "@/components/layout/navigation-drawer";
 import { cn } from "@/lib/utils";
 import { NavigationPending } from "@/components/ui/navigation-pending";
 
-function PublicLinks({ purpose }: { purpose?: string }) {
+function PublicLinks({
+  purpose,
+  pathname,
+}: {
+  purpose?: string;
+  pathname?: string;
+}) {
   return (
     <nav
       aria-label="Main navigation"
@@ -34,6 +40,31 @@ function PublicLinks({ purpose }: { purpose?: string }) {
           <NavigationPending />
         </Link>
       ))}
+      {(
+        [
+          ["/agents", "Our agents"],
+          ["/contact", "Contact"],
+        ] as const
+      ).map(([href, label]) => {
+        const active =
+          pathname === href ||
+          (href === "/agents" && pathname?.startsWith("/agents/"));
+
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors hover:bg-muted hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
+              active && "bg-muted text-primary ring-1 ring-inset ring-primary",
+            )}
+          >
+            {label}
+            <NavigationPending />
+          </Link>
+        );
+      })}
     </nav>
   );
 }
@@ -43,6 +74,7 @@ function PublicNavigation() {
   const searchParams = useSearchParams();
   return (
     <PublicLinks
+      pathname={pathname}
       purpose={
         pathname === "/properties"
           ? (searchParams.get("purpose") ?? undefined)
