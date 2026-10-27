@@ -8,6 +8,8 @@ The root [project specification](../spec.md) summarizes project-wide scope and t
 
 ## Current and verified maintenance
 
+- [CRM route guard and scoped loading](crm-route-guard-loading/spec.md): verified frontend maintenance for the cookie-only CRM Proxy gate and independently loading account, permission controls and list results. It retains Express-owned Better Auth and live authorization; production HTTPS cookie topology remains unverified.
+
 - [Shared public application components](shared-public-components/spec.md): verified public heading/search-panel/property-grid reuse and shared labelled fields across public search, inquiry and CRM, preserving existing visual hierarchy and behavior.
 
 - [Shared CRM application components](shared-crm-components/spec.md): verified frontend-only reuse of PageHeader, FilterPanel, DataTable<T>, CollectionPagination, and labelled ordinary fields across Properties and Leads. It preserves feature behavior, API contracts, permissions and roadmap completion.

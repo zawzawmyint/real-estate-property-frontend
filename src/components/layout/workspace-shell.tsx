@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Brand } from "@/components/layout/brand";
 import { WorkspaceSidebar } from "@/components/layout/workspace-sidebar";
 import { WorkspaceMenu } from "@/components/layout/workspace-menu";
@@ -9,7 +9,15 @@ import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { useClientReady } from "@/lib/use-client-ready";
 
-export function WorkspaceShell({ children }: { children: React.ReactNode }) {
+export function WorkspaceShell({
+  children,
+  account,
+  compactAccount,
+}: {
+  children: ReactNode;
+  account: ReactNode;
+  compactAccount: ReactNode;
+}) {
   const [expanded, setExpanded] = useState(false);
   const ready = useClientReady();
   const label = expanded ? "Collapse sidebar" : "Expand sidebar";
@@ -50,12 +58,15 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
           </Button>
         </div>
         <div className="flex min-h-0 flex-1 flex-col px-3 py-4">
-          <WorkspaceSidebar compact={!expanded} />
+          <WorkspaceSidebar
+            compact={!expanded}
+            account={expanded ? account : compactAccount}
+          />
         </div>
       </aside>
       <div className="flex min-w-0 flex-col">
         <div className="px-6 pt-4 sm:px-10 lg:hidden">
-          <WorkspaceMenu />
+          <WorkspaceMenu account={account} />
         </div>
         {children}
       </div>

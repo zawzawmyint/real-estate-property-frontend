@@ -22,9 +22,11 @@ import { SearchPicker } from "./search-picker";
 export function LeadFilters({
   filters,
   manager,
+  checkingSession = false,
 }: {
   filters: LeadFilters;
   manager: boolean;
+  checkingSession?: boolean;
 }) {
   const ready = useClientReady();
   const router = useRouter();
@@ -47,9 +49,11 @@ export function LeadFilters({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(filters);
   function navigate(next: LeadFilters) {
+    if (checkingSession) return;
     startTransition(() => router.push(leadsHref({ ...next, page: 1 })));
   }
   useEffect(() => {
+    if (checkingSession) return;
     if (q.trim() === (filters.q || "").trim()) return;
     const timer = setTimeout(() => {
       setSearch((current) => ({ ...current, requested: q.trim() }));
@@ -58,7 +62,7 @@ export function LeadFilters({
       );
     }, 300);
     return () => clearTimeout(timer);
-  }, [q, filters, router]);
+  }, [q, filters, router, checkingSession]);
   const count = [filters.stage, filters.source, filters.agentId].filter(
     Boolean,
   ).length;
@@ -116,7 +120,7 @@ export function LeadFilters({
   return (
     <FilterPanel
       busy={pending}
-      disabled={!ready}
+      disabled={!ready || checkingSession}
       fieldsClassName="md:grid-cols-[minmax(12rem,2fr)_repeat(3,minmax(8rem,1fr))]"
       before={
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -124,12 +128,14 @@ export function LeadFilters({
             aria-label="Lead views"
             className="flex min-h-11 gap-6 border-b border-border"
           >
-            {(manager
-              ? [
-                  ["unassigned", "Unassigned"],
-                  ["all", "All leads"],
-                ]
-              : [["mine", "My leads"]]
+            {(checkingSession
+              ? []
+              : manager
+                ? [
+                    ["unassigned", "Unassigned"],
+                    ["all", "All leads"],
+                  ]
+                : [["mine", "My leads"]]
             ).map(([view, label]) => (
               <Link
                 key={view}
@@ -149,7 +155,7 @@ export function LeadFilters({
           <Button
             type="button"
             variant="ghost"
-            disabled={!ready || pending}
+            disabled={!ready || pending || checkingSession}
             onClick={() => startTransition(() => router.refresh())}
           >
             Refresh leads
@@ -167,7 +173,12 @@ export function LeadFilters({
               }}
             >
               <SheetTrigger
-                render={<Button variant="outline" disabled={!ready} />}
+                render={
+                  <Button
+                    variant="outline"
+                    disabled={!ready || checkingSession}
+                  />
+                }
               >
                 Filters{count ? ` (${count})` : ""}
               </SheetTrigger>
@@ -220,14 +231,19 @@ export function LeadFilters({
               </div>
             </details>
           )}
-          {(count > 0 || filters.q || filters.sort !== "newest") && (
-            <Link
-              className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
-              href={leadsHref({ view: filters.view, sort: "newest", page: 1 })}
-            >
-              Clear filters{count ? ` (${count})` : ""}
-            </Link>
-          )}
+          {!checkingSession &&
+            (count > 0 || filters.q || filters.sort !== "newest") && (
+              <Link
+                className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+                href={leadsHref({
+                  view: filters.view,
+                  sort: "newest",
+                  page: 1,
+                })}
+              >
+                Clear filters{count ? ` (${count})` : ""}
+              </Link>
+            )}
         </div>
       }
     >

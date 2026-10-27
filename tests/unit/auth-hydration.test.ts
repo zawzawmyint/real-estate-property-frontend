@@ -1,5 +1,5 @@
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { createElement, Suspense } from "react";
+import { renderToStaticMarkup, renderToReadableStream } from "react-dom/server";
 import { expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
@@ -47,27 +47,48 @@ it("renders login fields and actions disabled until their React handlers are rea
   for (const control of controls) expect(control).toContain('disabled=""');
 });
 
-it("does not expose an enabled sign-out button before hydration", () => {
-  const html = renderToStaticMarkup(
+it("does not expose an enabled sign-out button before hydration", async () => {
+  const stream = await renderToReadableStream(
     createElement(
       StaffAccountProvider,
       {
-        staff: {
+        staff: Promise.resolve({
           id: "a",
           name: "Staff",
           email: "staff@example.com",
-          role: "agent",
+          role: "agent" as const,
           expiresAt: "2026-10-22T20:00:00Z",
-        },
+        }),
       },
       createElement(StaffAccount),
     ),
   );
+  await stream.allReady;
+  const html = await new Response(stream).text();
 
   expect(html.match(/<button\b[^>]*>/)?.[0]).toContain('disabled=""');
   expect(html).toContain('aria-label="Sign out"');
   expect(html).toContain("Staff");
   expect(html).toContain("Agent");
+});
+
+it("renders static shell content while only the account waits for verified identity", () => {
+  const staff = new Promise<null>(() => {});
+  const html = renderToStaticMarkup(
+    createElement(
+      StaffAccountProvider,
+      { staff },
+      createElement("nav", null, "Static workspace navigation"),
+      createElement(
+        Suspense,
+        { fallback: createElement("p", null, "Checking account") },
+        createElement(StaffAccount),
+      ),
+    ),
+  );
+  expect(html).toContain("Static workspace navigation");
+  expect(html).toContain("Checking account");
+  expect(html).not.toContain('aria-label="Sign out"');
 });
 
 it("keeps all three demo login actions inert until hydration", () => {

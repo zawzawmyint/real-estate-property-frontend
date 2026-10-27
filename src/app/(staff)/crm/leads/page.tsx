@@ -1,67 +1,78 @@
-import { PageHeader } from "@/components/layout/page-header";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { requireStaffSession } from "@/lib/auth/server";
-import { buttonVariants } from "@/components/ui/button-variants";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Icon } from "@/components/ui/icon";
-import { parseLeadFilters, leadQuery } from "@/features/leads/data/filters";
+import { PageHeader } from "@/components/layout/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
+import { parseLeadFilters } from "@/features/leads/data/filters";
 import { LeadFilters } from "@/features/leads/crm/lead-filters";
-import { LeadResults } from "@/features/leads/crm/lead-results";
 import { LeadLoading } from "@/features/leads/crm/lead-loading";
+import {
+  LeadFilterRegion,
+  LeadResultRegion,
+  CreateLeadAction,
+  InvalidLeadFilters,
+} from "@/features/leads/crm/lead-inventory";
+
 export const metadata: Metadata = {
   title: "Leads · Agency workspace",
   robots: { index: false, follow: false },
 };
+
 export default async function LeadsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const staff = await requireStaffSession();
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(await searchParams))
     if (typeof value === "string") query.set(key, value);
-  let filters;
+
+  // Construct only inert controls here. Verified regions resolve role-specific
+  // defaults and validate Agent restrictions before fetching data.
+  let provisionalFilters;
   try {
-    filters = parseLeadFilters(query, staff.role);
+    provisionalFilters = parseLeadFilters(query, "manager");
   } catch {
     return (
       <main id="main-content" className="min-w-0 flex-1 p-6 sm:p-8">
-        <h1 className="mb-6 text-3xl font-semibold">Leads</h1>
-        <Alert variant="destructive">
-          <AlertDescription>
-            These lead filters are invalid.{" "}
-            <Link href="/crm/leads" className="underline">
-              Clear filters and try again
-            </Link>
-          </AlertDescription>
-        </Alert>
+        <PageHeader title="Leads" />
+        <InvalidLeadFilters />
       </main>
     );
   }
-  const manager = staff.role !== "agent";
+  const queryString = query.toString();
+
   return (
     <main id="main-content" className="min-w-0 flex-1 px-4 py-8 sm:px-8">
       <PageHeader
         title="Leads"
-        description={
-          manager
-            ? "Turn every inquiry into a thoughtful next step."
-            : "Your conversations, follow-ups and property enquiries."
-        }
+        description="Turn every inquiry into a thoughtful next step."
         actions={
-          <Link href="/crm/leads/new" className={`${buttonVariants()} gap-2`}>
-            <Icon name="plus" />
-            New lead
-          </Link>
+          <Suspense
+            fallback={
+              <Skeleton
+                className="h-11 w-32"
+                aria-label="Checking lead permissions"
+              />
+            }
+          >
+            <CreateLeadAction />
+          </Suspense>
         }
       />
       <div className="space-y-6">
-        <LeadFilters filters={filters} manager={manager} />
-        <Suspense key={leadQuery(filters)} fallback={<LeadLoading />}>
-          <LeadResults filters={filters} manager={manager} />
+        <Suspense
+          fallback={
+            <LeadFilters
+              filters={provisionalFilters}
+              manager={false}
+              checkingSession
+            />
+          }
+        >
+          <LeadFilterRegion query={queryString} />
+        </Suspense>
+        <Suspense key={queryString} fallback={<LeadLoading />}>
+          <LeadResultRegion query={queryString} />
         </Suspense>
       </div>
     </main>

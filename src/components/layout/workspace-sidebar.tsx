@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { WorkspaceNavigation } from "@/components/layout/workspace-navigation";
 import { Icon } from "@/components/ui/icon";
-import { StaffAccount } from "@/features/auth/staff-account";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export function WorkspaceSidebar({ compact = false }: { compact?: boolean }) {
+export function WorkspaceSidebar({
+  compact = false,
+  account,
+}: {
+  compact?: boolean;
+  account: ReactNode;
+}) {
   return (
     <div
       className={cn(
@@ -34,7 +40,7 @@ export function WorkspaceSidebar({ compact = false }: { compact?: boolean }) {
           <Icon name="external" />
           {!compact && <span>View website</span>}
         </Link>
-        <StaffAccount compact={compact} />
+        {account}
       </div>
     </div>
   );
