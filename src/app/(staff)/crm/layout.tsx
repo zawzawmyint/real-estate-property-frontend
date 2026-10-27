@@ -1,17 +1,23 @@
-import { requireStaffSession } from "@/lib/auth/server";
+import {
+  StaffAccountRegion,
+  getAccountSession,
+} from "@/features/auth/staff-account-region";
 import { StaffAccountProvider } from "@/features/auth/staff-account";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 
-export default async function StaffLayout({
+export default function StaffLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const staff = await requireStaffSession();
-
   return (
-    <StaffAccountProvider staff={staff}>
-      <WorkspaceShell>{children}</WorkspaceShell>
+    <StaffAccountProvider staff={getAccountSession()}>
+      <WorkspaceShell
+        account={<StaffAccountRegion />}
+        compactAccount={<StaffAccountRegion compact />}
+      >
+        {children}
+      </WorkspaceShell>
     </StaffAccountProvider>
   );
 }

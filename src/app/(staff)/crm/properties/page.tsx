@@ -14,6 +14,30 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Icon } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SessionServiceError } from "@/lib/auth/transport";
+
+async function CreatePropertyAction() {
+  let staff;
+  try {
+    staff = await requireStaffSession();
+  } catch (error) {
+    if (!(error instanceof SessionServiceError)) throw error;
+    return null;
+  }
+  if (staff.role === "agent") return null;
+  return (
+    <Link
+      href="/crm/properties/new"
+      className={`${buttonVariants()} gap-2`}
+      aria-label="Add property"
+      title="Add property"
+    >
+      <Icon name="plus" />
+      Add property
+    </Link>
+  );
+}
 
 export const metadata: Metadata = {
   title: "Properties · Agency workspace",
@@ -25,7 +49,6 @@ export default async function PropertiesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const staff = await requireStaffSession();
   let filters;
 
   try {
@@ -52,17 +75,16 @@ export default async function PropertiesPage({
         title="Properties"
         description="Manage your agency’s property inventory."
         actions={
-          staff.role !== "agent" ? (
-            <Link
-              href="/crm/properties/new"
-              className={`${buttonVariants()} gap-2`}
-              aria-label="Add property"
-              title="Add property"
-            >
-              <Icon name="plus" />
-              Add property
-            </Link>
-          ) : undefined
+          <Suspense
+            fallback={
+              <Skeleton
+                className="h-11 w-36"
+                aria-label="Checking property permissions"
+              />
+            }
+          >
+            <CreatePropertyAction />
+          </Suspense>
         }
       />
       <div className="space-y-6">
@@ -71,10 +93,7 @@ export default async function PropertiesPage({
           key={serializePropertyFilters(filters).toString()}
           fallback={<PropertyInventoryLoading />}
         >
-          <PropertyInventoryResults
-            filters={filters}
-            canEdit={staff.role !== "agent"}
-          />
+          <PropertyInventoryResults filters={filters} />
         </Suspense>
       </div>
     </main>

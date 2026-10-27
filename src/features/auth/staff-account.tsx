@@ -6,6 +6,7 @@ import {
   useEffect,
   useRef,
   useState,
+  use,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,7 @@ import type { StaffRole } from "@/lib/auth/roles";
 import { useClientReady } from "@/lib/use-client-ready";
 import { Icon } from "@/components/ui/icon";
 import { NavigationDrawer } from "@/components/layout/navigation-drawer";
+import { SessionRetry } from "./session-retry";
 
 const roleLabels: Record<StaffRole, string> = {
   admin: "Admin",
@@ -26,7 +28,8 @@ const roleLabels: Record<StaffRole, string> = {
 };
 
 type StaffAccountState = {
-  identity: Pick<StaffSession, "name" | "role">;
+  staff: Promise<StaffSession | null>;
+  identity: Pick<StaffSession, "name" | "role"> | null;
   ready: boolean;
   pending: boolean;
   sessionError: boolean;
@@ -42,7 +45,7 @@ export function StaffAccountProvider({
   staff,
   children,
 }: {
-  staff: StaffSession;
+  staff: Promise<StaffSession | null>;
   children?: ReactNode;
 }) {
   const router = useRouter();
@@ -108,7 +111,8 @@ export function StaffAccountProvider({
   return (
     <StaffAccountContext.Provider
       value={{
-        identity: data?.user ?? staff,
+        staff,
+        identity: data?.user ?? null,
         ready,
         pending,
         sessionError: Boolean(error),
@@ -136,6 +140,11 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
   if (!account)
     throw new Error("StaffAccount requires a StaffAccountProvider.");
 
+  // Only this view suspends. The provider remains mounted above both drawers,
+  // preserving pending sign-out and errors while they close or change layout.
+  const staff = use(account.staff);
+  if (!staff) return <SessionRetry compact={compact} />;
+
   if (compact)
     return (
       <NavigationDrawer
@@ -150,7 +159,7 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
     );
 
   const {
-    identity,
+    identity: clientIdentity,
     ready,
     pending,
     sessionError,
@@ -159,6 +168,7 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
     signOut,
     retrySession,
   } = account;
+  const identity = clientIdentity ?? staff;
   const nameParts = identity.name.trim().split(/\s+/);
   const initials =
     (

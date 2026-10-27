@@ -1,5 +1,5 @@
 // Playwright-only fixture. No configurable upstream or non-loopback listener.
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createServer, request } from "node:http";
 
 const upstream = "http://127.0.0.1:4311";
@@ -12,6 +12,19 @@ function json(response, status, body) {
 
 function matches(rule, incoming, url, body) {
   if (incoming.method !== rule.method || url.pathname !== rule.path)
+    return false;
+  if (
+    rule.sessionDigest &&
+    !incoming.headers.cookie?.split(";").some((cookie) => {
+      const [name, ...value] = cookie.trim().split("=");
+      return (
+        name === "agency.session" &&
+        createHash("sha256")
+          .update(decodeURIComponent(value.join("=")))
+          .digest("hex") === rule.sessionDigest
+      );
+    })
+  )
     return false;
   if (
     rule.query &&
@@ -72,12 +85,20 @@ const server = createServer(async (incoming, response) => {
             rule.path,
           ) ||
           (rule.method === "GET" && rule.path === "/api/v1/properties") ||
+          (rule.method === "GET" &&
+            rule.path === "/api/v1/auth/get-session" &&
+            typeof rule.sessionDigest === "string" &&
+            /^[a-f0-9]{64}$/.test(rule.sessionDigest)) ||
           /^\/api\/v1\/staff\/leads(?:\/[\w-]+(?:\/(?:notes|stage|assignment|activity))?)?$/.test(
             rule.path,
           ) ||
           /^\/api\/v1\/public\/properties\/[\w-]+\/inquiries$/.test(rule.path)
         ) ||
         (!(typeof rule.title === "string" && rule.title.length > 8) &&
+          !(
+            typeof rule.sessionDigest === "string" &&
+            /^[a-f0-9]{64}$/.test(rule.sessionDigest)
+          ) &&
           !(typeof rule.name === "string" && rule.name.length > 8) &&
           !(typeof rule.query?.q === "string" && rule.query.q.length > 8) &&
           !(

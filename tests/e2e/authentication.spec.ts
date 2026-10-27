@@ -13,26 +13,18 @@ async function openStaffSidebar(page: Page) {
     exact: true,
   });
 
-  // A redirect can update the URL before the streamed workspace shell arrives.
-  await expect
-    .poll(
-      async () =>
-        (await menu.isVisible()) ||
-        (await account.isVisible()) ||
-        (await identity.isVisible()),
-    )
-    .toBe(true);
-  if (
-    (await menu.isVisible()) &&
-    (await menu.getAttribute("aria-expanded")) !== "true"
-  )
-    await menu.click();
-  if (
-    (await account.isVisible()) &&
-    (await account.getAttribute("aria-expanded")) !== "true"
-  )
-    await account.click();
-  await expect(identity).toBeVisible();
+  // Shell and account now stream separately. Wait for the appropriate hydrated
+  // trigger instead of deciding from a transient shell/account visibility gap.
+  await expect(async () => {
+    if (await identity.isVisible()) return;
+    const trigger =
+      (page.viewportSize()?.width ?? 1280) < 1024 ? menu : account;
+    await expect(trigger).toBeVisible({ timeout: 1000 });
+    await expect(trigger).toBeEnabled({ timeout: 1000 });
+    if ((await trigger.getAttribute("aria-expanded")) !== "true")
+      await trigger.click({ timeout: 1000 });
+    await expect(identity).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 10_000 });
 }
 
 async function signIn(
