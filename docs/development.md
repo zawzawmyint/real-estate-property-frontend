@@ -27,3 +27,11 @@ The public Contact/Agents content is backend-authored in `backend/src/modules/ag
 Keep each catalog portrait path synchronized with a local file in [`public/images/agents/`](../public/images/agents/). Assets must be 800×1000 WebP files, and their provenance belongs in that directory's `README.md`. Deploy the frontend assets with the backend catalog change so a published path is never missing. Real-business publication requires approved direct contact details, profile/portrait approval and inquiry usage wording, plus review of the demo/indexing flags. See the [public contact and agent specification](../specs/public-contact-and-agents/spec.md) and its [backend-owned contract snapshot](contracts/public-contact-and-agents.md).
 
 Public and CRM shells should remain usable at narrow widths, with keyboard navigation and visible focus. Review screenshots after layout changes. Avoid speculative UI tests that only assert static source wording.
+
+## Pull request branch naming
+
+For pull requests into main, use one of these prefixes followed by lowercase alphanumeric words separated by single hyphens: feat/, fix/, refactor/, docs/, test/, chore/ or ci/. Examples: feat/property-favorites, fix/contact-validation and ci/frontend-checks. Names such as feature/example, feat/Uppercase, fix/under_score or feat/a/b fail.
+
+The [Branch naming workflow](../.github/workflows/branch-name.yml) reports a **Branch name** check when a PR is opened, synchronized, reopened or edited. It validates the source branch without checking out PR code or installing dependencies. This is a merge gate when required; it does not prevent creating or pushing a branch. Existing feature/... branches and automation branches have no exemption and must follow the same policy before merging.
+
+After publishing the workflow, open a PR into main and let the check run. In Settings → Rules → Rulesets → Protect main, enable required status checks and add **Branch name** from GitHub Actions alongside the existing **check** CI check. Save the ruleset with Active enforcement. Repository settings are a manual step and have not been activated by this local delivery. If rolling back, remove Branch name from required checks before removing the workflow. See the [branch naming specification](../specs/branch-naming/spec.md).
