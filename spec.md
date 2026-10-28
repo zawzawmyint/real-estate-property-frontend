@@ -10,6 +10,8 @@ This file defines project-wide scope and boundaries and indexes existing specifi
 
 ## Verified baseline
 
+- The [pull request branch naming workflow](specs/branch-naming/spec.md) is locally verified for PRs into main. GitHub-hosted execution and required-check activation remain pending.
+
 - Sales pipeline Kanban at `/crm/leads/pipeline` provides six stage columns, accessible drag/explicit moves, URL filters, per-stage pagination and conflict/session recovery using existing lead contracts. See the verified [sales-pipeline specification](specs/sales-pipeline/spec.md).
 
 - Public homepage/listing headings, search panels and property grids share verified application components; ordinary public search and inquiry fields reuse the same labelled fields as CRM. Public hero/gallery and feature coordination remain distinct. See [shared public components](specs/shared-public-components/spec.md). This is maintenance with no new roadmap business-feature completion.
