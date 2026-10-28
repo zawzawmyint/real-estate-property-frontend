@@ -20,6 +20,26 @@ export default function PublicLayout({
             <p className="text-sm text-muted-foreground">
               A new place. A new beginning.
             </p>
+            <nav
+              aria-label="Footer navigation"
+              className="flex flex-wrap items-center gap-x-6 gap-y-2"
+            >
+              {(
+                [
+                  ["/agents", "Our agents"],
+                  ["/contact", "Contact"],
+                ] as const
+              ).map(([href, label]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="inline-flex min-h-11 items-center rounded-sm text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                >
+                  {label}
+                  <NavigationPending />
+                </Link>
+              ))}
+            </nav>
             <Link
               href="/login"
               className="inline-flex min-h-11 items-center rounded-sm text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"

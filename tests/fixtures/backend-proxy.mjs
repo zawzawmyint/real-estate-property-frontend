@@ -86,6 +86,9 @@ const server = createServer(async (incoming, response) => {
           ) ||
           (rule.method === "GET" && rule.path === "/api/v1/properties") ||
           (rule.method === "GET" &&
+            rule.path === "/api/v1/public/agents/daniel-brooks") ||
+          (rule.method === "GET" && rule.path === "/api/v1/public/agency") ||
+          (rule.method === "GET" &&
             rule.path === "/api/v1/auth/get-session" &&
             typeof rule.sessionDigest === "string" &&
             /^[a-f0-9]{64}$/.test(rule.sessionDigest)) ||
@@ -101,6 +104,11 @@ const server = createServer(async (incoming, response) => {
           ) &&
           !(typeof rule.name === "string" && rule.name.length > 8) &&
           !(typeof rule.query?.q === "string" && rule.query.q.length > 8) &&
+          !(
+            rule.method === "GET" &&
+            rule.path === "/api/v1/public/agents/daniel-brooks"
+          ) &&
+          !(rule.method === "GET" && rule.path === "/api/v1/public/agency") &&
           !(
             typeof rule.query?.location === "string" &&
             rule.query.location.length > 8

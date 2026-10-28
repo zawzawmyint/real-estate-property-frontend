@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { BuildingLoader, LoadingState } from "@/components/ui/building-loader";
+import { BuildingLoader } from "@/components/ui/building-loader";
+import { LoadingState } from "@/components/ui/loading-state";
 import { NavigationPending } from "@/components/ui/navigation-pending";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getPublicProperties } from "@/lib/api/server";

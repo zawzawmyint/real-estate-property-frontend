@@ -9,7 +9,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { useClientReady } from "@/lib/use-client-ready";
 import { inquiryFormSchema, type InquiryValues } from "../data/input";
 import { sendInquiry } from "../data/actions";
-export function InquiryCard({
+export function PropertyInquiryCard({
   propertyId,
   title,
   location,
@@ -184,7 +184,9 @@ export function InquiryCard({
                   ? "Provide a phone number or email address."
                   : undefined
               }
-              maxLength={key === "name" ? 120 : key === "phone" ? 40 : 254}
+              maxLength={
+                key === "name" ? 120 : key === "email" ? 254 : undefined
+              }
             />
           ))}
           <TextareaField

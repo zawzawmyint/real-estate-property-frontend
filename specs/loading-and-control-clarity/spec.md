@@ -41,3 +41,7 @@ Frontend presentation only. Watch narrow header/account rows and CRM action wrap
 ## Implementation evidence
 
 The delivered source uses the shared decorative motion-safe Spinner with operation text for submit, authentication, search, upload, delete, retry and navigation feedback. Grouped photo reorder/remove and lifecycle controls remain locked during work and expose one adjacent spinner/status with the current operation text. The original Dubai skyline geometry remains reserved for large route/result regions: each property collection has one 64px skyline with skeletons, and LoadingState has only its 96px form. Individual photo loading uses a neutral reserved shape; failed media uses a static image icon and optional `Photo unavailable` label. NativeSelect now uses a logical-end, centered SVG chevron while retaining native select semantics and keyboard behavior. Buy/Rent navigation and the CRM Add property native link expose visible text. There are no API, dependency, authentication, data, permission, configuration or operational-workflow changes.
+
+## Current module locations
+
+The verified [shared-code naming maintenance](../shared-code-naming/spec.md) gives `LoadingState` its own module at `src/components/ui/loading-state.tsx`; decorative `BuildingLoader` artwork and styles remain in their existing files. Its markup, default label, accessibility and 96px presentation are unchanged.

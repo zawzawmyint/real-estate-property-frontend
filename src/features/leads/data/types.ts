@@ -17,6 +17,7 @@ export type StageInput = components["schemas"]["LeadStageInput"];
 export type NoteInput = components["schemas"]["LeadNoteInput"];
 export type NoteResult = components["schemas"]["LeadNoteResult"];
 export type InquiryInput = components["schemas"]["InquiryInput"];
+export type AgencyInquiryInput = components["schemas"]["AgencyInquiryInput"];
 export type InquiryReceipt = components["schemas"]["InquiryReceipt"];
 
 export type ActionError = {

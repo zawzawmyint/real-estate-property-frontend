@@ -28,7 +28,7 @@ export function PublicSectionHeader({
         className,
       )}
     >
-      <div>
+      <div className="min-w-0">
         {eyebrow && (
           <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
             {eyebrow}
@@ -37,7 +37,7 @@ export function PublicSectionHeader({
         <Heading
           id={id}
           className={cn(
-            "display-heading leading-tight",
+            "display-heading break-words leading-tight",
             level === 1 ? "text-4xl sm:text-5xl" : "text-3xl sm:text-4xl",
             eyebrow && "mt-3",
           )}

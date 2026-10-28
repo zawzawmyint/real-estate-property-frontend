@@ -92,7 +92,7 @@ Public pages share ordinary labelled fields with CRM, while public headings and 
 - PropertyCard from @/features/properties/public/property-card already owns property card rendering; props property and optional resultsQuery. PropertyFilters from @/features/properties/public/property-filters already shares SearchForm between homepage, desktop results and mobile Sheet; props query (default empty) and home (default false). PropertyPagination remains the feature-owned numbered navigation. Reuse these rather than rebuilding them.
 - Use TextField, SelectField and TextareaField from @/components/forms/fields for ordinary public search/inquiry controls, just as in CRM. Pass register(name), error.message, native props and existing control ids. Let wrapper help use its generated id. Preserve external budget-note aria-describedby; wrapper errors merge with it. Keep radio purpose tabs and inline result sort specialized rather than adding unused generic variants.
 
-Server headings and property grids remain server-compatible. PublicSearchPanel owns no domain imports or client state. The feature retains exact AED conversion, URL/query state, mobile Apply/close behavior and hydration readiness. InquiryCard retains native autofill synchronization, stable receipts, duplicate guards and explicit uncertain-save reconciliation. There is one inquiry form today; create no generic contact form or public table without another real consumer.
+Server headings and property grids remain server-compatible. PublicSearchPanel owns no domain imports or client state. The feature retains exact AED conversion, URL/query state, mobile Apply/close behavior and hydration readiness. PropertyInquiryCard and AgencyInquiryCard each retain native autofill synchronization, stable receipts, duplicate guards and explicit uncertain-save reconciliation for their distinct property-bound and property-independent contracts. Do not create a generic contact form or public table without another real consumer.
 
 Example of composing an existing public collection (rows are already fetched by the feature):
 
@@ -122,7 +122,7 @@ export function PublicCollection({
 }
 ```
 
-Real consumers: src/app/(public)/page.tsx, src/app/(public)/properties/page.tsx, src/features/properties/public/property-results.tsx and property-filters.tsx, and src/features/leads/public/inquiry-card.tsx. See [shared public component specification](../../../specs/shared-public-components/spec.md).
+Real consumers: src/app/(public)/page.tsx, src/app/(public)/properties/page.tsx, src/features/properties/public/property-results.tsx and property-filters.tsx, and src/features/leads/public/property-inquiry-card.tsx. See [shared public component specification](../../../specs/shared-public-components/spec.md).
 
 ## 5. Forms
 

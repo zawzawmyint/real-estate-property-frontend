@@ -10,6 +10,8 @@ This file defines project-wide scope and boundaries and indexes existing specifi
 
 ## Verified baseline
 
+- Sales pipeline Kanban at `/crm/leads/pipeline` provides six stage columns, accessible drag/explicit moves, URL filters, per-stage pagination and conflict/session recovery using existing lead contracts. See the verified [sales-pipeline specification](specs/sales-pipeline/spec.md).
+
 - Public homepage/listing headings, search panels and property grids share verified application components; ordinary public search and inquiry fields reuse the same labelled fields as CRM. Public hero/gallery and feature coordination remain distinct. See [shared public components](specs/shared-public-components/spec.md). This is maintenance with no new roadmap business-feature completion.
 
 - Public homepage shell at `/` and staff shell at `/crm`, with separate layouts and shared design tokens and UI primitives.
@@ -40,7 +42,11 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 ## Planned product scope
 
-Remaining work includes contact and agent pages, pipeline Kanban, viewings, follow-up tasks and reporting. Later enhancements and the optional client portal remain subject to the roadmap.
+Remaining work includes viewings, follow-up tasks and reporting. Later enhancements and the optional client portal remain subject to the roadmap.
+
+The verified [public contact and agent pages specification](specs/public-contact-and-agents/spec.md) records Contact, Our agents, public profiles and the property-independent enquiry flow into the existing CRM. The fictional demo delivery is complete; real-business publication remains an operational content/approval gate.
+
+The 2026-10-27 review remediation keeps the delivered lead/contact and pipeline scope intact while canonicalizing phone whitespace at validation boundaries, preserving the Contact receipt across recovery, making unknown agency mode explicit, and aligning drag announcements with their actual outcome. The affected feature specs record completed focused evidence. The full browser run reported 163 passed, 8 intentional skips and one pointer-cancel test synchronization failure. After correcting the test to wait for settled drop-animation geometry and verify an active drag before Escape, that case passed three consecutive isolated reruns. All 164 applicable browser cases are covered across these runs; a single clean full-suite rerun is not claimed.
 
 Staff authentication, property management, homepage search and featured results, filtered listings, and property detail/gallery are already delivered within the verified baseline above. The roadmap records partial delivery for broader homepage and mobile-layout checklist items; their unchecked status does not make the delivered portions unimplemented.
 
@@ -68,6 +74,8 @@ Use maroon `#701F35`, warm ivory `#FAF8F5` and charcoal `#252329`, with clear pr
 - [AGENTS.md](AGENTS.md): contribution instructions.
 
 Keep this overview current as features are verified. Do not duplicate full feature requirements here. If documents disagree, reconcile them before implementation; do not silently override a feature contract. Shared documents use the frontend-first synchronization policy; this project-specific spec is maintained independently of the backend root spec.
+
+The verified [shared-code naming maintenance](specs/shared-code-naming/spec.md) aligns reusable infrastructure and UI names with their actual ownership. All callers use the new module paths directly; business behavior, API contracts, permissions and roadmap completion states are unchanged.
 
 ## Validation
 

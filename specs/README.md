@@ -45,3 +45,17 @@ The root [project specification](../spec.md) summarizes project-wide scope and t
 - [Separate CRM property details and editing](crm-property-details/spec.md): verified authenticated read-only CRM details for every staff role, distinct editor and public-listing destinations, role-safe owner presentation and Agent redirects from edit URLs. It does not change roadmap completion status.
 - [Property management and public discovery](property-management/spec.md): verified CRM property lifecycle/photos and public search/list/detail using the agreed Avenor design. [Implementation plan](../docs/plans/property-management.md).
 - [Demo property presentation](demo-property-data/spec.md): verified presentation of explicitly seeded fictional sample listings and generated illustrative images.
+
+## Verified sales pipeline
+
+- [Sales pipeline](sales-pipeline/spec.md): verified P1-10 responsive Kanban, accessible stage movement and recovery using existing lead contracts.
+
+## Verified public contact and agent pages
+
+- [Public contact and agent pages](public-contact-and-agents/spec.md): verified P1-17 Contact, directory and profile design, enquiry-to-CRM flow and a separate public content catalog. [Brief implementation plan](../docs/superpowers/plans/2026-10-27-public-contact-and-agents.md). The fictional demo delivery is verified; real-business publication remains gated.
+
+- [2026-10-27 review remediation](public-contact-and-agents/spec.md#review-remediation--2026-10-27): focused maintenance of canonical phone handling, unknown-mode Contact resilience and receipt recovery; related pipeline announcement evidence is in the [sales pipeline specification](sales-pipeline/spec.md#review-remediation--2026-10-27). It introduces no new roadmap feature or completion count; The full browser run reported 163 passed, 8 intentional skips and one pointer-cancel test synchronization failure. After correcting the test to wait for settled drop-animation geometry and verify an active drag before Escape, that case passed three consecutive isolated reruns. All 164 applicable browser cases are covered across these runs; a single clean full-suite rerun is not claimed.
+
+## Verified naming maintenance
+
+- [Shared-code naming and ownership](shared-code-naming/spec.md): verified shared-helper locations, updated direct imports and property-specific enquiry naming; no new feature or API contract.

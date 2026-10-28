@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { InquiryCard } from "@/features/leads/public/inquiry-card";
+import { PropertyInquiryCard } from "@/features/leads/public/property-inquiry-card";
 import { getPublicProperty } from "@/lib/api/server";
 import { PropertyApiError } from "@/features/properties/data/request";
 import {
@@ -141,7 +141,7 @@ export default async function PropertyPage({
             </p>
           </section>
         </article>
-        <InquiryCard
+        <PropertyInquiryCard
           propertyId={property.id}
           title={property.title}
           location={`${property.community}, ${property.city}`}

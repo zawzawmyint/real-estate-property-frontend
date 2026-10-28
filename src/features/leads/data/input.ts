@@ -23,11 +23,15 @@ export const sourceLabels = {
 };
 const phone = z
   .string()
-  .trim()
-  .min(3)
-  .max(40)
-  .regex(/^[+\d\s()-]+$/)
-  .regex(/\d/);
+  .transform((value) => value.replace(/\s/g, " ").trim())
+  .pipe(
+    z
+      .string()
+      .min(3, "Enter a phone number with at least 3 characters.")
+      .max(40, "Keep the phone number within 40 characters.")
+      .regex(/^[+\d ()-]+$/, "Use digits, spaces, +, - or parentheses.")
+      .regex(/\d/, "Include at least one digit in the phone number."),
+  );
 const email = z.string().trim().toLowerCase().pipe(z.email().max(254));
 const optional = <T extends z.ZodType<string>>(schema: T) =>
   schema.nullable().optional();
@@ -52,6 +56,14 @@ export const inquirySchema = z
     submissionId: z.uuid(),
     ...contact,
     message: optional(z.string().trim().min(1).max(2000)),
+  })
+  .superRefine(requireContact);
+export const agencyInquirySchema = z
+  .strictObject({
+    submissionId: z.uuid(),
+    ...contact,
+    purpose: z.enum(["sale", "rent"]),
+    message: z.string().trim().min(1, "Tell us how we can help.").max(2000),
   })
   .superRefine(requireContact);
 export const createLeadSchema = z
@@ -140,3 +152,15 @@ export const inquiryFormSchema = z
   .superRefine(requireContact);
 export type LeadFormValues = z.infer<typeof leadFormSchema>;
 export type InquiryValues = z.infer<typeof inquiryFormSchema>;
+export const agencyInquiryFormSchema = z
+  .object({
+    name: contact.name,
+    phone: blankPhone,
+    email: blankEmail,
+    purpose: z.enum(["sale", "rent"], {
+      error: "Choose whether you are looking to buy or rent.",
+    }),
+    message: z.string().trim().min(1, "Tell us how we can help.").max(2000),
+  })
+  .superRefine(requireContact);
+export type AgencyInquiryValues = z.infer<typeof agencyInquiryFormSchema>;

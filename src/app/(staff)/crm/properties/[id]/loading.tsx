@@ -1,4 +1,4 @@
-import { LoadingState } from "@/components/ui/building-loader";
+import { LoadingState } from "@/components/ui/loading-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {

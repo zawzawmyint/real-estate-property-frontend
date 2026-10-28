@@ -7,6 +7,7 @@ import {
   assignmentSchema,
   createLeadSchema,
   inquirySchema,
+  agencyInquirySchema,
   noteSchema,
   patchLeadSchema,
   stageSchema,
@@ -21,6 +22,7 @@ import type {
   NoteInput,
   NoteResult,
   InquiryInput,
+  AgencyInquiryInput,
   InquiryReceipt,
 } from "./types";
 const path = (id: string) =>
@@ -98,6 +100,30 @@ export async function sendInquiry(
         status: 503,
         message:
           "Inquiries are temporarily unavailable. Your details have been preserved; please try again later.",
+      },
+    };
+  }
+}
+
+export async function sendAgencyInquiry(
+  input: AgencyInquiryInput,
+): Promise<ActionResult<InquiryReceipt>> {
+  try {
+    const relay = inquiryRelayHeaders(await headers());
+    return runLeadMutation(
+      "public/inquiries",
+      "POST",
+      () => agencyInquirySchema.parse(input),
+      { publicHeaders: relay, receipt: true },
+    );
+  } catch {
+    return {
+      ok: false,
+      error: {
+        code: "SERVICE_UNAVAILABLE",
+        status: 503,
+        message:
+          "Enquiries are temporarily unavailable. Your details have been preserved; please try again later.",
       },
     };
   }

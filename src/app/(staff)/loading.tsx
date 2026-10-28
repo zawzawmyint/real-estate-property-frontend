@@ -1,4 +1,4 @@
-import { LoadingState } from "@/components/ui/building-loader";
+import { LoadingState } from "@/components/ui/loading-state";
 
 export default function Loading() {
   return (
