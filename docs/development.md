@@ -20,6 +20,10 @@ Browser integration requires the isolated backend fixture, rather than a manuall
 
 The disposable backend seeds fictional featured listings by default so public image tests are independent of other test files. Set `STAFF_E2E_SEED_PROPERTIES=0` only for targeted suites that do not need public listing media. Playwright automatically sets `E2E_TEST_RUN=1` on its Next server to hide the floating development indicator, which otherwise overlaps CRM account controls; compile/runtime errors remain enabled. Normal development and production do not require this flag. The long sign-in/refresh/sign-out/back-navigation journeys have a 60-second total budget while individual assertions retain their existing limits.
 
+Dashboard acceptance is deliberately isolated from the legacy browser fixture because it requires an exact ten-lead agency population. In the backend terminal, set the same temporary `STAFF_E2E_PASSWORD`, then set `STAFF_E2E_DASHBOARD_ONLY=1` before starting `bun run test:auth:e2e-server`. In the frontend terminal, set both variables and run `bun run test:e2e -- tests/e2e/dashboard.spec.ts --workers=1`. The dashboard suite is skipped unless this flag is set; do not set it for the normal legacy suite.
+
+The test-only `E2E_BACKEND_PORT` selects the proxy's strict `127.0.0.1` upstream; it defaults to `4311`. To use an alternate port such as `14311`, set `E2E_BACKEND_PORT=14311` and `PORT=14311` in the backend fixture terminal, then set `E2E_BACKEND_PORT=14311` in the frontend test terminal. The fixture also uses that port for its test `PUBLIC_ORIGIN`, including media URLs. This is fixture/proxy configuration only and does not change production environment configuration.
+
 ## Public agency catalog and portraits
 
 The public Contact/Agents content is backend-authored in `backend/src/modules/agency/agency.catalog.ts`; it has no live CMS or Better Auth/staff-account synchronization. Update only approved public fields and `published` flags there. Direct contact values remain absent until approved, and the current catalog is fictional demo content, so Contact, directory and profile pages remain noindex.

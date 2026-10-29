@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
 
 const paths = {
+  won: "M8 3h8v7a4 4 0 0 1-8 0V3ZM8 5H4v3a4 4 0 0 0 4 4M16 5h4v3a4 4 0 0 1-4 4M12 14v6M8 21h8",
+  conversion:
+    "m5 19 14-14M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z",
   tasks: "M9 5H5v16h14V5h-4M9 3h6v4H9zM8 12l2 2 5-5M8 18h8",
   calendar: "M4 5h16v16H4zM8 3v4M16 3v4M4 10h16M8 14h2M14 14h2M8 18h2",
   "chevron-down": "m6 9 6 6 6-6",

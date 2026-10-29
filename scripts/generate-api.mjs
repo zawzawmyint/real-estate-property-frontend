@@ -8,6 +8,7 @@ for (const domain of [
   "public-agency",
   "viewings",
   "tasks",
+  "dashboard",
 ]) {
   const schema = new URL(
     `../docs/contracts/${domain}.openapi.yaml`,

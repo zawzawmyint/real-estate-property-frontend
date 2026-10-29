@@ -54,7 +54,10 @@ async function signIn(
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/crm$/);
   await expect(
-    page.getByRole("heading", { name: "Your agency workspace", exact: true }),
+    page.getByRole("heading", {
+      name: role === "agent" ? "My overview" : "Agency overview",
+      exact: true,
+    }),
   ).toBeVisible();
 
   if (testInfo)
@@ -125,7 +128,7 @@ for (const role of staffRoles) {
     await page.goto("/crm");
     await expect(page).toHaveURL(/\/login$/);
     await expect(
-      page.getByRole("heading", { name: "Your agency workspace", exact: true }),
+      page.getByRole("heading", { name: /^(Agency|My) overview$/ }),
     ).toHaveCount(0);
   });
 }
@@ -600,7 +603,7 @@ test("anonymous direct CRM requests are protected and login supports keyboard an
   await page.goto("/crm");
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole("heading", { name: "Your agency workspace", exact: true }),
+    page.getByRole("heading", { name: /^(Agency|My) overview$/ }),
   ).toHaveCount(0);
   await expect(page.getByRole("main")).toHaveCount(1);
 

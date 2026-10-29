@@ -6,6 +6,10 @@ The standalone [project foundation](project-foundation/spec.md) covers this repo
 
 The root [project specification](../spec.md) summarizes project-wide scope and the verified baseline. Keep detailed requirements and acceptance evidence in the feature specs; keep checklist progress in [the roadmap](../ROADMAP.md).
 
+## Verified dashboard
+
+- [Agency dashboard](agency-dashboard/spec.md): verified P1-28–P1-30 endpoint and CRM dashboard, including full checks, final 16/16 desktop/mobile browser coverage and visual QA. All active legacy cases passed across two non-clean parallel runs; that limitation is recorded in the feature specification.
+
 ## Verified follow-up tasks
 
 - [Follow-up tasks](follow-up-tasks/spec.md): verified P1-26–P1-27 behavior for lead-linked dated tasks and overdue highlighting. [Implementation plan](../docs/superpowers/plans/2026-10-29-follow-up-tasks.md); backend/frontend quality gates, task reruns and the final legacy regression passed.
