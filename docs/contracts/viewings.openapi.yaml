@@ -40,7 +40,7 @@ paths:
             schema: { type: string, enum: [scheduled, completed, cancelled] },
           }
       responses:
-        "200":
+        '200':
           description: Authorized appointments; all states by default
           content:
             application/json:
@@ -52,14 +52,14 @@ paths:
                   items:
                     {
                       type: array,
-                      items: { $ref: "#/components/schemas/Viewing" },
+                      items: { $ref: '#/components/schemas/Viewing' },
                     }
                   page: { type: integer }
                   pageSize: { type: integer }
                   total: { type: integer }
-        "400": { $ref: "#/components/responses/ViewingError" }
-        "401": { $ref: "#/components/responses/ViewingError" }
-        "404": { $ref: "#/components/responses/ViewingError" }
+        '400': { $ref: '#/components/responses/ViewingError' }
+        '401': { $ref: '#/components/responses/ViewingError' }
+        '404': { $ref: '#/components/responses/ViewingError' }
     post:
       operationId: createViewing
       summary: Book a future 15–240 minute appointment for an eligible assigned lead and published available property
@@ -68,17 +68,17 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateViewing" }
+            schema: { $ref: '#/components/schemas/CreateViewing' }
       responses:
-        "201": { $ref: "#/components/responses/ViewingSuccess" }
-        "200": { $ref: "#/components/responses/ViewingSuccess" }
-        "400": { $ref: "#/components/responses/ViewingError" }
-        "401": { $ref: "#/components/responses/ViewingError" }
-        "403": { $ref: "#/components/responses/ViewingError" }
-        "404": { $ref: "#/components/responses/ViewingError" }
-        "409": { $ref: "#/components/responses/ViewingError" }
-        "413": { $ref: "#/components/responses/ViewingError" }
-        "415": { $ref: "#/components/responses/ViewingError" }
+        '201': { $ref: '#/components/responses/ViewingSuccess' }
+        '200': { $ref: '#/components/responses/ViewingSuccess' }
+        '400': { $ref: '#/components/responses/ViewingError' }
+        '401': { $ref: '#/components/responses/ViewingError' }
+        '403': { $ref: '#/components/responses/ViewingError' }
+        '404': { $ref: '#/components/responses/ViewingError' }
+        '409': { $ref: '#/components/responses/ViewingError' }
+        '413': { $ref: '#/components/responses/ViewingError' }
+        '415': { $ref: '#/components/responses/ViewingError' }
   /api/v1/staff/viewings/{id}:
     parameters:
       - {
@@ -91,10 +91,10 @@ paths:
       operationId: getViewing
       security: [{ staffSession: [] }]
       responses:
-        "200": { $ref: "#/components/responses/ViewingSuccess" }
-        "400": { $ref: "#/components/responses/ViewingError" }
-        "401": { $ref: "#/components/responses/ViewingError" }
-        "404": { $ref: "#/components/responses/ViewingError" }
+        '200': { $ref: '#/components/responses/ViewingSuccess' }
+        '400': { $ref: '#/components/responses/ViewingError' }
+        '401': { $ref: '#/components/responses/ViewingError' }
+        '404': { $ref: '#/components/responses/ViewingError' }
     patch:
       operationId: rescheduleViewing
       summary: Reschedule scheduled appointment with current lead/version/eligibility checks
@@ -103,16 +103,16 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/RescheduleViewing" }
+            schema: { $ref: '#/components/schemas/RescheduleViewing' }
       responses:
-        "200": { $ref: "#/components/responses/ViewingSuccess" }
-        "400": { $ref: "#/components/responses/ViewingError" }
-        "401": { $ref: "#/components/responses/ViewingError" }
-        "403": { $ref: "#/components/responses/ViewingError" }
-        "404": { $ref: "#/components/responses/ViewingError" }
-        "409": { $ref: "#/components/responses/ViewingError" }
-        "413": { $ref: "#/components/responses/ViewingError" }
-        "415": { $ref: "#/components/responses/ViewingError" }
+        '200': { $ref: '#/components/responses/ViewingSuccess' }
+        '400': { $ref: '#/components/responses/ViewingError' }
+        '401': { $ref: '#/components/responses/ViewingError' }
+        '403': { $ref: '#/components/responses/ViewingError' }
+        '404': { $ref: '#/components/responses/ViewingError' }
+        '409': { $ref: '#/components/responses/ViewingError' }
+        '413': { $ref: '#/components/responses/ViewingError' }
+        '415': { $ref: '#/components/responses/ViewingError' }
   /api/v1/staff/viewings/{id}/status:
     parameters:
       - {
@@ -129,16 +129,16 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/UpdateViewingStatus" }
+            schema: { $ref: '#/components/schemas/UpdateViewingStatus' }
       responses:
-        "200": { $ref: "#/components/responses/ViewingSuccess" }
-        "400": { $ref: "#/components/responses/ViewingError" }
-        "401": { $ref: "#/components/responses/ViewingError" }
-        "403": { $ref: "#/components/responses/ViewingError" }
-        "404": { $ref: "#/components/responses/ViewingError" }
-        "409": { $ref: "#/components/responses/ViewingError" }
-        "413": { $ref: "#/components/responses/ViewingError" }
-        "415": { $ref: "#/components/responses/ViewingError" }
+        '200': { $ref: '#/components/responses/ViewingSuccess' }
+        '400': { $ref: '#/components/responses/ViewingError' }
+        '401': { $ref: '#/components/responses/ViewingError' }
+        '403': { $ref: '#/components/responses/ViewingError' }
+        '404': { $ref: '#/components/responses/ViewingError' }
+        '409': { $ref: '#/components/responses/ViewingError' }
+        '413': { $ref: '#/components/responses/ViewingError' }
+        '415': { $ref: '#/components/responses/ViewingError' }
 components:
   securitySchemes:
     staffSession:
@@ -151,7 +151,7 @@ components:
       description: Privacy-safe viewing; identical authorized create replay returns 200
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/Viewing" }
+          schema: { $ref: '#/components/schemas/Viewing' }
     ViewingError:
       description: Structured error; inaccessible records return 404, stale versions or lifecycle/eligibility conflicts return 409
       content:
@@ -207,11 +207,11 @@ components:
           properties:
             id: { type: string, format: uuid }
             title: { type: string }
-            location: { type: [string, "null"] }
+            location: { type: [string, 'null'] }
             bookable: { type: boolean }
         assignedAgent:
           oneOf:
-            - { type: "null" }
+            - { type: 'null' }
             - type: object
               additionalProperties: false
               required: [id, name]
@@ -221,7 +221,7 @@ components:
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
         status: { type: string, enum: [scheduled, completed, cancelled] }
-        feedback: { type: [string, "null"] }
+        feedback: { type: [string, 'null'] }
         version: { type: integer, minimum: 1 }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }

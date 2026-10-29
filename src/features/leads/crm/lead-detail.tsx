@@ -56,6 +56,7 @@ export function LeadDetail({
   back,
   saved,
   viewings,
+  tasks,
 }: {
   initialLead: Detail;
   initialActivity: Page<Activity>;
@@ -63,6 +64,7 @@ export function LeadDetail({
   back: string;
   saved: boolean;
   viewings?: ReactNode;
+  tasks?: ReactNode;
 }) {
   const ready = useClientReady();
   const router = useRouter();
@@ -156,6 +158,7 @@ export function LeadDetail({
         setConfirmStage(false);
         setAnnouncement("Stage saved.");
         await reload();
+        startTransition(() => router.refresh());
       } catch {
         await reload();
         setMessage(
@@ -437,6 +440,7 @@ export function LeadDetail({
                   setAnnouncement(text);
                   startTransition(async () => {
                     await reload();
+                    startTransition(() => router.refresh());
                   });
                 }}
               />
@@ -444,6 +448,38 @@ export function LeadDetail({
           </LeadSection>
         </aside>
         <div className="min-w-0 space-y-6 lg:col-start-1 lg:row-start-1">
+          <section
+            aria-label="Tasks"
+            className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-6"
+          >
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold">Tasks</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Dated follow-ups and their history for this lead.
+                </p>
+              </div>
+              {lead.assignedAgent?.available &&
+                !["won", "lost"].includes(lead.stage) && (
+                  <Link
+                    href={`/crm/tasks/new?leadId=${lead.id}`}
+                    className={buttonVariants()}
+                  >
+                    Add follow-up
+                  </Link>
+                )}
+            </div>
+            {(!lead.assignedAgent?.available ||
+              ["won", "lost"].includes(lead.stage)) && (
+              <p className="mb-5 text-sm text-muted-foreground">
+                {!lead.assignedAgent?.available
+                  ? "Assign an active Agent before adding a follow-up."
+                  : "Won or lost leads cannot receive new follow-ups."}{" "}
+                Existing open tasks can still be completed or cancelled.
+              </p>
+            )}
+            {tasks}
+          </section>
           <LeadSection
             title="Viewings"
             description="Appointments and history for this lead, one week at a time."

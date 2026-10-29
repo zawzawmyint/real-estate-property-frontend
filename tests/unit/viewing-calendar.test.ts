@@ -6,7 +6,21 @@ import {
   validDate,
   weekDays,
   weekQuery,
+  viewingHref,
 } from "@/features/viewings/data/calendar";
+it("preserves independent lead task filters during viewing navigation", () => {
+  const href = viewingHref(
+    "/crm/leads/id",
+    "2026-11-01",
+    "",
+    "taskDue=overdue&taskPage=2&status=scheduled",
+  );
+  const query = new URL(href, "http://local").searchParams;
+  expect(query.get("taskDue")).toBe("overdue");
+  expect(query.get("taskPage")).toBe("2");
+  expect(query.get("date")).toBe("2026-11-01");
+  expect(query.has("status")).toBe(false);
+});
 it("groups UTC midnight boundaries by Dubai day independently of device timezone", () => {
   expect(dubaiDate("2026-10-28T21:30:00Z")).toBe("2026-10-29");
   expect(timeLabel("2026-10-28T21:30:00Z")).toBe("01:30");

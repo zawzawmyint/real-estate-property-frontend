@@ -14,6 +14,9 @@ import { LeadApiError } from "@/features/leads/data/request";
 import { safeLeadReturn } from "@/features/leads/data/filters";
 import { LeadDetail } from "@/features/leads/crm/lead-detail";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { parseTaskFilters, taskHref } from "@/features/tasks/data/filters";
+import { TaskToolbar } from "@/features/tasks/crm/task-toolbar";
+import { TaskLoading, TaskResults } from "@/features/tasks/crm/results";
 export default async function LeadDetailPage({
   params,
   searchParams,
@@ -25,6 +28,11 @@ export default async function LeadDetailPage({
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
   const query = await searchParams;
+  const taskFilters = parseTaskFilters(query, true);
+  const taskKey = `${id}-${taskFilters.status}-${taskFilters.due}-${taskFilters.page}`;
+  const existingParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(query))
+    if (typeof value === "string") existingParams.set(key, value);
   const date =
     typeof query.date === "string" && validDate(query.date)
       ? query.date
@@ -73,6 +81,38 @@ export default async function LeadDetailPage({
       manager={staff.role !== "agent"}
       back={safeLeadReturn(query.from, staff.role)}
       saved={query.saved === "1"}
+      tasks={
+        taskFilters.valid ? (
+          <>
+            <TaskToolbar
+              key={`toolbar-${taskKey}`}
+              filters={taskFilters}
+              leadMode
+            />
+            <Suspense key={taskKey} fallback={<TaskLoading />}>
+              <TaskResults filters={taskFilters} leadId={id} />
+            </Suspense>
+          </>
+        ) : (
+          <Alert variant="destructive">
+            <AlertDescription>
+              These task filters are invalid.{" "}
+              <Link
+                href={taskHref(
+                  `/crm/leads/${id}`,
+                  { status: "open", due: "all", page: 1, valid: true },
+                  1,
+                  existingParams,
+                  true,
+                )}
+                className="underline"
+              >
+                Reset task filters
+              </Link>
+            </AlertDescription>
+          </Alert>
+        )
+      }
       viewings={
         <>
           <ViewingToolbar

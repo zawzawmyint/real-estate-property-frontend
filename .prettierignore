@@ -3,6 +3,8 @@ node_modules
 .delivery-work
 # Backend-owned OpenAPI snapshot; keep its source formatting verbatim.
 docs/contracts/properties.openapi.yaml
+docs/contracts/viewings.openapi.yaml
+docs/contracts/tasks.openapi.yaml
 out
 coverage
 playwright-report

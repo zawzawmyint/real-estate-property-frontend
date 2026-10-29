@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { buttonVariants } from "@/components/ui/button-variants";
@@ -17,6 +17,7 @@ import {
   endDayLabel,
   weekDays,
   weekQuery,
+  viewingHref,
 } from "../data/calendar";
 import { getViewings } from "../data/queries";
 import type { Viewing, ViewingPage } from "../data/types";
@@ -68,15 +69,21 @@ export function ViewingToolbar({
   const ready = useClientReady();
   const router = useRouter();
   const pathname = usePathname();
+  const search = useSearchParams();
   const href = (day: string) =>
-    `${pathname}?${new URLSearchParams({ date: day, ...(status ? { status } : {}) })}`;
+    viewingHref(pathname, day, status, search.toString());
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         router.push(
-          `${pathname}?${new URLSearchParams({ date: String(data.get("date")), ...(data.get("status") ? { status: String(data.get("status")) } : {}) })}`,
+          viewingHref(
+            pathname,
+            String(data.get("date")),
+            String(data.get("status") || ""),
+            search.toString(),
+          ),
         );
       }}
     >
@@ -178,6 +185,7 @@ function CalendarPage({
   const days = weekDays(date);
   const today = dubaiDate();
   const pathname = usePathname();
+  const search = useSearchParams();
   const cards = (day: string) =>
     data.items
       .filter((item) => dubaiDate(item.startsAt) === day)
@@ -199,7 +207,7 @@ function CalendarPage({
           {days.map((day) => (
             <Link
               key={day}
-              href={`${pathname}?${new URLSearchParams({ date: day, ...(status ? { status } : {}) })}`}
+              href={viewingHref(pathname, day, status, search.toString())}
               aria-current={day === date ? "date" : undefined}
               aria-label={dayLabel(day, true)}
               className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] ${day === date ? "bg-primary text-primary-foreground" : day === today ? "bg-muted text-primary" : "text-muted-foreground"}`}
