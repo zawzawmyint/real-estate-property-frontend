@@ -50,6 +50,18 @@ export function timeLabel(value: string) {
     minute: "2-digit",
   }).format(new Date(value));
 }
+export function viewingHref(
+  pathname: string,
+  date: string,
+  status: string,
+  existing: string,
+) {
+  const query = new URLSearchParams(existing);
+  query.set("date", date);
+  if (status) query.set("status", status);
+  else query.delete("status");
+  return `${pathname}?${query}`;
+}
 export function endDayLabel(startsAt: string, endsAt: string) {
   return dubaiDate(startsAt) === dubaiDate(endsAt)
     ? ""

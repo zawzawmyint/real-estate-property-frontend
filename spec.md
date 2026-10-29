@@ -44,7 +44,7 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 ## Planned product scope
 
-Viewing management is verified; follow-up tasks and reporting remain. Later enhancements and the optional client portal remain subject to the roadmap.
+Viewing management and follow-up tasks are verified; reporting remains future work. Later enhancements and the optional client portal remain subject to the roadmap.
 
 The verified [public contact and agent pages specification](specs/public-contact-and-agents/spec.md) records Contact, Our agents, public profiles and the property-independent enquiry flow into the existing CRM. The fictional demo delivery is complete; real-business publication remains an operational content/approval gate.
 
@@ -53,6 +53,8 @@ The 2026-10-27 review remediation keeps the delivered lead/contact and pipeline 
 Staff authentication, property management, homepage search and featured results, filtered listings, and property detail/gallery are already delivered within the verified baseline above. The roadmap records partial delivery for broader homepage and mobile-layout checklist items; their unchecked status does not make the delivered portions unimplemented.
 
 The verified viewing slice adds role-scoped scheduling, calendar and feedback workflows at `/crm/viewings`, `/crm/viewings/new` and `/crm/viewings/[id]`, and a bounded Viewings section on lead details. It persists UTC instants while consistently presenting Dubai time, including overnight end dates. Current lead assignment controls access; booking does not alter the pipeline stage or inquiry property. Its backend-owned contract and frontend snapshot are recorded in [the viewing-management specification](specs/viewing-management/spec.md) and [local contract](docs/contracts/viewings.md).
+
+The verified follow-up-task slice adds `/crm/tasks`, `/crm/tasks/new` and `/crm/tasks/[id]`, plus a bounded Tasks section on lead details. It uses the backend-owned task contract, current lead assignment, UTC persistence with explicit Dubai presentation, safe receipt/version recovery and server-derived overdue state. Backend/frontend quality gates, all task-case evidence across the documented worker/serial reruns, and the final unchanged serial legacy regression passed. See the [follow-up-tasks specification](specs/follow-up-tasks/spec.md) and [local contract](docs/contracts/tasks.md).
 
 The [roadmap](ROADMAP.md) owns checklist IDs and progress. The verified [authentication feature spec](specs/staff-authentication-and-roles/spec.md) covers P1-01 and the identity portion of P1-02; the lead-management feature verifies P1-03–P1-09, P1-20–P1-22 and P1-16.
 

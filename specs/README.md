@@ -6,6 +6,10 @@ The standalone [project foundation](project-foundation/spec.md) covers this repo
 
 The root [project specification](../spec.md) summarizes project-wide scope and the verified baseline. Keep detailed requirements and acceptance evidence in the feature specs; keep checklist progress in [the roadmap](../ROADMAP.md).
 
+## Verified follow-up tasks
+
+- [Follow-up tasks](follow-up-tasks/spec.md): verified P1-26–P1-27 behavior for lead-linked dated tasks and overdue highlighting. [Implementation plan](../docs/superpowers/plans/2026-10-29-follow-up-tasks.md); backend/frontend quality gates, task reruns and the final legacy regression passed.
+
 ## Current and verified maintenance
 
 - [CRM route guard and scoped loading](crm-route-guard-loading/spec.md): verified frontend maintenance for the cookie-only CRM Proxy gate and independently loading account, permission controls and list results. It retains Express-owned Better Auth and live authorization; production HTTPS cookie topology remains unverified.
