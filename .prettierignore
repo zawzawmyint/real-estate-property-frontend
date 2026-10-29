@@ -5,6 +5,7 @@ node_modules
 docs/contracts/properties.openapi.yaml
 docs/contracts/viewings.openapi.yaml
 docs/contracts/tasks.openapi.yaml
+docs/contracts/dashboard.openapi.yaml
 out
 coverage
 playwright-report

@@ -59,6 +59,9 @@ export default async function warmup() {
         throw new Error(`Warmup ${path}: ${response.status()}`);
     }
 
+    // Dedicated dashboard acceptance owns an exact ten-lead population.
+    if (process.env.STAFF_E2E_DASHBOARD_ONLY === "1") return;
+
     const leadResponse = await client.post("/api/v1/staff/leads", {
       data: {
         submissionId: randomUUID(),

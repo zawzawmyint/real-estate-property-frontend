@@ -476,7 +476,16 @@ test("an expired session clears the board and sends a move back to sign in", asy
   await expect(
     page.getByRole("combobox", { name: `Move ${name} to stage`, exact: true }),
   ).toBeEnabled();
-  await page.context().clearCookies();
+  // Keep the expired cookie present so live authorization handles the move,
+  // rather than the optimistic missing-cookie proxy redirecting its POST.
+  const cookies = await page.context().cookies();
+  const signedOut = await page.request.post("/api/v1/auth/sign-out", {
+    headers,
+    data: {},
+  });
+  expect(signedOut.status()).toBe(200);
+  sessions.delete(`${test.info().project.name}-manager`);
+  await page.context().addCookies(cookies);
   await page
     .getByRole("combobox", { name: `Move ${name} to stage`, exact: true })
     .selectOption("contacted");

@@ -44,7 +44,7 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 ## Planned product scope
 
-Viewing management and follow-up tasks are verified; reporting remains future work. Later enhancements and the optional client portal remain subject to the roadmap.
+Viewing management and follow-up tasks are verified. The [agency dashboard](specs/agency-dashboard/spec.md) completes P1-28–P1-30 with an authorized aggregate endpoint, four metrics and two accessible charts. Backend/frontend full checks, the final 16/16 desktop/mobile dashboard suite, runtime inspection and visual QA passed. Every active legacy case passed across two non-clean parallel runs; the feature spec records the timing/sign-in-cache limitation. Reporting beyond this fixed dashboard remains future work. Later enhancements and the optional client portal remain subject to the roadmap.
 
 The verified [public contact and agent pages specification](specs/public-contact-and-agents/spec.md) records Contact, Our agents, public profiles and the property-independent enquiry flow into the existing CRM. The fictional demo delivery is complete; real-business publication remains an operational content/approval gate.
 

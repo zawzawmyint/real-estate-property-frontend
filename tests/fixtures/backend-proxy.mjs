@@ -1,8 +1,11 @@
-// Playwright-only fixture. No configurable upstream or non-loopback listener.
+// Playwright-only fixture. The upstream and listener stay on loopback; only the port varies.
 import { createHash, randomUUID } from "node:crypto";
 import { createServer, request } from "node:http";
 
-const upstream = "http://127.0.0.1:4311";
+const backendPort = Number(process.env.E2E_BACKEND_PORT ?? 4311);
+if (!Number.isInteger(backendPort) || backendPort < 1 || backendPort > 65535)
+  throw new Error("E2E_BACKEND_PORT must be a valid loopback port");
+const upstream = `http://127.0.0.1:${backendPort}`;
 const rules = new Map();
 
 function json(response, status, body) {
@@ -88,6 +91,10 @@ const server = createServer(async (incoming, response) => {
           (rule.method === "GET" &&
             rule.path === "/api/v1/public/agents/daniel-brooks") ||
           (rule.method === "GET" && rule.path === "/api/v1/public/agency") ||
+          (rule.method === "GET" &&
+            rule.path === "/api/v1/staff/dashboard" &&
+            typeof rule.sessionDigest === "string" &&
+            /^[a-f0-9]{64}$/.test(rule.sessionDigest)) ||
           (rule.method === "GET" &&
             rule.path === "/api/v1/auth/get-session" &&
             typeof rule.sessionDigest === "string" &&
@@ -204,7 +211,7 @@ const server = createServer(async (incoming, response) => {
       new URL(`${url.pathname}${url.search}`, upstream),
       {
         method: incoming.method,
-        headers: { ...incoming.headers, host: "127.0.0.1:4311" },
+        headers: { ...incoming.headers, host: `127.0.0.1:${backendPort}` },
       },
       (result) => {
         response.writeHead(result.statusCode ?? 502, result.headers);
