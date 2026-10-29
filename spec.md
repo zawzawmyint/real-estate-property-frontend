@@ -44,13 +44,15 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 ## Planned product scope
 
-Remaining work includes viewings, follow-up tasks and reporting. Later enhancements and the optional client portal remain subject to the roadmap.
+Viewing management is verified; follow-up tasks and reporting remain. Later enhancements and the optional client portal remain subject to the roadmap.
 
 The verified [public contact and agent pages specification](specs/public-contact-and-agents/spec.md) records Contact, Our agents, public profiles and the property-independent enquiry flow into the existing CRM. The fictional demo delivery is complete; real-business publication remains an operational content/approval gate.
 
 The 2026-10-27 review remediation keeps the delivered lead/contact and pipeline scope intact while canonicalizing phone whitespace at validation boundaries, preserving the Contact receipt across recovery, making unknown agency mode explicit, and aligning drag announcements with their actual outcome. The affected feature specs record completed focused evidence. The full browser run reported 163 passed, 8 intentional skips and one pointer-cancel test synchronization failure. After correcting the test to wait for settled drop-animation geometry and verify an active drag before Escape, that case passed three consecutive isolated reruns. All 164 applicable browser cases are covered across these runs; a single clean full-suite rerun is not claimed.
 
 Staff authentication, property management, homepage search and featured results, filtered listings, and property detail/gallery are already delivered within the verified baseline above. The roadmap records partial delivery for broader homepage and mobile-layout checklist items; their unchecked status does not make the delivered portions unimplemented.
+
+The verified viewing slice adds role-scoped scheduling, calendar and feedback workflows at `/crm/viewings`, `/crm/viewings/new` and `/crm/viewings/[id]`, and a bounded Viewings section on lead details. It persists UTC instants while consistently presenting Dubai time, including overnight end dates. Current lead assignment controls access; booking does not alter the pipeline stage or inquiry property. Its backend-owned contract and frontend snapshot are recorded in [the viewing-management specification](specs/viewing-management/spec.md) and [local contract](docs/contracts/viewings.md).
 
 The [roadmap](ROADMAP.md) owns checklist IDs and progress. The verified [authentication feature spec](specs/staff-authentication-and-roles/spec.md) covers P1-01 and the identity portion of P1-02; the lead-management feature verifies P1-03–P1-09, P1-20–P1-22 and P1-16.
 

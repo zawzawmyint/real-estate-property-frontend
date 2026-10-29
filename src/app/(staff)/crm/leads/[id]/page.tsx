@@ -1,4 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { dubaiDate, validDate } from "@/features/viewings/data/calendar";
+import { ViewingToolbar } from "@/features/viewings/crm/calendar";
+import {
+  ViewingLoading,
+  ViewingResults,
+} from "@/features/viewings/crm/results";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { requireStaffSession } from "@/lib/auth/server";
@@ -18,6 +25,15 @@ export default async function LeadDetailPage({
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
   const query = await searchParams;
+  const date =
+    typeof query.date === "string" && validDate(query.date)
+      ? query.date
+      : dubaiDate();
+  const status =
+    typeof query.status === "string" &&
+    ["scheduled", "completed", "cancelled"].includes(query.status)
+      ? query.status
+      : "";
   let lead, activity;
   try {
     [lead, activity] = await Promise.all([
@@ -57,6 +73,22 @@ export default async function LeadDetailPage({
       manager={staff.role !== "agent"}
       back={safeLeadReturn(query.from, staff.role)}
       saved={query.saved === "1"}
+      viewings={
+        <>
+          <ViewingToolbar
+            key={`${date}-${status}`}
+            date={date}
+            status={status}
+            leadId={id}
+          />
+          <Suspense
+            key={`${id}-${date}-${status}`}
+            fallback={<ViewingLoading />}
+          >
+            <ViewingResults date={date} status={status} leadId={id} />
+          </Suspense>
+        </>
+      }
     />
   );
 }

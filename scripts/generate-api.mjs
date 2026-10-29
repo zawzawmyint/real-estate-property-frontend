@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import openapiTS, { astToString } from "openapi-typescript";
 import prettier from "prettier";
 
-for (const domain of ["properties", "leads", "public-agency"]) {
+for (const domain of ["properties", "leads", "public-agency", "viewings"]) {
   const schema = new URL(
     `../docs/contracts/${domain}.openapi.yaml`,
     import.meta.url,

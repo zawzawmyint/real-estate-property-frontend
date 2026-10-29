@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
 const paths = {
+  calendar: "M4 5h16v16H4zM8 3v4M16 3v4M4 10h16M8 14h2M14 14h2M8 18h2",
   "chevron-down": "m6 9 6 6 6-6",
   image: "M3 3h18v18H3zM3 17l6-6 4 4 3-3 5 5M16 7h.01",
   overview: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",

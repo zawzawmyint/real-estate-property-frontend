@@ -80,12 +80,18 @@ export default async function warmup() {
       "/crm/leads/new",
       `/crm/leads/${leadId}`,
       `/crm/leads/${leadId}/edit`,
+      "/crm/viewings",
+      `/crm/viewings/new?leadId=${leadId}`,
     ]) {
       const response = await client.get(path, { maxRedirects: 0 });
 
       if (response.status() !== 200)
         throw new Error(`Warmup ${path}: ${response.status()}`);
     }
+    const viewingDetail = await client.get(`/crm/viewings/${randomUUID()}`);
+    // A streamed App Router not-found response can retain HTTP 200.
+    if (![200, 404].includes(viewingDetail.status()))
+      throw new Error(`Warmup viewing detail: ${viewingDetail.status()}`);
   } finally {
     if (propertyId) {
       await client.patch(`/api/v1/staff/properties/${propertyId}`, {

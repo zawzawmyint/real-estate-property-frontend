@@ -95,6 +95,9 @@ const server = createServer(async (incoming, response) => {
           /^\/api\/v1\/staff\/leads(?:\/[\w-]+(?:\/(?:notes|stage|assignment|activity))?)?$/.test(
             rule.path,
           ) ||
+          /^\/api\/v1\/staff\/viewings(?:\/[\w-]+(?:\/status)?)?$/.test(
+            rule.path,
+          ) ||
           /^\/api\/v1\/public\/properties\/[\w-]+\/inquiries$/.test(rule.path)
         ) ||
         (!(typeof rule.title === "string" && rule.title.length > 8) &&
