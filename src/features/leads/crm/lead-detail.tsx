@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,12 +55,14 @@ export function LeadDetail({
   manager,
   back,
   saved,
+  viewings,
 }: {
   initialLead: Detail;
   initialActivity: Page<Activity>;
   manager: boolean;
   back: string;
   saved: boolean;
+  viewings?: ReactNode;
 }) {
   const ready = useClientReady();
   const router = useRouter();
@@ -442,6 +444,29 @@ export function LeadDetail({
           </LeadSection>
         </aside>
         <div className="min-w-0 space-y-6 lg:col-start-1 lg:row-start-1">
+          <LeadSection
+            title="Viewings"
+            description="Appointments and history for this lead, one week at a time."
+          >
+            <div className="mb-5">
+              {lead.assignedAgent?.available &&
+              !["won", "lost"].includes(lead.stage) ? (
+                <Link
+                  href={`/crm/viewings/new?leadId=${lead.id}`}
+                  className={buttonVariants()}
+                >
+                  Schedule viewing
+                </Link>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {!lead.assignedAgent?.available
+                    ? "Assign an active Agent using the Assignment controls before scheduling."
+                    : "Won or lost leads cannot be scheduled."}
+                </p>
+              )}
+            </div>
+            {viewings}
+          </LeadSection>
           {lead.originalMessage && (
             <LeadSection title="Original inquiry">
               <p className="text-sm leading-7 break-words whitespace-pre-wrap">

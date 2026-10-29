@@ -426,7 +426,11 @@ for (const role of ["admin", "manager"]) {
       .click();
     await expect(page).toHaveURL(`${origin}/properties/${property.id}`);
     await expect(
-      page.getByRole("heading", { name: property.title, exact: true }),
+      page.getByRole("heading", {
+        name: property.title,
+        exact: true,
+        level: 1,
+      }),
     ).toBeVisible();
     expect(await page.content()).not.toContain("Private owner E2E");
   });
