@@ -38,3 +38,7 @@ The broader legacy parallel runs had development rebuild/navigation timing and a
 - [x] Semantic tokens, existing assets and accessible text alternatives retained.
 - [x] Loading, empty, failure, keyboard retry and expired-session behavior verified.
 - [x] Final dashboard browser run passed; wider regression evidence and limitations recorded.
+
+# Public homepage redesign — 2026-10-30
+
+The cinematic-maroon homepage has its own [visual QA report](specs/public-homepage-redesign/design-qa.md). Its visual result is passed; detailed integration evidence and any remaining release limits belong in the feature specification. The preceding dashboard report is preserved as historical evidence.

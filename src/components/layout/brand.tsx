@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { NavigationPending } from "@/components/ui/navigation-pending";
 
-export function Brand({ compact = false }: { compact?: boolean }) {
+export function Brand({
+  compact = false,
+  inverse = false,
+}: {
+  compact?: boolean;
+  inverse?: boolean;
+}) {
   return (
     <Link
       href="/"
-      className="inline-flex shrink-0 items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      className={`inline-flex shrink-0 items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring ${inverse ? "brand-inverse" : ""}`}
       aria-label="Avenor Properties home"
     >
       <NavigationPending />

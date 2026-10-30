@@ -127,17 +127,18 @@ test("homepage search and public results stay usable while their server reads ar
     try {
       await page.goto("/", { waitUntil: "commit" });
       await expect(
-        page.getByRole("heading", { name: "A place for your next chapter." }),
+        page.getByRole("heading", { name: "Find your place in Dubai." }),
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Search properties", exact: true }),
       ).toBeEnabled();
-      const hero = page
-        .getByRole("status")
-        .filter({ hasText: "Loading featured home…" });
-      await expect(hero.locator('[data-slot="building-loader"]')).toHaveCount(
-        1,
-      );
+      const featured = page.getByRole("status", {
+        name: "Loading properties",
+        exact: true,
+      });
+      await expect(featured).toBeVisible();
+      const reserved = await featured.boundingBox();
+      expect(reserved!.height).toBeGreaterThan(400);
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth > innerWidth,
@@ -149,7 +150,7 @@ test("homepage search and public results stay usable while their server reads ar
         caret: "initial",
       });
       await page.request.post(`${control}/${id}/release`);
-      await expect(hero).toHaveCount(0);
+      await expect(featured).toHaveCount(0);
     } finally {
       await page.request.delete(`${control}/${id}`);
     }

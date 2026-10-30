@@ -92,9 +92,9 @@ export function PublicHeader() {
   );
 
   return (
-    <header className="border-b border-border bg-card">
+    <header className="public-header">
       <div className="public-container flex min-h-[72px] items-center justify-between gap-4 py-3 md:min-h-20">
-        <Brand />
+        <Brand inverse />
         <div className="hidden md:block">{links}</div>
         <div className="md:hidden">
           <NavigationDrawer

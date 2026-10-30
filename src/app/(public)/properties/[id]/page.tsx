@@ -108,7 +108,7 @@ export default async function PropertyPage({
               </AlertDescription>
             </Alert>
           )}
-          <p className="mt-4 leading-7 text-muted-foreground">
+          <p className="mt-4 leading-7 break-words text-muted-foreground">
             {property.community}, {property.city}
           </p>
           <p className="mt-6 text-3xl font-semibold tracking-tight">

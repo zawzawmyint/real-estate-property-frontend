@@ -148,9 +148,12 @@ function SearchForm({
       noValidate
       aria-busy={pending}
       aria-label={home ? "Find a property" : "Filter properties"}
-      className="space-y-5"
+      className={home ? "home-search-form" : "space-y-5"}
     >
-      <fieldset disabled={!ready || pending} className="min-w-0 space-y-5">
+      <fieldset
+        disabled={!ready || pending}
+        className={home ? "home-search-fields" : "min-w-0 space-y-5"}
+      >
         <fieldset className="flex gap-2 border-b border-border">
           <legend className="sr-only">Purpose</legend>
           {(
@@ -202,12 +205,27 @@ function SearchForm({
               </NativeSelectOption>
             ))}
           </SelectField>
-          <div className="grid grid-cols-2 gap-3">
+          <div
+            role={home ? "group" : undefined}
+            aria-labelledby={home ? `${id}-budget-heading` : undefined}
+            className={cn(
+              "grid gap-3",
+              home
+                ? "home-budget-group min-[400px]:grid-cols-2"
+                : "grid-cols-2",
+            )}
+          >
+            {home && (
+              <p id={`${id}-budget-heading`} className="home-budget-heading">
+                Budget (AED)
+              </p>
+            )}
             <TextField
               id={`${id}-min-price`}
               label="Min. price (AED)"
+              fieldClassName={home ? "[&>label]:sr-only" : undefined}
               inputMode="decimal"
-              placeholder="No minimum"
+              placeholder={home ? "Min. price" : "No minimum"}
               {...register("minPrice")}
               error={errors.minPrice?.message}
               aria-describedby={`${id}-budget-note`}
@@ -215,8 +233,9 @@ function SearchForm({
             <TextField
               id={`${id}-max-price`}
               label="Max. price (AED)"
+              fieldClassName={home ? "[&>label]:sr-only" : undefined}
               inputMode="decimal"
-              placeholder="No maximum"
+              placeholder={home ? "Max. price" : "No maximum"}
               {...register("maxPrice")}
               error={errors.maxPrice?.message}
               aria-describedby={`${id}-budget-note`}
