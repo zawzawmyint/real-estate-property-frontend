@@ -9,15 +9,21 @@ import { NavigationPending } from "@/components/ui/navigation-pending";
 export function PropertyCard({
   property,
   resultsQuery,
+  home = false,
 }: {
   property: PublicPropertySummary;
   resultsQuery?: string;
+  home?: boolean;
 }) {
   const href = `/properties/${property.id}${resultsQuery ? `?from=${encodeURIComponent(resultsQuery)}` : ""}`;
 
   return (
     <Card
-      className="gap-0 overflow-hidden rounded-xl py-0 shadow-none transition-shadow hover:shadow-md"
+      className={
+        home
+          ? "home-property-card"
+          : "gap-0 overflow-hidden rounded-xl py-0 shadow-none transition-shadow hover:shadow-md"
+      }
       data-testid="property-card"
     >
       <Link
@@ -30,7 +36,11 @@ export function PropertyCard({
           <PropertyImage
             photo={property.coverPhoto}
             alt={`${property.title} — cover photo`}
-            className="aspect-[4/3] transition-transform duration-300 group-hover:scale-[1.025]"
+            className={
+              home
+                ? "home-property-photo"
+                : "aspect-[4/3] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.025]"
+            }
           />
           <Badge className="absolute start-4 top-4 border-0 bg-card text-foreground shadow-sm">
             {property.purpose === "rent" ? "For rent" : "For sale"}
@@ -45,10 +55,10 @@ export function PropertyCard({
           <p className="text-xl font-semibold tracking-tight">
             {formatPrice(property.priceFils, property.purpose)}
           </p>
-          <h3 className="mt-2 line-clamp-2 text-base leading-6 font-medium group-hover:text-primary">
+          <h3 className="mt-2 line-clamp-2 text-base leading-6 font-medium break-words group-hover:text-primary">
             {property.title}
           </h3>
-          <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">
+          <p className="mt-3 line-clamp-2 text-sm leading-6 break-words text-muted-foreground">
             {property.community}, {property.city}
           </p>
           {property.isDemo && (

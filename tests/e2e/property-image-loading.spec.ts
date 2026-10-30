@@ -18,7 +18,10 @@ test("property photos use a quiet reserved placeholder while an image is delayed
 
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const photo = page.locator('img[alt$="— featured home"]');
+    const photo = page
+      .getByTestId("property-card")
+      .first()
+      .locator('img[alt$="— cover photo"]');
     const frame = photo.locator("..");
     const placeholder = frame.locator(
       '[data-slot="property-image-placeholder"]',
@@ -100,7 +103,12 @@ test("failed property photos show a static unavailable icon without a loader", a
     path: testInfo.outputPath("static-photo-unavailable.png"),
   });
   await expect(frame.getByRole("img")).toHaveAccessibleName(
-    /featured home\. Photo unavailable$/,
+    /cover photo\. Photo unavailable$/,
   );
-  await expect(page.locator('img[alt$="— featured home"]')).toHaveCount(0);
+  await expect(
+    page
+      .getByTestId("property-card")
+      .first()
+      .locator('img[alt$="— cover photo"]'),
+  ).toHaveCount(0);
 });

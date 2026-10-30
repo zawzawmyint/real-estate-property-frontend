@@ -6,6 +6,12 @@ The standalone [project foundation](project-foundation/spec.md) covers this repo
 
 The root [project specification](../spec.md) summarizes project-wide scope and the verified baseline. Keep detailed requirements and acceptance evidence in the feature specs; keep checklist progress in [the roadmap](../ROADMAP.md).
 
+## Phase 1 public completion in progress
+
+- [Public homepage redesign — cinematic maroon](public-homepage-redesign/spec.md): verified frontend presentation for the selected latest refinement option 3, with [visual QA](public-homepage-redesign/design-qa.md) and a 102-pass/20-intentional-skip browser result. [Implementation plan](../docs/superpowers/plans/2026-10-30-public-homepage-redesign.md). It supersedes the earlier homepage composition only; broader public-completion acceptance remains pending.
+
+- [Phase 1 public website completion](phase-one-public-completion/spec.md): P1-14 homepage completion and P1-18 public mobile code changes are under verification. [Implementation plan](../docs/superpowers/plans/2026-10-30-phase-one-public-completion.md). Both roadmap items remain unchecked until full acceptance is verified.
+
 ## Verified dashboard
 
 - [Agency dashboard](agency-dashboard/spec.md): verified P1-28–P1-30 endpoint and CRM dashboard, including full checks, final 16/16 desktop/mobile browser coverage and visual QA. All active legacy cases passed across two non-clean parallel runs; that limitation is recorded in the feature specification.

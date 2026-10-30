@@ -5,7 +5,7 @@ test("public footer provides staff sign-in and direct CRM access remains protect
 }, testInfo) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "A place for your next chapter." }),
+    page.getByRole("heading", { name: "Find your place in Dubai." }),
   ).toBeVisible();
   await expect(page.getByRole("main")).toBeVisible();
   expect(
@@ -166,26 +166,12 @@ test("public header reflows across supported widths and enlarged layout", async 
   ).toMatch(/poppins/i);
   expect(
     await page
-      .getByRole("heading", { name: "A place for your next chapter." })
+      .getByRole("heading", { name: "Find your place in Dubai." })
       .evaluate((element) => getComputedStyle(element).fontFamily),
   ).toMatch(/lora/i);
 
   for (const width of [320, 375, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    if (width >= 1024) {
-      const gap = await page.evaluate(() => {
-        const heading = document.querySelector("#home-heading")!;
-        const image = heading.closest("section")!.querySelector("img");
-        if (!image) return null;
-        const text = document.createRange();
-        text.selectNodeContents(heading);
-        const right = Math.max(
-          ...Array.from(text.getClientRects(), (rect) => rect.right),
-        );
-        return image.getBoundingClientRect().left - right;
-      });
-      if (gap !== null) expect(gap).toBeGreaterThanOrEqual(24);
-    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

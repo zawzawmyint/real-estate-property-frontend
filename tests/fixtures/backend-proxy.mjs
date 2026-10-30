@@ -17,6 +17,11 @@ function matches(rule, incoming, url, body) {
   if (incoming.method !== rule.method || url.pathname !== rule.path)
     return false;
   if (
+    (rule.empty || rule.featuredCount !== undefined) &&
+    [...url.searchParams].length !== 3
+  )
+    return false;
+  if (
     rule.sessionDigest &&
     !incoming.headers.cookie?.split(";").some((cookie) => {
       const [name, ...value] = cookie.trim().split("=");
@@ -131,6 +136,27 @@ const server = createServer(async (incoming, response) => {
             rule.query?.featured === "true"
           )) ||
         (rule.status !== undefined && rule.status !== 503) ||
+        (rule.empty !== undefined &&
+          (rule.empty !== true ||
+            rule.method !== "GET" ||
+            rule.path !== "/api/v1/properties" ||
+            rule.query?.featured !== "true" ||
+            rule.query?.pageSize !== "3" ||
+            rule.query?.sort !== "newest" ||
+            Object.keys(rule.query).length !== 3 ||
+            rule.status !== undefined)) ||
+        (rule.featuredCount !== undefined &&
+          (!Number.isInteger(rule.featuredCount) ||
+            rule.featuredCount < 0 ||
+            rule.featuredCount > 3 ||
+            rule.method !== "GET" ||
+            rule.path !== "/api/v1/properties" ||
+            rule.query?.featured !== "true" ||
+            rule.query?.pageSize !== "3" ||
+            rule.query?.sort !== "newest" ||
+            Object.keys(rule.query).length !== 3 ||
+            rule.empty !== undefined ||
+            rule.status !== undefined)) ||
         (rule.query !== undefined &&
           (typeof rule.query !== "object" ||
             rule.query === null ||
@@ -187,11 +213,17 @@ const server = createServer(async (incoming, response) => {
       return;
     }
 
+    let featuredCount;
     for (const rule of rules.values()) {
       if (!matches(rule, incoming, url, body)) continue;
 
       rule.hits++;
       await rule.held;
+
+      if (rule.empty) {
+        json(response, 200, { items: [], total: 0, page: 1, pageSize: 3 });
+        return;
+      }
 
       if (rule.status) {
         json(response, rule.status, {
@@ -204,6 +236,7 @@ const server = createServer(async (incoming, response) => {
         return;
       }
 
+      featuredCount = rule.featuredCount;
       break;
     }
 
@@ -214,6 +247,31 @@ const server = createServer(async (incoming, response) => {
         headers: { ...incoming.headers, host: `127.0.0.1:${backendPort}` },
       },
       (result) => {
+        if (featuredCount !== undefined && result.statusCode === 200) {
+          const chunks = [];
+          result.on("data", (chunk) => chunks.push(chunk));
+          result.on("end", () => {
+            try {
+              const collection = JSON.parse(Buffer.concat(chunks).toString());
+              if (
+                !Array.isArray(collection.items) ||
+                collection.items.length < featuredCount
+              )
+                throw new Error("Insufficient seeded featured homes");
+              const items = collection.items.slice(0, featuredCount);
+              json(response, 200, {
+                ...collection,
+                items,
+                total: items.length,
+              });
+            } catch {
+              json(response, 502, {
+                error: "Invalid featured fixture response",
+              });
+            }
+          });
+          return;
+        }
         response.writeHead(result.statusCode ?? 502, result.headers);
         result.pipe(response);
       },
