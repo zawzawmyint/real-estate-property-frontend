@@ -39,7 +39,10 @@ export default async function TasksPage({
           <AlertDescription>
             These task filters are invalid. Overdue is available for open tasks
             only.{" "}
-            <Link href="/crm/tasks" className="underline">
+            <Link
+              href="/crm/tasks"
+              className={buttonVariants({ variant: "outline" })}
+            >
               Reset filters
             </Link>
           </AlertDescription>

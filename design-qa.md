@@ -42,3 +42,7 @@ The broader legacy parallel runs had development rebuild/navigation timing and a
 # Public homepage redesign — 2026-10-30
 
 The cinematic-maroon homepage has its own [visual QA report](specs/public-homepage-redesign/design-qa.md). Its visual result is passed; detailed integration evidence and any remaining release limits belong in the feature specification. The preceding dashboard report is preserved as historical evidence.
+
+# Public property pages redesign — 2026-11-02
+
+The scoped [property-pages visual QA](specs/public-property-pages-redesign/design-qa.md) passed with no unresolved P0/P1/P2 findings across reviewed desktop/mobile comparisons. Its specification records the separate native-browser 200% zoom limitation; visual screenshots and equivalent viewport checks do not verify that requirement.

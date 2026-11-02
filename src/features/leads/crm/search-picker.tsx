@@ -137,7 +137,7 @@ export function SearchPicker({
             {error}{" "}
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               onClick={() => setRetry((value) => value + 1)}
             >
               Retry options

@@ -167,7 +167,7 @@ function TaskListPage({
           <TaskDate value={data.asOf} /> · Dubai
         </p>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           disabled={!ready || busy}
           onClick={() => void refresh(true)}

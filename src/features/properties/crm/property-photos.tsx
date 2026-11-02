@@ -263,7 +263,7 @@ export function PropertyPhotos({
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   aria-label={`Move photo ${index + 1} earlier`}
                   disabled={locked || index === 0}
                   onClick={() => move(index, index - 1)}
@@ -273,7 +273,7 @@ export function PropertyPhotos({
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   aria-label={`Move photo ${index + 1} later`}
                   disabled={locked || index === property.photos.length - 1}
                   onClick={() => move(index, index + 1)}
@@ -283,7 +283,7 @@ export function PropertyPhotos({
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
+                  variant="destructive"
                   disabled={
                     locked ||
                     (property.publishingState === "published" &&

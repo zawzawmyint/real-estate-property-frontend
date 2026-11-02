@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button-variants";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -148,13 +149,18 @@ function SearchForm({
       noValidate
       aria-busy={pending}
       aria-label={home ? "Find a property" : "Filter properties"}
-      className={home ? "home-search-form" : "space-y-5"}
+      className={home ? "home-search-form" : "listing-search-form"}
     >
       <fieldset
         disabled={!ready || pending}
-        className={home ? "home-search-fields" : "min-w-0 space-y-5"}
+        className={home ? "home-search-fields" : "listing-search-fields"}
       >
-        <fieldset className="flex gap-2 border-b border-border">
+        <fieldset
+          className={cn(
+            "flex gap-2 border-b border-border",
+            !home && "listing-search-purpose",
+          )}
+        >
           <legend className="sr-only">Purpose</legend>
           {(
             [
@@ -180,7 +186,7 @@ function SearchForm({
             "grid items-start gap-4",
             home
               ? "sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1.5fr_auto]"
-              : "sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1.5fr_1fr_auto]",
+              : "listing-search-controls",
           )}
         >
           <TextField
@@ -190,10 +196,12 @@ function SearchForm({
             autoComplete="off"
             {...register("location")}
             error={errors.location?.message}
+            fieldClassName={home ? undefined : "listing-search-location"}
           />
           <SelectField
             id={`${id}-type`}
             label="Property type"
+            fieldClassName={home ? undefined : "listing-search-type"}
             {...register("type")}
             error={errors.type?.message}
             className="w-full [&_select]:min-h-12 [&_select]:bg-card"
@@ -206,20 +214,21 @@ function SearchForm({
             ))}
           </SelectField>
           <div
-            role={home ? "group" : undefined}
-            aria-labelledby={home ? `${id}-budget-heading` : undefined}
+            role="group"
+            aria-labelledby={`${id}-budget-heading`}
             className={cn(
               "grid gap-3",
               home
                 ? "home-budget-group min-[400px]:grid-cols-2"
-                : "grid-cols-2",
+                : "listing-budget-group",
             )}
           >
-            {home && (
-              <p id={`${id}-budget-heading`} className="home-budget-heading">
-                Budget (AED)
-              </p>
-            )}
+            <p
+              id={`${id}-budget-heading`}
+              className={home ? "home-budget-heading" : "sr-only"}
+            >
+              Budget (AED)
+            </p>
             <TextField
               id={`${id}-min-price`}
               label="Min. price (AED)"
@@ -244,7 +253,8 @@ function SearchForm({
           {!home && (
             <SelectField
               id={`${id}-bedrooms`}
-              label="Bedrooms"
+              label="Minimum bedrooms"
+              fieldClassName="listing-search-bedrooms"
               {...register("minBedrooms")}
               error={errors.minBedrooms?.message}
               className="w-full [&_select]:min-h-12 [&_select]:bg-card"
@@ -262,18 +272,27 @@ function SearchForm({
             pending={pending}
             pendingLabel="Searching…"
             label={home ? "Search properties" : "Apply filters"}
-            className="min-h-12 self-start sm:mt-[26px]"
+            className={
+              home
+                ? "min-h-12 self-start sm:mt-[26px]"
+                : "listing-search-submit"
+            }
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
           <p id={`${id}-budget-note`}>
             Buy prices are total. Rent prices are per year.
+            {!home && (
+              <span className="mt-1 block">
+                Choose Buy or Rent, then apply filters to update the results.
+              </span>
+            )}
           </p>
           {!home && (
             <Link
               href="/properties?purpose=sale"
               onClick={query === "purpose=sale" ? onApplied : undefined}
-              className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4"
+              className={buttonVariants({ variant: "outline" })}
             >
               Clear all filters
               <NavigationPending />
@@ -306,7 +325,10 @@ export function PropertyFilters({
 
   return (
     <>
-      <PublicSearchPanel treatment="listing" className="hidden lg:block">
+      <PublicSearchPanel
+        treatment="listing"
+        className="listing-search-dock hidden lg:block"
+      >
         <SearchForm key={query} query={query} id="desktop-filters" />
       </PublicSearchPanel>
       <div className="lg:hidden">

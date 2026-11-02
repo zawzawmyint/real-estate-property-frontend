@@ -6,6 +6,18 @@ The standalone [project foundation](project-foundation/spec.md) covers this repo
 
 The root [project specification](../spec.md) summarizes project-wide scope and the verified baseline. Keep detailed requirements and acceptance evidence in the feature specs; keep checklist progress in [the roadmap](../ROADMAP.md).
 
+## Public agency pages redesign — delivered with a verification limitation
+
+- [Agent directory, profile and Contact redesign](public-agency-pages-redesign/spec.md): selected images 1/5/9, including directory enquiries, editorial profile and split Contact layout. [Implementation plan](../docs/superpowers/plans/2026-11-02-public-agency-pages-redesign.md). The backend-owned additive directory-languages projection is delivered; native 200% browser zoom remains unverified, and P1-14/P1-18 remain unchecked.
+
+## Shared action hierarchy — delivered
+
+- [Shared primary and secondary buttons](button-consistency/spec.md): verified frontend-only action hierarchy for public pages, authentication and CRM. Shared `Button`/`buttonVariants` controls now provide solid primary and outlined secondary actions, plus inverse treatment for dark surfaces. The implementation preserves specialized controls and existing backend contracts; it does not change roadmap completion.
+
+## Public property pages redesign — delivered with a verification limitation
+
+- [Public listings and details redesign](public-property-pages-redesign/spec.md): delivered horizontal listing cards, architectural heading art, outlined actions and the selected photo-first detail layout. Existing backend contracts remain unchanged; summary-description previews and unsupported detail facts remain excluded. [Implementation plan](../docs/superpowers/plans/2026-11-02-public-property-pages-redesign.md). Recorded quality/runtime/visual evidence passed, but canonical native-browser 200% zoom remains blocked; broader P1-14/P1-18 status is unchanged.
+
 ## Phase 1 public completion in progress
 
 - [Public homepage redesign — cinematic maroon](public-homepage-redesign/spec.md): verified frontend presentation for the selected latest refinement option 3, with [visual QA](public-homepage-redesign/design-qa.md) and a 102-pass/20-intentional-skip browser result. [Implementation plan](../docs/superpowers/plans/2026-10-30-public-homepage-redesign.md). It supersedes the earlier homepage composition only; broader public-completion acceptance remains pending.

@@ -1,4 +1,5 @@
 "use client";
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { useCallback, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -246,7 +247,7 @@ export function TaskForm({
           {existingTaskId && (
             <Link
               href={`/crm/tasks/${existingTaskId}`}
-              className="inline-flex min-h-11 items-center text-primary underline"
+              className={buttonVariants({ variant: "outline" })}
             >
               Review saved task
             </Link>
@@ -272,7 +273,7 @@ export function TaskForm({
             />
             <Link
               href="/crm/tasks"
-              className="inline-flex min-h-11 items-center px-3 text-sm text-muted-foreground"
+              className={buttonVariants({ variant: "outline" })}
             >
               Cancel
             </Link>

@@ -129,7 +129,10 @@ for (const [label, purpose] of [
     expect(query.get("maxPriceFils")).toBe("250000050");
     expect(query.get("page") ?? "1").toBe("1");
     await expect(
-      page.getByRole("heading", { name: "Homes to make your own." }),
+      page.getByRole("heading", {
+        name:
+          purpose === "rent" ? "Properties for rent" : "Properties for sale",
+      }),
     ).toBeVisible();
   });
 }
@@ -176,7 +179,7 @@ test("type and community shortcuts open sale-filtered existing results", async (
       [key]: value,
     });
     await expect(
-      page.getByRole("heading", { name: "Homes to make your own." }),
+      page.getByRole("heading", { name: "Properties for sale" }),
     ).toBeVisible();
   }
 });

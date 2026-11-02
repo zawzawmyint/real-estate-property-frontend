@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button-variants";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicSectionHeader } from "@/components/layout/public-section-header";
@@ -35,35 +36,58 @@ export default async function PropertiesPage({
     if (error instanceof PropertyFilterError) invalid = true;
     else throw error;
   }
+  const purpose = new URLSearchParams(query).get("purpose");
 
   return (
-    <main id="main-content" className="public-container py-10 sm:py-14">
-      <PublicSectionHeader
-        level={1}
-        title="Homes to make your own."
-        eyebrow="Find your next chapter"
-        description="Explore our collection of homes for sale and rent."
-      />
-      <PropertyFilters key={`filters-${query}`} query={query} />
-      {invalid ? (
-        <Alert className="mt-8">
-          <AlertDescription>
-            These search filters aren’t valid. Check the prices and filter
-            values, or{" "}
-            <Link
-              href="/properties?purpose=sale"
-              className="font-medium underline underline-offset-4"
-            >
-              clear all filters
-            </Link>{" "}
-            to start again.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <Suspense key={`results-${query}`} fallback={<PropertyCardsLoading />}>
-          <PropertyResults query={query} />
-        </Suspense>
-      )}
+    <main id="main-content" className="property-listings">
+      <section className="listings-intro" aria-labelledby="listings-heading">
+        <div className="listings-architecture" aria-hidden="true" />
+        <div className="public-container">
+          <nav aria-label="Breadcrumb" className="listings-breadcrumb">
+            <ol>
+              <li>
+                <Link href="/">Home</Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page">Properties</li>
+            </ol>
+          </nav>
+          <PublicSectionHeader
+            level={1}
+            id="listings-heading"
+            className="listings-heading"
+            title={
+              purpose === "rent" ? "Properties for rent" : "Properties for sale"
+            }
+            description="Find a place for your next chapter. Explore homes across our collection."
+          />
+        </div>
+      </section>
+      <div className="public-container listings-search-results">
+        <PropertyFilters key={`filters-${query}`} query={query} />
+        {invalid ? (
+          <Alert className="mt-8">
+            <AlertDescription>
+              These search filters aren’t valid. Check the prices and filter
+              values, or{" "}
+              <Link
+                href="/properties?purpose=sale"
+                className={buttonVariants({ variant: "outline" })}
+              >
+                clear all filters
+              </Link>{" "}
+              to start again.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Suspense
+            key={`results-${query}`}
+            fallback={<PropertyCardsLoading />}
+          >
+            <PropertyResults query={query} />
+          </Suspense>
+        )}
+      </div>
     </main>
   );
 }

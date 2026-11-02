@@ -1,4 +1,5 @@
 "use client";
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -296,7 +297,7 @@ export function LeadForm({
         />
         <Link
           href={lead ? `/crm/leads/${lead.id}` : "/crm/leads"}
-          className="inline-flex min-h-11 items-center px-4 text-sm text-muted-foreground underline"
+          className={buttonVariants({ variant: "outline" })}
         >
           Cancel
         </Link>

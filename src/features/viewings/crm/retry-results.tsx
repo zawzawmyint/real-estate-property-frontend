@@ -10,7 +10,7 @@ export function RetryViewings() {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="outline"
       disabled={!ready || pending}
       onClick={() => startTransition(() => router.refresh())}
     >

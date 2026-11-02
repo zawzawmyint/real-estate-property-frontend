@@ -53,20 +53,16 @@ export function PropertyCardsLoading() {
           Loading properties…
         </span>
       </div>
-      <div
-        aria-hidden="true"
-        className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
-      >
+      <div aria-hidden="true" className="listing-property-grid">
         {[0, 1, 2].map((item) => (
-          <div
-            key={item}
-            className="overflow-hidden rounded-xl border border-border bg-card"
-          >
-            <PropertyImagePlaceholder className="aspect-[4/3] h-auto" />
-            <div className="space-y-4 p-5">
-              <Skeleton className="h-6 w-2/3" />
-              <Skeleton className="h-4 w-5/6" />
+          <div key={item} className="listing-property-card">
+            <PropertyImagePlaceholder className="listing-property-photo" />
+            <div className="listing-property-content gap-4">
+              <Skeleton className="h-8 w-2/3" />
+              <Skeleton className="h-7 w-5/6" />
               <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="mt-auto h-11 w-40 self-end" />
             </div>
           </div>
         ))}

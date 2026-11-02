@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button-variants";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NavigationPending } from "@/components/ui/navigation-pending";
@@ -46,7 +47,7 @@ export default async function PropertyDetailsPage({
         {canEdit && (
           <Link
             href={`/crm/properties/${id}/edit`}
-            className="inline-flex min-h-11 items-center text-primary underline"
+            className={buttonVariants({ variant: "outline" })}
           >
             Edit property
           </Link>
@@ -55,7 +56,7 @@ export default async function PropertyDetailsPage({
           property.availability === "available" && (
             <Link
               href={`/properties/${id}`}
-              className="inline-flex min-h-11 items-center text-primary underline"
+              className={buttonVariants({ variant: "outline" })}
             >
               View public listing
               <NavigationPending />

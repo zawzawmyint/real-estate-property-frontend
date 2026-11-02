@@ -1,6 +1,7 @@
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
 import "./public.css";
+import "@/features/agency/public/agency-contact.css";
 
 export default function PublicLayout({
   children,

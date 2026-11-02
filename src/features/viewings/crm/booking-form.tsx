@@ -1,4 +1,5 @@
 "use client";
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -204,7 +205,7 @@ export function BookingForm({
           )}
           {existingViewingId && (
             <Link
-              className="inline-flex min-h-11 items-center text-primary underline"
+              className={buttonVariants({ variant: "outline" })}
               href={`/crm/viewings/${existingViewingId}`}
             >
               Review saved viewing

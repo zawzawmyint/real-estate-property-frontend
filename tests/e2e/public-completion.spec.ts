@@ -101,7 +101,10 @@ test("homepage guidance connects visitors with agents and contact", async ({
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/agents$/);
   await expect(
-    page.getByRole("heading", { name: /Meet the people behind/ }),
+    page.getByRole("heading", {
+      name: "People behind your next move.",
+      exact: true,
+    }),
   ).toBeVisible();
 
   await page.goto("/");

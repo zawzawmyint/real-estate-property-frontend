@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
 
 const paths = {
+  bed: "M3 18v3M21 18v3M3 18h18V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9ZM3 13h18M7 13v-3h4v3M13 13v-3h4v3",
+  bath: "M4 12h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-3ZM3 12h18M6 20v2M18 20v2M6 12V5a2 2 0 0 1 4 0v1M8 6h4",
+  area: "M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5M3 3l6 6M15 15l6 6M7 9h2V7M15 17v-2h2",
+  camera: "M3 7h4l2-3h6l2 3h4v13H3V7Zm13 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z",
+  location:
+    "M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0ZM14.3 10a2.3 2.3 0 1 1-4.6 0 2.3 2.3 0 0 1 4.6 0Z",
   won: "M8 3h8v7a4 4 0 0 1-8 0V3ZM8 5H4v3a4 4 0 0 0 4 4M16 5h4v3a4 4 0 0 1-4 4M12 14v6M8 21h8",
   conversion:
     "m5 19 14-14M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z",

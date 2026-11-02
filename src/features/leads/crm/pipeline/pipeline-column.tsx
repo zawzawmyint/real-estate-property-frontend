@@ -120,7 +120,7 @@ export function PipelineColumn({
             <AlertDescription>
               {error}
               <Button
-                variant="ghost"
+                variant="outline"
                 disabled={readDisabled}
                 onClick={onLoadMore}
               >

@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -28,7 +29,7 @@ export async function PropertyResults({ query }: { query: string }) {
 
   return (
     <>
-      <div className="mt-9 mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="listings-results-toolbar">
         <p role="status" className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">
             {result.total.toLocaleString("en-AE")}
@@ -51,7 +52,10 @@ export async function PropertyResults({ query }: { query: string }) {
           </p>
           <Link
             href={result.total ? firstPage : "/properties?purpose=sale"}
-            className="mt-5 inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4"
+            className={buttonVariants({
+              variant: "outline",
+              className: "mt-5",
+            })}
           >
             {result.total ? "Go to the first page" : "Clear all filters"}
           </Link>

@@ -5,6 +5,8 @@ import { type PublicPropertySummary } from "../data/types";
 import { formatArea, formatBedrooms, formatPrice } from "../data/filters";
 import { PropertyImage } from "../shared/property-image";
 import { NavigationPending } from "@/components/ui/navigation-pending";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 
 export function PropertyCard({
   property,
@@ -17,15 +19,67 @@ export function PropertyCard({
 }) {
   const href = `/properties/${property.id}${resultsQuery ? `?from=${encodeURIComponent(resultsQuery)}` : ""}`;
 
+  if (!home)
+    return (
+      <Card
+        className="listing-property-card"
+        data-testid="property-card"
+        role="listitem"
+      >
+        <div className="listing-property-media">
+          <PropertyImage
+            photo={property.coverPhoto}
+            alt={`${property.title} — cover photo`}
+            className="listing-property-photo"
+          />
+          {property.isDemo && (
+            <Badge className="absolute start-4 top-4 border-0 bg-card text-foreground shadow-sm">
+              Demo property
+            </Badge>
+          )}
+        </div>
+        <CardContent className="listing-property-content">
+          <p className="listing-property-price">
+            {formatPrice(property.priceFils, property.purpose)}
+          </p>
+          <h2 className="listing-property-title">{property.title}</h2>
+          <p className="listing-property-location">
+            {property.community}, {property.city}
+          </p>
+          <p className="listing-property-category">
+            {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
+            <span aria-hidden="true"> · </span>
+            {property.purpose === "rent" ? "For rent · Per year" : "For sale"}
+          </p>
+          <ul className="listing-property-facts" aria-label="Property features">
+            <li>{formatBedrooms(property.bedrooms)}</li>
+            <li>
+              {property.bathrooms} {property.bathrooms === 1 ? "bath" : "baths"}
+            </li>
+            <li>{formatArea(property.areaSqft)}</li>
+          </ul>
+          {property.isDemo && (
+            <p className="listing-property-disclosure">
+              Illustrative home · AI-generated imagery
+            </p>
+          )}
+          <Link
+            href={href}
+            aria-label={`View property: ${property.title}`}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "listing-property-link",
+            )}
+          >
+            View property <span aria-hidden="true">→</span>
+            <NavigationPending />
+          </Link>
+        </CardContent>
+      </Card>
+    );
+
   return (
-    <Card
-      className={
-        home
-          ? "home-property-card"
-          : "gap-0 overflow-hidden rounded-xl py-0 shadow-none transition-shadow hover:shadow-md"
-      }
-      data-testid="property-card"
-    >
+    <Card className="home-property-card" data-testid="property-card">
       <Link
         href={href}
         className="group block h-full"
@@ -36,11 +90,7 @@ export function PropertyCard({
           <PropertyImage
             photo={property.coverPhoto}
             alt={`${property.title} — cover photo`}
-            className={
-              home
-                ? "home-property-photo"
-                : "aspect-[4/3] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.025]"
-            }
+            className="home-property-photo"
           />
           <Badge className="absolute start-4 top-4 border-0 bg-card text-foreground shadow-sm">
             {property.purpose === "rent" ? "For rent" : "For sale"}

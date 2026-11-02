@@ -44,17 +44,14 @@ export default async function AgentPage({ params }: Props) {
   const agent = await readProfile(slug);
 
   return (
-    <main
-      id="main-content"
-      className="public-container pb-12 pt-6 sm:pb-16 sm:pt-8"
-    >
+    <main id="main-content">
       {agent ? (
         <AgentProfile agent={agent} />
       ) : (
-        <>
+        <div className="public-container py-12 sm:py-16">
           <PublicSectionHeader level={1} title="Agent profile unavailable" />
           <AgencyUnavailable profile />
-        </>
+        </div>
       )}
     </main>
   );

@@ -37,7 +37,7 @@ test("public search keeps budget validation and descriptions after field reuse",
   expect(query.get("minPriceFils")).toBe("100000");
   expect(query.get("maxPriceFils")).toBe("200000");
   await expect(
-    page.getByRole("heading", { name: "Homes to make your own." }),
+    page.getByRole("heading", { name: "Properties for sale" }),
   ).toBeVisible();
 });
 

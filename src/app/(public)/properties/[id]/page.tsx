@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icon";
 import { PropertyInquiryCard } from "@/features/leads/public/property-inquiry-card";
 import { getPublicProperty } from "@/lib/api/server";
 import { PropertyApiError } from "@/features/properties/data/request";
@@ -14,6 +15,7 @@ import {
   serializePropertyFilters,
 } from "@/features/properties/data/filters";
 import { PropertyGallery } from "@/features/properties/public/property-gallery";
+import { PropertyDetails } from "@/features/properties/public/property-details";
 import { PropertyRetry } from "@/features/properties/public/property-retry";
 import { propertyIdSchema } from "@/features/properties/data/action-input";
 
@@ -76,31 +78,66 @@ export default async function PropertyPage({
   }
 
   return (
-    <main id="main-content" className="public-container py-7 sm:py-10">
-      <Link
-        href={back}
-        className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground hover:text-primary"
-      >
+    <main id="main-content" className="public-container property-detail">
+      <Link href={back} className="property-detail-back">
         <span aria-hidden="true">←</span>
         {resultsQuery ? "Back to results" : "Back to listings"}
       </Link>
-      <PropertyGallery photos={property.photos} title={property.title} />
-      <div className="mt-9 grid items-start gap-10 lg:mt-12 lg:grid-cols-[1fr_340px] lg:gap-16">
+      <PropertyGallery
+        photos={property.photos}
+        title={property.title}
+        purpose={property.purpose}
+      />
+      <header className="property-detail-heading">
+        <div className="property-detail-labels">
+          <span className="capitalize text-muted-foreground">
+            {property.type}
+          </span>
+          {property.isDemo && <Badge variant="outline">Demo property</Badge>}
+        </div>
+        <h1 className="display-heading property-detail-title">
+          {property.title}
+        </h1>
+      </header>
+      <div className="property-detail-layout">
         <article className="min-w-0">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <Badge variant="outline">
-              {property.purpose === "rent" ? "For rent" : "For sale"}
-            </Badge>
-            <span className="capitalize text-muted-foreground">
-              {property.type}
+          <p className="property-detail-location">
+            <Icon name="location" />
+            <span>
+              {property.community}, {property.city}
             </span>
-            {property.isDemo && <Badge variant="outline">Demo property</Badge>}
-          </div>
-          <h1 className="display-heading mt-5 text-4xl leading-tight break-words sm:text-5xl">
-            {property.title}
-          </h1>
+          </p>
+          <p className="property-detail-price">
+            {formatPrice(property.priceFils, property.purpose)}
+          </p>
+          <dl className="property-detail-facts">
+            <div>
+              <dt>
+                <Icon name="bed" />
+                <span className="sr-only">Bedrooms</span>
+              </dt>
+              <dd>{formatBedrooms(property.bedrooms)}</dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="bath" />
+                <span className="sr-only">Bathrooms</span>
+              </dt>
+              <dd>
+                {property.bathrooms}{" "}
+                {property.bathrooms === 1 ? "bath" : "baths"}
+              </dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="area" />
+                <span className="sr-only">Property size</span>
+              </dt>
+              <dd>{formatArea(property.areaSqft)}</dd>
+            </div>
+          </dl>
           {property.isDemo && (
-            <Alert className="mt-5">
+            <Alert className="property-detail-demo">
               <AlertDescription>
                 This is a demo property, not a real listing. Its photographs are
                 AI-generated illustrative imagery, and the details and price are
@@ -108,44 +145,20 @@ export default async function PropertyPage({
               </AlertDescription>
             </Alert>
           )}
-          <p className="mt-4 leading-7 break-words text-muted-foreground">
-            {property.community}, {property.city}
-          </p>
-          <p className="mt-6 text-3xl font-semibold tracking-tight">
-            {formatPrice(property.priceFils, property.purpose)}
-          </p>
-          <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-6 border-y border-border py-6">
-            <div>
-              <dt className="text-xs text-muted-foreground">Bedrooms</dt>
-              <dd className="mt-2 font-medium">
-                {formatBedrooms(property.bedrooms)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">Bathrooms</dt>
-              <dd className="mt-2 font-medium">{property.bathrooms}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">Property size</dt>
-              <dd className="mt-2 font-medium">
-                {formatArea(property.areaSqft)}
-              </dd>
-            </div>
-          </dl>
-          <section className="mt-9 mb-10" aria-labelledby="about-heading">
+          <section
+            className="property-detail-about"
+            aria-labelledby="about-heading"
+          >
             <h2 id="about-heading" className="display-heading text-3xl">
               About this home
             </h2>
-            <p className="mt-5 text-sm leading-8 break-words whitespace-pre-line text-muted-foreground">
+            <p className="property-detail-description">
               {property.description}
             </p>
           </section>
+          <PropertyDetails property={property} />
         </article>
-        <PropertyInquiryCard
-          propertyId={property.id}
-          title={property.title}
-          location={`${property.community}, ${property.city}`}
-        />
+        <PropertyInquiryCard propertyId={property.id} />
       </div>
     </main>
   );

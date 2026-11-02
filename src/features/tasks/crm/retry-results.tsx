@@ -7,7 +7,7 @@ export function RetryTasks() {
   const [pending, startTransition] = useTransition();
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       disabled={pending}
       onClick={() => startTransition(() => router.refresh())}
     >

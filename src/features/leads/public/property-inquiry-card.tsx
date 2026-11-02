@@ -9,15 +9,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { useClientReady } from "@/lib/use-client-ready";
 import { inquiryFormSchema, type InquiryValues } from "../data/input";
 import { sendInquiry } from "../data/actions";
-export function PropertyInquiryCard({
-  propertyId,
-  title,
-  location,
-}: {
-  propertyId: string;
-  title: string;
-  location: string;
-}) {
+export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
   const ready = useClientReady();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
@@ -82,22 +74,13 @@ export function PropertyInquiryCard({
     });
   }
   return (
-    <aside
-      className="min-w-0 rounded-xl border border-border bg-card p-5 sm:p-6 lg:sticky lg:top-28"
-      aria-labelledby="inquiry-heading"
-    >
+    <aside className="property-inquiry-card" aria-labelledby="inquiry-heading">
       <h2 id="inquiry-heading" className="display-heading text-2xl">
         Enquire about this property
       </h2>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">
-        Tell us how to reach you. Our team can help you take the next step.
+      <p className="mt-2 mb-5 text-sm leading-6 text-muted-foreground">
+        Ask for more information or arrange a viewing.
       </p>
-      <div className="my-6 border-y border-border py-4">
-        <p className="text-sm font-semibold break-words">{title}</p>
-        <p className="mt-1 text-xs break-words text-muted-foreground">
-          {location}
-        </p>
-      </div>
       {success ? (
         <div role="status" className="space-y-3 py-4">
           <p className="font-semibold">
@@ -110,7 +93,7 @@ export function PropertyInquiryCard({
       ) : (
         <form
           noValidate
-          className="space-y-5"
+          className="space-y-4"
           aria-busy={busy}
           onSubmit={async (event) => {
             event.preventDefault();
@@ -193,7 +176,7 @@ export function PropertyInquiryCard({
             id="inquiry-message"
             label="Message (optional)"
             {...register("message")}
-            rows={4}
+            rows={3}
             maxLength={2000}
             disabled={!ready || busy || uncertain}
             error={errors.message?.message}

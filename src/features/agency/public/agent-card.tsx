@@ -13,9 +13,13 @@ export function AgentCard({
   const href = `/agents/${agent.slug}`;
 
   return (
-    <article className="overflow-hidden rounded-xl border border-border bg-card">
-      <AgentPortrait agent={agent} priority={priority} />
-      <div className="p-5 sm:p-6">
+    <article className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <AgentPortrait
+        agent={agent}
+        priority={priority}
+        className="aspect-[7/6] [&_img]:object-top"
+      />
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         <h2 className="display-heading text-2xl leading-tight break-words">
           <Link
             href={href}
@@ -24,7 +28,7 @@ export function AgentCard({
             {agent.name}
           </Link>
         </h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-sm leading-6 break-words text-muted-foreground">
           {agent.title}
         </p>
         {agent.specialties.length > 0 && (
@@ -32,22 +36,29 @@ export function AgentCard({
             {agent.specialties.slice(0, 2).map((specialty) => (
               <li
                 key={specialty}
-                className="rounded-md bg-background px-2.5 py-1 text-xs leading-5 text-primary"
+                className="max-w-full rounded-md bg-muted px-2.5 py-1 text-xs leading-5 break-words text-foreground"
               >
                 {specialty}
               </li>
             ))}
           </ul>
         )}
+        {agent.languages?.length > 0 && (
+          <p className="mt-4 text-sm leading-6 break-words text-muted-foreground">
+            <span className="font-semibold">Languages:</span>{" "}
+            {agent.languages.join(", ")}
+          </p>
+        )}
+        <div className="flex-1" />
         <Link
           href={href}
-          aria-label={`View ${agent.name}’s profile`}
+          aria-label={`View profile: ${agent.name}`}
           className={buttonVariants({
             variant: "outline",
-            className: "mt-6 w-full justify-between",
+            className: "mt-6 w-full gap-3",
           })}
         >
-          View profile <span aria-hidden="true">↗</span>
+          View profile <span aria-hidden="true">→</span>
         </Link>
       </div>
     </article>

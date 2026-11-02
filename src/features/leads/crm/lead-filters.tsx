@@ -1,4 +1,5 @@
 "use client";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { FilterPanel } from "@/components/layout/filter-panel";
 import { TextField, SelectField } from "@/components/forms/fields";
 import { useEffect, useState, useTransition } from "react";
@@ -192,7 +193,7 @@ export function LeadFilters({
           {!pipeline && (
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               disabled={!ready || pending || checkingSession}
               onClick={() => startTransition(() => router.refresh())}
             >
@@ -273,7 +274,7 @@ export function LeadFilters({
           {!checkingSession &&
             (count > 0 || filters.q || filters.sort !== "newest") && (
               <Link
-                className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+                className={buttonVariants({ variant: "outline" })}
                 href={href({
                   view: filters.view,
                   sort: "newest",
