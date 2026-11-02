@@ -1,4 +1,5 @@
 "use client";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { FilterPanel } from "@/components/layout/filter-panel";
 import { TextField, SelectField } from "@/components/forms/fields";
 
@@ -150,7 +151,11 @@ export function PropertyInventoryFilters({
               href="/crm/properties"
               aria-label="Clear filters"
               title="Clear filters"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-primary transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className={buttonVariants({
+                variant: "outline",
+                size: "sm",
+                className: "shrink-0 gap-2",
+              })}
             >
               <Icon name="close" />
               Clear filters

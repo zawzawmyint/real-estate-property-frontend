@@ -11,11 +11,11 @@ export function PropertyRetry() {
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       disabled={pending}
       aria-busy={pending}
       onClick={() => startTransition(() => router.refresh())}
-      className="px-2 underline underline-offset-4"
+      className="gap-2"
     >
       {pending && <Spinner className="size-5 text-primary" />}
       {pending ? "Retrying…" : "Try again"}

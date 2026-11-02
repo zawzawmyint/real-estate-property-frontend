@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { Suspense } from "react";
 import { dubaiDate, validDate } from "@/features/viewings/data/calendar";
@@ -64,7 +65,13 @@ export default async function LeadDetailPage({
             {!(
               error instanceof LeadApiError && [403, 404].includes(error.status)
             ) && (
-              <Link href={`/crm/leads/${id}`} className="ms-4 underline">
+              <Link
+                href={`/crm/leads/${id}`}
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "ms-4",
+                })}
+              >
                 Retry
               </Link>
             )}
@@ -105,7 +112,7 @@ export default async function LeadDetailPage({
                   existingParams,
                   true,
                 )}
-                className="underline"
+                className={buttonVariants({ variant: "outline" })}
               >
                 Reset task filters
               </Link>

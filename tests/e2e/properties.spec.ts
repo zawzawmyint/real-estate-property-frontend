@@ -616,11 +616,17 @@ test("public filtered listings survive reload and gallery works by keyboard", as
 
   await page.goto(url);
   await expect(
-    page.getByRole("link", { name: `View ${property.title}`, exact: true }),
+    page.getByRole("link", {
+      name: `View property: ${property.title}`,
+      exact: true,
+    }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("link", { name: `View ${property.title}`, exact: true }),
+    page.getByRole("link", {
+      name: `View property: ${property.title}`,
+      exact: true,
+    }),
   ).toBeVisible();
   expect(await page.content()).not.toContain("Private owner E2E");
   expect(
@@ -633,7 +639,10 @@ test("public filtered listings survive reload and gallery works by keyboard", as
     fullPage: true,
   });
   await page
-    .getByRole("link", { name: `View ${property.title}`, exact: true })
+    .getByRole("link", {
+      name: `View property: ${property.title}`,
+      exact: true,
+    })
     .click();
 
   const openGallery = page.getByRole("button", { name: /view all.*photos/i });

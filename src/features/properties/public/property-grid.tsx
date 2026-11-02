@@ -12,9 +12,9 @@ export function PropertyGrid({
 }) {
   return (
     <div
-      className={
-        home ? "home-property-grid" : "grid gap-6 md:grid-cols-2 xl:grid-cols-3"
-      }
+      className={home ? "home-property-grid" : "listing-property-grid"}
+      role={home ? undefined : "list"}
+      aria-label={home ? undefined : "Properties"}
     >
       {properties.map((property) => (
         <PropertyCard

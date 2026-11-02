@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Accessibility, Feedback } from "@dnd-kit/dom";
@@ -122,7 +123,7 @@ export function PipelineBoard({
           <p className="text-sm font-medium">No matching leads</p>
           <Link
             href={pipelineHref({ view: filters.view, page: 1, sort: "newest" })}
-            className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+            className={buttonVariants({ variant: "outline" })}
           >
             Clear filters
           </Link>

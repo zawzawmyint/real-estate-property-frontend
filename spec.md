@@ -8,6 +8,10 @@ Provide the Avenor Properties public website and internal staff CRM interface in
 
 This file defines project-wide scope and boundaries and indexes existing specifications. Detailed behavior, contracts and acceptance criteria belong in feature specs; this overview does not replace them or mark planned features delivered.
 
+## Delivered maintenance
+
+- The [public agency pages redesign](specs/public-agency-pages-redesign/spec.md) delivers selected images 1/5/9 for the directory, agent profile and Contact page, including the directory enquiry presentation and additive backend languages projection. The [implementation plan](docs/superpowers/plans/2026-11-02-public-agency-pages-redesign.md) records delivery evidence. Canonical native 200% browser zoom remains unverified; this presentation delivery does not complete P1-14 or P1-18.
+
 ## Verified baseline
 
 - The [pull request branch naming workflow](specs/branch-naming/spec.md) is locally verified for PRs into main. GitHub-hosted execution and required-check activation remain pending.
@@ -43,6 +47,8 @@ The loading and control clarity maintenance keeps the shared Dubai skyline for l
 The [project review remediation](specs/project-review-remediation/spec.md) verifies CRM error recovery, UUID not-found handling, shared media/filter/upload definitions, public-form hydration guards, and the complete browser regression suite. This maintenance preserves API contracts, permissions and roadmap scope.
 
 ## Planned product scope
+
+The [public property pages redesign](specs/public-property-pages-redesign/spec.md) and [implementation plan](docs/superpowers/plans/2026-11-02-public-property-pages-redesign.md) record the delivered frontend-only listings/detail presentation upgrade. Existing backend contracts remain unchanged. Quality checks, focused integration coverage, normal-runtime inspection and visual QA passed, but canonical native-browser 200% zoom remains blocked and is not claimed as verified; no additional roadmap acceptance is checked off.
 
 Viewing management and follow-up tasks are verified. The [agency dashboard](specs/agency-dashboard/spec.md) completes P1-28–P1-30 with an authorized aggregate endpoint, four metrics and two accessible charts. Backend/frontend full checks, the final 16/16 desktop/mobile dashboard suite, runtime inspection and visual QA passed. Every active legacy case passed across two non-clean parallel runs; the feature spec records the timing/sign-in-cache limitation. Reporting beyond this fixed dashboard remains future work. Later enhancements and the optional client portal remain subject to the roadmap.
 

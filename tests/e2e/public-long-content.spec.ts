@@ -123,7 +123,9 @@ test("maximum-length property text stays readable on mobile and at zoom-equivale
         width,
       );
       await expectReadableText(
-        page.locator("article").getByText(location, { exact: true }),
+        page
+          .locator(".property-detail-location")
+          .getByText(location, { exact: true }),
         width,
       );
       const inquiry = page.getByRole("complementary", {
@@ -131,11 +133,9 @@ test("maximum-length property text stays readable on mobile and at zoom-equivale
       });
 
       await expectReadableText(
-        inquiry.getByText(title, { exact: true }),
-        width,
-      );
-      await expectReadableText(
-        inquiry.getByText(location, { exact: true }),
+        page
+          .getByRole("region", { name: "Property details", exact: true })
+          .getByText(location, { exact: true }),
         width,
       );
       await expect(
@@ -167,7 +167,10 @@ test("maximum-length property text stays readable on mobile and at zoom-equivale
         width,
       );
       await expect(
-        card.getByRole("link", { name: `View ${title}`, exact: true }),
+        card.getByRole("link", {
+          name: `View property: ${title}`,
+          exact: true,
+        }),
       ).toBeVisible();
       expect
         .soft(await page.evaluate(() => document.documentElement.scrollWidth))

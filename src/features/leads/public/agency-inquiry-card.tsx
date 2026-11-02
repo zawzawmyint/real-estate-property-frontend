@@ -10,6 +10,7 @@ import {
 } from "@/components/forms/fields";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 import {
   Dialog,
@@ -32,9 +33,11 @@ const initialValues = { name: "", phone: "", email: "", message: "" };
 export function AgencyInquiryCard({
   isDemo = null,
   showDemoNotice = true,
+  presentation = "contact",
 }: {
   isDemo?: boolean | null;
   showDemoNotice?: boolean;
+  presentation?: "contact" | "directory";
 }) {
   const ready = useClientReady();
   const [pending, startTransition] = useTransition();
@@ -60,6 +63,7 @@ export function AgencyInquiryCard({
     formState: { errors, isSubmitting },
   } = form;
   const busy = pending || isSubmitting;
+  const directory = presentation === "directory";
 
   useEffect(() => {
     if (success) successRef.current?.focus();
@@ -146,42 +150,55 @@ export function AgencyInquiryCard({
     <section
       aria-labelledby="agency-inquiry-heading"
       aria-describedby={isDemo === null ? "agency-mode-notice" : undefined}
-      className="min-w-0 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-8 lg:p-10"
+      className={
+        directory
+          ? "grid min-w-0 gap-7 rounded-xl border border-border bg-background p-5 sm:p-7 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.7fr)] lg:gap-8"
+          : "min-w-0"
+      }
     >
-      <p className="mb-3 text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">
-        A conversation starts here
-      </p>
-      <h2
-        id="agency-inquiry-heading"
-        className="display-heading text-3xl leading-tight sm:text-4xl"
+      <div
+        className={
+          directory ? "min-w-0 lg:border-e lg:border-border lg:pe-8" : "min-w-0"
+        }
       >
-        Send a property enquiry
-      </h2>
-      <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground">
-        Tell us a little about your next move. You don’t need a particular
-        property in mind.
-      </p>
-      {isDemo === null && (
-        <p
-          id="agency-mode-notice"
-          className="mt-4 rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground"
+        <h2
+          id="agency-inquiry-heading"
+          className={
+            directory
+              ? "display-heading text-3xl leading-tight sm:text-4xl"
+              : "display-heading max-w-xl text-4xl leading-tight sm:text-5xl"
+          }
         >
-          Agency details and demo status could not be confirmed. Try loading the
-          agency details again before sharing personal contact information. If
-          you are testing a demonstration, use fictional details.
+          {directory ? "Enquiry with our agency." : "Send a property enquiry"}
+        </h2>
+        <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground">
+          {directory
+            ? "Tell us what you’re looking for. You don’t need a particular property in mind."
+            : "Tell us a little about your next move so we can understand what you’re looking for."}
         </p>
-      )}
-      {isDemo && showDemoNotice && (
-        <p className="mt-4 rounded-lg border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
-          This is a demonstration. Please use fictional contact details.
-        </p>
-      )}
+        {isDemo === null && (
+          <p
+            id="agency-mode-notice"
+            className="mt-4 rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground"
+          >
+            Agency details and demo status could not be confirmed. Try loading
+            the agency details again before sharing personal contact
+            information. If you are testing a demonstration, use fictional
+            details.
+          </p>
+        )}
+        {isDemo && showDemoNotice && (
+          <p className="mt-4 rounded-lg border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
+            This is a demonstration. Please use fictional contact details.
+          </p>
+        )}
+      </div>
       {success ? (
         <div
           ref={successRef}
           role="status"
           tabIndex={-1}
-          className="mt-8 rounded-xl border border-border bg-background p-6 outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+          className={`${directory ? "" : "mt-8 "}min-w-0 rounded-xl border border-border bg-background p-6 outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring`}
         >
           <span
             aria-hidden="true"
@@ -211,7 +228,7 @@ export function AgencyInquiryCard({
         <form
           noValidate
           aria-busy={busy}
-          className="mt-8 space-y-6"
+          className={directory ? "min-w-0 space-y-4" : "mt-8 min-w-0 space-y-6"}
           onSubmit={async (event) => {
             event.preventDefault();
             if (!ready || guard.current || busy || retrySeconds > 0) return;
@@ -272,10 +289,10 @@ export function AgencyInquiryCard({
           )}
           <fieldset
             disabled={!ready || busy || uncertain}
-            className="min-w-0 space-y-5"
+            className={directory ? "min-w-0 space-y-4" : "min-w-0 space-y-5"}
           >
             <legend className="sr-only">Enquiry details</legend>
-            <div className="grid min-w-0 gap-5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <TextField
                 id="agency-name"
                 label="Full name"
@@ -285,30 +302,74 @@ export function AgencyInquiryCard({
                 maxLength={120}
                 error={errors.name?.message}
               />
-              <SelectField
-                id="agency-purpose"
-                label="I'm looking to"
-                {...register("purpose")}
-                defaultValue=""
-                required
-                error={errors.purpose?.message}
-              >
-                <option value="" disabled>
-                  Select buy or rent
-                </option>
-                <option value="sale">Buy a property</option>
-                <option value="rent">Rent a property</option>
-              </SelectField>
+              {directory ? (
+                <fieldset
+                  className="min-w-0"
+                  aria-describedby={
+                    errors.purpose ? "agency-purpose-error" : undefined
+                  }
+                  aria-invalid={Boolean(errors.purpose)}
+                >
+                  <legend className="mb-2 text-sm font-semibold">
+                    I&apos;m looking to
+                  </legend>
+                  <div className="flex flex-wrap gap-x-6 gap-y-1">
+                    {(
+                      [
+                        ["sale", "Buy"],
+                        ["rent", "Rent"],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <label
+                        key={value}
+                        htmlFor={
+                          value === "sale"
+                            ? "agency-purpose"
+                            : "agency-purpose-rent"
+                        }
+                        className="inline-flex min-h-11 cursor-pointer items-center gap-3 text-sm"
+                      >
+                        <input
+                          id={
+                            value === "sale"
+                              ? "agency-purpose"
+                              : "agency-purpose-rent"
+                          }
+                          type="radio"
+                          {...register("purpose")}
+                          value={value}
+                          required
+                          aria-describedby={
+                            errors.purpose ? "agency-purpose-error" : undefined
+                          }
+                          className="size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring disabled:cursor-not-allowed"
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                  <FieldError id="agency-purpose-error">
+                    {errors.purpose?.message}
+                  </FieldError>
+                </fieldset>
+              ) : (
+                <SelectField
+                  id="agency-purpose"
+                  label="I'm looking to"
+                  {...register("purpose")}
+                  defaultValue=""
+                  required
+                  error={errors.purpose?.message}
+                >
+                  <option value="" disabled>
+                    Select buy or rent
+                  </option>
+                  <option value="sale">Buy a property</option>
+                  <option value="rent">Rent a property</option>
+                </SelectField>
+              )}
             </div>
-            <p
-              id="agency-contact-help"
-              className="text-xs leading-6 text-muted-foreground"
-            >
-              {isDemo === null
-                ? "Enter a phone number or email to submit your enquiry."
-                : "Enter a phone number or email so we can reply."}
-            </p>
-            <div className="grid min-w-0 gap-5 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <TextField
                 id="agency-phone"
                 label="Phone"
@@ -329,19 +390,39 @@ export function AgencyInquiryCard({
                 error={errors.email?.message}
               />
             </div>
+            <p
+              id="agency-contact-help"
+              className="text-xs leading-6 text-muted-foreground"
+            >
+              {isDemo === null
+                ? "Enter a phone number or email to submit your enquiry."
+                : "Enter a phone number or email so we can reply."}
+            </p>
             <TextareaField
               id="agency-message"
               label="Message"
               {...register("message")}
-              rows={5}
+              rows={3}
               required
               maxLength={2000}
               placeholder="Tell us about the home, neighbourhood or next step you have in mind."
               error={errors.message?.message}
             />
           </fieldset>
-          <div className="border-t border-border pt-5">
-            <p className="mb-5 max-w-xl text-xs leading-6 text-muted-foreground">
+          <div
+            className={
+              directory
+                ? "grid items-start gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-6"
+                : "space-y-5"
+            }
+          >
+            <p
+              className={
+                directory
+                  ? "max-w-xl text-xs leading-6 text-muted-foreground sm:col-start-2 sm:row-start-1 sm:border-s sm:border-border sm:ps-6"
+                  : "max-w-xl text-xs leading-6 text-muted-foreground"
+              }
+            >
               {isDemo === null
                 ? "Submitting this form records the contact details and message you enter. Share only the information needed for your enquiry."
                 : "Your details will be used to respond to this property enquiry."}
@@ -354,13 +435,17 @@ export function AgencyInquiryCard({
               label={uncertain ? "Retry same enquiry" : "Send enquiry"}
               pendingLabel="Sending enquiry…"
               disabled={!ready || retrySeconds > 0}
-              className="w-full sm:w-auto sm:min-w-48"
+              className={
+                directory
+                  ? "w-full sm:col-start-1 sm:row-start-1 sm:w-auto sm:min-w-44"
+                  : "w-full"
+              }
             />
             {uncertain && (
               <Button
-                variant="ghost"
+                variant="outline"
                 disabled={busy || !ready}
-                className="mt-3 w-full sm:ms-2 sm:mt-0 sm:w-auto"
+                className="w-full sm:col-span-full"
                 onClick={() => setEditConfirmation(true)}
               >
                 Edit as a new enquiry

@@ -285,7 +285,7 @@ export function LeadDetail({
             {review && (
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 disabled={pending}
                 onClick={() => {
                   startTransition(async () => {
@@ -402,7 +402,7 @@ export function LeadDetail({
                     Mark this lead as {stageLabels[selected]}?{" "}
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => {
                         setConfirmStage(false);
                         setSelected(lead.stage);

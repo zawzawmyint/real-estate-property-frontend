@@ -36,7 +36,7 @@ export async function AgentDirectory() {
           <DemoDisclosure />
         </div>
       )}
-      <div className="grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {directory.items.map((agent, index) => (
           <AgentCard key={agent.slug} agent={agent} priority={index === 0} />
         ))}

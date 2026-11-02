@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icon";
 import {
   Dialog,
   DialogContent,
@@ -9,16 +11,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type PropertyPhoto } from "../data/types";
+import { type PropertyPhoto, type PublicPropertyDetail } from "../data/types";
 import { PropertyImage } from "../shared/property-image";
-import { cn } from "@/lib/utils";
 
 export function PropertyGallery({
   photos,
   title,
+  purpose,
 }: {
   photos: PropertyPhoto[];
   title: string;
+  purpose: PublicPropertyDetail["purpose"];
 }) {
   const [index, setIndex] = useState(0);
 
@@ -35,18 +38,18 @@ export function PropertyGallery({
 
   return (
     <Dialog>
-      <section aria-label="Property photos" className="relative">
+      <section aria-label="Property photos" className="property-gallery">
+        <Badge className="property-gallery-purpose">
+          {purpose === "rent" ? "For rent" : "For sale"}
+        </Badge>
         <div
-          className={cn(
-            "grid gap-2 overflow-hidden rounded-xl",
-            photos.length > 1 && "md:grid-cols-2",
-          )}
+          className={`property-gallery-mosaic${photos.length > 1 ? " property-gallery-mosaic--multiple" : ""}`}
         >
           <DialogTrigger
             render={
               <Button
                 variant="ghost"
-                className="block h-full overflow-hidden rounded-none p-0"
+                className="property-gallery-tile property-gallery-cover"
               />
             }
             onClick={() => setIndex(0)}
@@ -56,24 +59,18 @@ export function PropertyGallery({
               photo={cover}
               alt={`${title} — photo 1`}
               priority
-              className="aspect-[4/3] h-full max-h-[520px] w-full"
+              className="property-gallery-image"
             />
           </DialogTrigger>
           {photos.length > 1 && (
             <div
-              className={cn(
-                "hidden gap-2 md:grid",
-                photos.length > 3 ? "grid-cols-2" : "grid-cols-1",
-              )}
+              className={`property-gallery-support property-gallery-support--${Math.min(photos.length - 1, 4)}`}
             >
               {photos.slice(1, 5).map((photo, offset) => (
                 <DialogTrigger
                   key={photo.id}
                   render={
-                    <Button
-                      variant="ghost"
-                      className="block h-full overflow-hidden rounded-none p-0"
-                    />
+                    <Button variant="ghost" className="property-gallery-tile" />
                   }
                   onClick={() => setIndex(offset + 1)}
                   aria-label={`Open photo ${offset + 2}`}
@@ -81,7 +78,7 @@ export function PropertyGallery({
                   <PropertyImage
                     photo={photo}
                     alt={`${title} — photo ${offset + 2}`}
-                    className="h-full min-h-0 aspect-[4/3]"
+                    className="property-gallery-image"
                   />
                 </DialogTrigger>
               ))}
@@ -92,16 +89,18 @@ export function PropertyGallery({
           render={
             <Button
               variant="outline"
-              className="absolute end-3 bottom-3 bg-card shadow-sm sm:end-5 sm:bottom-5"
+              tone="inverse"
+              className="property-gallery-view-all"
             />
           }
           onClick={() => setIndex(0)}
         >
+          <Icon name="camera" />
           View all {photos.length} {photos.length === 1 ? "photo" : "photos"}
         </DialogTrigger>
       </section>
       <DialogContent
-        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-5xl gap-4 overflow-y-auto p-4 sm:max-w-5xl sm:p-6"
+        className="property-gallery-dialog max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-5xl gap-4 overflow-y-auto p-4 sm:max-w-5xl sm:p-6"
         onKeyDown={(event) => {
           if (photos.length < 2) return;
           if (event.key === "ArrowLeft" || event.key === "ArrowRight") {

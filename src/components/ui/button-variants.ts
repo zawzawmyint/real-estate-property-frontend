@@ -5,11 +5,15 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "button-primary bg-primary text-primary-foreground",
         outline:
-          "border border-border bg-background text-foreground hover:bg-muted",
+          "button-secondary border border-primary bg-transparent text-primary",
         ghost: "text-primary hover:bg-muted",
         destructive: "bg-primary text-primary-foreground hover:bg-primary/90",
+      },
+      tone: {
+        default: "",
+        inverse: "button-inverse",
       },
       size: {
         default: "",
@@ -18,6 +22,6 @@ export const buttonVariants = cva(
         "icon-sm": "size-11 px-0",
       },
     },
-    defaultVariants: { variant: "default", size: "default" },
+    defaultVariants: { variant: "default", size: "default", tone: "default" },
   },
 );

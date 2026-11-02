@@ -1,4 +1,5 @@
 "use client";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { DataTable, type DataColumn } from "@/components/crm/data-table";
 import { CollectionPagination } from "@/components/crm/collection-pagination";
 import Link from "next/link";
@@ -152,7 +153,10 @@ export function LeadList({
                   sort: "newest",
                   page: 1,
                 })}
-                className="mt-4 inline-flex min-h-11 items-center text-sm text-primary underline"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "mt-4",
+                })}
               >
                 Clear filters
               </Link>

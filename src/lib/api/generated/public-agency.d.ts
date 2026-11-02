@@ -94,6 +94,7 @@ export interface components {
       name: string;
       title: string;
       specialties: string[];
+      languages: string[];
       portrait: components["schemas"]["AgentPortrait"] | null;
       isDemo: boolean;
     };

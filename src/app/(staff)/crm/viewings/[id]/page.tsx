@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
@@ -35,7 +36,13 @@ export default async function ViewingDetailPage({
             <Link href="/crm/viewings" className="underline">
               Back to viewings
             </Link>{" "}
-            <Link href={`/crm/viewings/${id}`} className="ms-4 underline">
+            <Link
+              href={`/crm/viewings/${id}`}
+              className={buttonVariants({
+                variant: "outline",
+                className: "ms-4",
+              })}
+            >
               Retry
             </Link>
           </AlertDescription>

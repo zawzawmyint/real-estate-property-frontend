@@ -4,135 +4,165 @@ import type { PublicAgentDetail } from "../data/types";
 import { emailHref, phoneHref } from "../data/contact";
 import { AgentPortrait } from "./agent-portrait";
 import { DemoDisclosure } from "./agency-states";
-import { AgencySupport } from "./agency-support";
 
 export function AgentProfile({ agent }: { agent: PublicAgentDetail }) {
   const phone = phoneHref(agent.publicPhone);
   const email = emailHref(agent.publicEmail);
   const firstName = agent.name.trim().split(/\s+/)[0];
+  const breadcrumbLink =
+    "inline-flex min-h-11 items-center rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring";
 
   return (
-    <>
-      <nav
-        aria-label="Breadcrumb"
-        className="mb-7 flex flex-wrap items-center gap-x-3 text-sm text-muted-foreground"
-      >
-        <Link
-          href="/agents"
-          className="inline-flex min-h-11 items-center rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-        >
-          Our agents
-        </Link>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{agent.name}</span>
-      </nav>
-      <article>
-        <div className="grid items-start gap-6 md:grid-cols-[minmax(0,4fr)_minmax(0,5fr)] md:gap-x-10 md:gap-y-0 lg:gap-x-20">
-          <div className="md:col-start-2 md:row-start-1 md:pt-5 lg:pt-10">
-            <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+    <article>
+      <header className="bg-primary/5">
+        <div className="public-container pb-9 pt-4 sm:pb-12 sm:pt-6">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-7 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground"
+          >
+            <Link href="/" className={breadcrumbLink}>
+              Home
+            </Link>
+            <span aria-hidden="true">/</span>
+            <Link href="/agents" className={breadcrumbLink}>
               Our agents
-            </p>
-            <h1 className="display-heading mt-4 text-4xl leading-tight break-words sm:text-5xl lg:text-6xl">
-              {agent.name}
-            </h1>
-            <p className="mt-4 leading-7 text-primary">{agent.title}</p>
-          </div>
-          <AgentPortrait
-            agent={agent}
-            priority
-            className="rounded-xl md:col-start-1 md:row-span-2 md:row-start-1"
-          />
-          <div className="md:col-start-2 md:row-start-2 md:mt-6">
-            <p className="text-lg leading-8 text-muted-foreground">
-              {agent.introduction}
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              {phone && (
-                <a
-                  href={phone}
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  Call {firstName}
-                </a>
-              )}
-              {email && (
-                <a
-                  href={email}
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  Email {firstName}
-                </a>
-              )}
-              <Link href="/contact" className={buttonVariants()}>
-                Send a property enquiry
-              </Link>
-            </div>
-            <p className="mt-4 text-sm leading-6 text-muted-foreground">
-              {!phone && !email ? "Agency contact: " : "Property enquiries: "}
-              The agency team receives your enquiry and coordinates follow-up.
-              Enquiries are not assigned directly to this profile.
-            </p>
-            {agent.isDemo && (
-              <div className="mt-7 border-t border-border pt-5">
-                <DemoDisclosure />
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="mt-12 grid gap-10 border-t border-border pt-10 sm:mt-16 md:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-20">
-          <section aria-labelledby="agent-about-heading">
-            <h2
-              id="agent-about-heading"
-              className="display-heading text-3xl sm:text-4xl"
+            </Link>
+            <span aria-hidden="true">/</span>
+            <span
+              aria-current="page"
+              className="min-w-0 break-words text-primary"
             >
-              About {firstName}
-            </h2>
-            <div className="mt-5 space-y-5 leading-8 text-muted-foreground">
-              {agent.biography.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+              {agent.name}
+            </span>
+          </nav>
+          <h1 className="display-heading text-5xl leading-tight break-words sm:text-6xl lg:text-7xl">
+            {agent.name}
+          </h1>
+          <p className="mt-4 text-lg leading-7 break-words text-primary sm:text-2xl">
+            {agent.title}
+          </p>
+          {agent.isDemo && (
+            <div className="mt-5 max-w-3xl">
+              <DemoDisclosure />
             </div>
-          </section>
-          <div className="space-y-8">
+          )}
+        </div>
+      </header>
+      <div className="public-container pb-12 pt-9 sm:pb-16 sm:pt-12">
+        <div className="grid items-start gap-9 lg:grid-cols-[minmax(0,2fr)_minmax(0,4fr)_minmax(0,3fr)] lg:gap-7 xl:gap-9">
+          <aside
+            aria-label="Agent specialties and languages"
+            className="min-w-0 space-y-7 lg:pe-6"
+          >
             {agent.specialties.length > 0 && (
               <section aria-labelledby="agent-specialties-heading">
                 <h2
                   id="agent-specialties-heading"
-                  className="text-sm font-semibold"
+                  className="text-xs font-semibold tracking-[0.18em] text-primary uppercase"
                 >
                   Specialties
                 </h2>
-                <ul className="mt-4 flex flex-wrap gap-2">
+                <ul className="mt-5 space-y-2 text-sm leading-7 break-words">
                   {agent.specialties.map((specialty) => (
-                    <li
-                      key={specialty}
-                      className="rounded-md border border-border bg-card px-3 py-2 text-sm leading-6 text-primary"
-                    >
-                      {specialty}
-                    </li>
+                    <li key={specialty}>{specialty}</li>
                   ))}
                 </ul>
               </section>
             )}
             {agent.languages.length > 0 && (
-              <section aria-labelledby="agent-languages-heading">
+              <section
+                aria-labelledby="agent-languages-heading"
+                className="border-t border-border pt-7"
+              >
                 <h2
                   id="agent-languages-heading"
-                  className="text-sm font-semibold"
+                  className="text-xs font-semibold tracking-[0.18em] text-primary uppercase"
                 >
                   Spoken languages
                 </h2>
-                <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm leading-6 text-muted-foreground">
+                <ul className="mt-5 space-y-2 text-sm leading-7 break-words">
                   {agent.languages.map((language) => (
                     <li key={language}>{language}</li>
                   ))}
                 </ul>
               </section>
             )}
-          </div>
+            <div className="border-t border-border pt-7">
+              <Link
+                href="/agents"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "w-full",
+                })}
+              >
+                Meet the team
+              </Link>
+            </div>
+          </aside>
+          <section
+            aria-labelledby="agent-about-heading"
+            className="min-w-0 lg:border-x lg:border-border lg:px-7 xl:px-9"
+          >
+            <h2 id="agent-about-heading" className="sr-only">
+              About {firstName}
+            </h2>
+            <p className="display-heading text-3xl leading-snug break-words sm:text-4xl">
+              {agent.introduction}
+            </p>
+            <div className="mt-7 space-y-5 text-sm leading-7 break-words text-muted-foreground sm:text-base sm:leading-8">
+              {agent.biography.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+            <Link
+              href="/contact"
+              className={buttonVariants({ className: "mt-8 max-w-full gap-3" })}
+            >
+              Send a property enquiry <span aria-hidden="true">→</span>
+            </Link>
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">
+              {!phone && !email ? "Agency contact: " : "Property enquiries: "}
+              The agency team receives your enquiry and coordinates follow-up.
+              Enquiries are not assigned directly to this profile.
+            </p>
+            {(phone || email) && (
+              <div className="mt-6 flex flex-wrap gap-3">
+                {phone && (
+                  <a
+                    href={phone}
+                    className={buttonVariants({
+                      variant: "outline",
+                      className: "min-w-0 max-w-full break-all",
+                    })}
+                  >
+                    Call {firstName}
+                  </a>
+                )}
+                {email && (
+                  <a
+                    href={email}
+                    className={buttonVariants({
+                      variant: "outline",
+                      className: "min-w-0 max-w-full break-all",
+                    })}
+                  >
+                    Email {firstName}
+                  </a>
+                )}
+              </div>
+            )}
+          </section>
+          <AgentPortrait
+            agent={agent}
+            priority
+            className="w-full rounded-lg lg:aspect-[4/7]"
+          />
         </div>
-      </article>
-      <AgencySupport />
-    </>
+        <p className="display-heading mt-10 border-t border-border pt-8 text-3xl leading-snug text-primary italic sm:mt-12 sm:pt-10 sm:text-4xl lg:text-5xl">
+          A home is more than a place — it’s the foundation for the life you
+          want to build in Dubai.
+        </p>
+      </div>
+    </article>
   );
 }

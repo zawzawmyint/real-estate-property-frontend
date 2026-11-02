@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -167,7 +168,7 @@ export function PropertyLifecycleControls({
               <Button
                 className="w-full"
                 type="button"
-                variant="ghost"
+                variant="outline"
                 disabled={pending}
                 onClick={() =>
                   void onTransition(
@@ -239,7 +240,7 @@ export function PropertyLifecycleControls({
           property.availability === "available" && (
             <Link
               href={`/properties/${property.id}`}
-              className="inline-flex min-h-11 items-center text-sm text-primary underline"
+              className={buttonVariants({ variant: "outline" })}
             >
               View public listing ↗
               <NavigationPending />
@@ -254,7 +255,7 @@ export function PropertyLifecycleControls({
         {property && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             onClick={onReload}
           >

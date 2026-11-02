@@ -175,7 +175,7 @@ test("homepage search and public results stay usable while their server reads ar
         })
         .toBeGreaterThan(0);
       await expect(
-        page.getByRole("heading", { name: "Homes to make your own." }),
+        page.getByRole("heading", { name: "Properties for sale" }),
       ).toBeVisible();
       const loading = page.getByRole("status", { name: "Loading properties" });
       await expect(loading).toBeVisible();

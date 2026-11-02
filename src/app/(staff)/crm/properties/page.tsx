@@ -60,7 +60,10 @@ export default async function PropertiesPage({
         <Alert variant="destructive">
           <AlertDescription>
             These inventory filters are invalid.{" "}
-            <Link href="/crm/properties" className="underline">
+            <Link
+              href="/crm/properties"
+              className={buttonVariants({ variant: "outline" })}
+            >
               Clear filters and try again.
             </Link>
           </AlertDescription>

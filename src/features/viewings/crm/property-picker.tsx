@@ -113,7 +113,7 @@ export function ViewingPropertyPicker({
             {error}
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               onClick={() => setRetry((n) => n + 1)}
             >
               Retry properties

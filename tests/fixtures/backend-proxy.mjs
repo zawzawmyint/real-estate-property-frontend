@@ -7,6 +7,13 @@ if (!Number.isInteger(backendPort) || backendPort < 1 || backendPort > 65535)
   throw new Error("E2E_BACKEND_PORT must be a valid loopback port");
 const upstream = `http://127.0.0.1:${backendPort}`;
 const rules = new Map();
+const publicAgencyPaths = new Set([
+  "/api/v1/public/agency",
+  "/api/v1/public/agents",
+  "/api/v1/public/agents/amira-hassan",
+  "/api/v1/public/agents/daniel-brooks",
+  "/api/v1/public/agents/leila-mansour",
+]);
 
 function json(response, status, body) {
   response.writeHead(status, { "Content-Type": "application/json" });
@@ -17,8 +24,15 @@ function matches(rule, incoming, url, body) {
   if (incoming.method !== rule.method || url.pathname !== rule.path)
     return false;
   if (
+    url.pathname === "/api/v1/properties" &&
     (rule.empty || rule.featuredCount !== undefined) &&
     [...url.searchParams].length !== 3
+  )
+    return false;
+  if (
+    (rule.empty || rule.agentCount !== undefined) &&
+    url.pathname === "/api/v1/public/agents" &&
+    url.searchParams.size
   )
     return false;
   if (
@@ -85,6 +99,8 @@ const server = createServer(async (incoming, response) => {
     }
     if (url.pathname === "/_e2e/rules" && incoming.method === "POST") {
       const rule = JSON.parse(body.toString());
+      const publicAgencyRead =
+        rule.method === "GET" && publicAgencyPaths.has(rule.path);
 
       if (
         !["GET", "POST", "PATCH", "DELETE"].includes(rule.method) ||
@@ -93,9 +109,7 @@ const server = createServer(async (incoming, response) => {
             rule.path,
           ) ||
           (rule.method === "GET" && rule.path === "/api/v1/properties") ||
-          (rule.method === "GET" &&
-            rule.path === "/api/v1/public/agents/daniel-brooks") ||
-          (rule.method === "GET" && rule.path === "/api/v1/public/agency") ||
+          publicAgencyRead ||
           (rule.method === "GET" &&
             rule.path === "/api/v1/staff/dashboard" &&
             typeof rule.sessionDigest === "string" &&
@@ -122,11 +136,7 @@ const server = createServer(async (incoming, response) => {
           ) &&
           !(typeof rule.name === "string" && rule.name.length > 8) &&
           !(typeof rule.query?.q === "string" && rule.query.q.length > 8) &&
-          !(
-            rule.method === "GET" &&
-            rule.path === "/api/v1/public/agents/daniel-brooks"
-          ) &&
-          !(rule.method === "GET" && rule.path === "/api/v1/public/agency") &&
+          !publicAgencyRead &&
           !(
             typeof rule.query?.location === "string" &&
             rule.query.location.length > 8
@@ -135,15 +145,25 @@ const server = createServer(async (incoming, response) => {
             rule.path === "/api/v1/properties" &&
             rule.query?.featured === "true"
           )) ||
-        (rule.status !== undefined && rule.status !== 503) ||
+        (rule.status !== undefined &&
+          rule.status !== 503 &&
+          !(
+            [404, 429].includes(rule.status) &&
+            rule.method === "POST" &&
+            /^\/api\/v1\/public\/properties\/[\w-]+\/inquiries$/.test(rule.path)
+          )) ||
         (rule.empty !== undefined &&
           (rule.empty !== true ||
             rule.method !== "GET" ||
-            rule.path !== "/api/v1/properties" ||
-            rule.query?.featured !== "true" ||
-            rule.query?.pageSize !== "3" ||
-            rule.query?.sort !== "newest" ||
-            Object.keys(rule.query).length !== 3 ||
+            !(
+              (rule.path === "/api/v1/public/agents" &&
+                rule.query === undefined) ||
+              (rule.path === "/api/v1/properties" &&
+                rule.query?.featured === "true" &&
+                rule.query?.pageSize === "3" &&
+                rule.query?.sort === "newest" &&
+                Object.keys(rule.query).length === 3)
+            ) ||
             rule.status !== undefined)) ||
         (rule.featuredCount !== undefined &&
           (!Number.isInteger(rule.featuredCount) ||
@@ -157,6 +177,15 @@ const server = createServer(async (incoming, response) => {
             Object.keys(rule.query).length !== 3 ||
             rule.empty !== undefined ||
             rule.status !== undefined)) ||
+        (rule.agentCount !== undefined &&
+          (!Number.isInteger(rule.agentCount) ||
+            rule.agentCount < 0 ||
+            rule.agentCount > 24 ||
+            rule.method !== "GET" ||
+            rule.path !== "/api/v1/public/agents" ||
+            rule.empty !== undefined ||
+            rule.status !== undefined ||
+            rule.query !== undefined)) ||
         (rule.query !== undefined &&
           (typeof rule.query !== "object" ||
             rule.query === null ||
@@ -214,6 +243,7 @@ const server = createServer(async (incoming, response) => {
     }
 
     let featuredCount;
+    let agentCount;
     for (const rule of rules.values()) {
       if (!matches(rule, incoming, url, body)) continue;
 
@@ -221,7 +251,13 @@ const server = createServer(async (incoming, response) => {
       await rule.held;
 
       if (rule.empty) {
-        json(response, 200, { items: [], total: 0, page: 1, pageSize: 3 });
+        json(
+          response,
+          200,
+          url.pathname === "/api/v1/public/agents"
+            ? { items: [], total: 0 }
+            : { items: [], total: 0, page: 1, pageSize: 3 },
+        );
         return;
       }
 
@@ -237,6 +273,7 @@ const server = createServer(async (incoming, response) => {
       }
 
       featuredCount = rule.featuredCount;
+      agentCount = rule.agentCount;
       break;
     }
 
@@ -247,12 +284,46 @@ const server = createServer(async (incoming, response) => {
         headers: { ...incoming.headers, host: `127.0.0.1:${backendPort}` },
       },
       (result) => {
-        if (featuredCount !== undefined && result.statusCode === 200) {
+        if (
+          (featuredCount !== undefined || agentCount !== undefined) &&
+          result.statusCode === 200
+        ) {
           const chunks = [];
           result.on("data", (chunk) => chunks.push(chunk));
           result.on("end", () => {
             try {
               const collection = JSON.parse(Buffer.concat(chunks).toString());
+              if (agentCount !== undefined) {
+                if (
+                  !Array.isArray(collection.items) ||
+                  (agentCount > 0 && !collection.items.length)
+                )
+                  throw new Error("Insufficient seeded public agents");
+                const items = Array.from(
+                  { length: agentCount },
+                  (_, index) => ({
+                    ...collection.items[index % collection.items.length],
+                    slug: `layout-agent-${index + 1}`,
+                    name: `Advisor ${index + 1} ${"N".repeat(105)}`,
+                    title: "ResidentialPropertyAdvisor".repeat(5).slice(0, 120),
+                    specialties: Array.from(
+                      { length: 8 },
+                      (_, item) => `Focus ${item + 1} ${"S".repeat(72)}`,
+                    ),
+                    languages: Array.from(
+                      { length: 8 },
+                      (_, item) => `Language ${item + 1} ${"L".repeat(69)}`,
+                    ),
+                    portrait:
+                      index === 0
+                        ? null
+                        : collection.items[index % collection.items.length]
+                            .portrait,
+                  }),
+                );
+                json(response, 200, { items, total: items.length });
+                return;
+              }
               if (
                 !Array.isArray(collection.items) ||
                 collection.items.length < featuredCount

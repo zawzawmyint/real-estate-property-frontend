@@ -198,7 +198,7 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
         </div>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           className="shrink-0 gap-2"
           aria-label={pending ? "Signing out…" : "Sign out"}
@@ -221,7 +221,7 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
             <p>Session verification is unavailable.</p>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               className="mt-2 max-w-full gap-2 whitespace-normal text-start"
               aria-label={

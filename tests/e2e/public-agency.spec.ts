@@ -546,7 +546,10 @@ test("portrait failure retains the profile and a stable accessible image fallbac
   });
   await expect(fallback).toBeVisible();
   const box = await fallback.boundingBox();
-  expect(box!.width / box!.height).toBeCloseTo(0.8, 1);
+  expect(box!.width / box!.height).toBeCloseTo(
+    (page.viewportSize()?.width ?? 1280) >= 1024 ? 4 / 7 : 4 / 5,
+    1,
+  );
   await expect(
     page.getByRole("link", { name: "Send a property enquiry", exact: true }),
   ).toBeVisible();

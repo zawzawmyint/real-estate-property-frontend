@@ -15,7 +15,7 @@ export function SessionRetry({ compact = false }: { compact?: boolean }) {
         Session verification is unavailable.
       </p>
       <Button
-        variant="ghost"
+        variant="outline"
         size={compact ? "icon" : "sm"}
         disabled={pending}
         aria-label="Retry session check"

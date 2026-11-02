@@ -11,7 +11,7 @@ export function PublicFooter() {
           <p className="display-heading">Let’s find your next chapter.</p>
           <Link
             href="/contact"
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: "outline", tone: "inverse" })}
           >
             Contact us <NavigationPending />
           </Link>

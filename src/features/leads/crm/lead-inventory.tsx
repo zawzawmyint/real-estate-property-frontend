@@ -27,7 +27,10 @@ export function InvalidLeadFilters() {
     <Alert variant="destructive">
       <AlertDescription>
         These lead filters are invalid.{" "}
-        <Link href="/crm/leads" className="underline">
+        <Link
+          href="/crm/leads"
+          className={buttonVariants({ variant: "outline" })}
+        >
           Clear filters and try again
         </Link>
       </AlertDescription>

@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button-variants";
 import { DataTable, type DataColumn } from "@/components/crm/data-table";
 import { CollectionPagination } from "@/components/crm/collection-pagination";
 import Link from "next/link";
@@ -202,7 +203,11 @@ function Actions({
         href={`/crm/properties/${property.id}`}
         aria-label="View details"
         title="View details"
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-primary transition-colors hover:bg-muted"
+        className={buttonVariants({
+          variant: "outline",
+          size: "icon",
+          className: "shrink-0",
+        })}
       >
         <Icon name="view" />
       </Link>
@@ -211,7 +216,11 @@ function Actions({
           href={`/crm/properties/${property.id}/edit`}
           aria-label="Edit"
           title="Edit"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-primary transition-colors hover:bg-muted"
+          className={buttonVariants({
+            variant: "outline",
+            size: "icon",
+            className: "shrink-0",
+          })}
         >
           <Icon name="edit" />
         </Link>
@@ -222,7 +231,11 @@ function Actions({
             href={`/properties/${property.id}`}
             aria-label="View public listing"
             title="View public listing"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-primary transition-colors hover:bg-muted"
+            className={buttonVariants({
+              variant: "outline",
+              size: "icon",
+              className: "shrink-0",
+            })}
           >
             <Icon name="external" />
             <NavigationPending />
