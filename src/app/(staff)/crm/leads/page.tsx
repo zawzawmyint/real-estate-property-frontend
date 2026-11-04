@@ -34,7 +34,7 @@ export default async function LeadsPage({
   } catch {
     return (
       <main id="main-content" className="min-w-0 flex-1 p-6 sm:p-8">
-        <PageHeader title="Leads" />
+        <PageHeader title="Leads" variant="workspace" />
         <InvalidLeadFilters />
       </main>
     );
@@ -42,8 +42,9 @@ export default async function LeadsPage({
   const queryString = query.toString();
 
   return (
-    <main id="main-content" className="min-w-0 flex-1 px-4 py-8 sm:px-8">
+    <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-8">
       <PageHeader
+        variant="workspace"
         title="Leads"
         description="Turn every inquiry into a thoughtful next step."
         actions={
@@ -59,7 +60,7 @@ export default async function LeadsPage({
           </Suspense>
         }
       />
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Suspense
           fallback={
             <LeadFilters

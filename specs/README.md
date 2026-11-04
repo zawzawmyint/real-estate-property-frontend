@@ -1,10 +1,30 @@
 # Feature specifications
 
+## Compact CRM account popover — delivered with a formatter limitation
+
+- [Staff account popover](crm-account-popover/spec.md): replaces CRM account drawers and inline sign-out with a shared non-modal Base UI popover, retaining the existing provider, Better Auth behavior and mobile navigation drawer. Browser, unit, lint, type, production-build and normal-runtime evidence is recorded. The repository-wide formatter retains inherited CRLF-only differences.
+
+## Compact CRM overview — delivered with a formatter limitation
+
+- [Overview header and metric cards](crm-overview-compact/spec.md): applies the shared compact header and reduced metric-card geometry to `/crm` without changing metrics, graphs, refresh behavior, role scope, sidebar, public pages or backend contracts. Browser, unit, lint, type, build and runtime evidence is recorded; the repository-wide formatter retains inherited CRLF-only differences.
+
+## Sales pipeline workspace header and toolbar — delivered with a formatter limitation
+
+- [Pipeline workspace chrome](crm-pipeline-toolbar/spec.md): applies shared CRM header, toolbar and chips to `/crm/leads/pipeline` while leaving the board, drag/drop, sidebar, public pages and backend contract unchanged. Browser, unit, lint, API-drift, type, production-build and normal-runtime evidence is recorded. The repository-wide formatter still has inherited CRLF-only differences.
+
+## Shared CRM workspace presentation — delivered with verification limitations
+
+- [Shared Properties, Leads, Tasks and Viewings presentation](crm-workspace-presentation/spec.md): reusable compact headers/toolbars, table/status/pagination styling and calendar presentation, with feature-owned behavior and unchanged sidebar/public pages. Includes four saved mockup references and an [implementation plan](../docs/superpowers/plans/2026-11-03-crm-workspace-presentation.md). Native 200% browser zoom and the inherited repository-wide formatter baseline remain unverified.
+
 Before implementation, create `specs/<feature-name>/spec.md` from [_template/spec.md](_template/spec.md). Resolve blocking questions, define contracts with the backend, and agree acceptance criteria before code. Keep the spec beside the feature throughout delivery. Mark acceptance verified only with evidence.
 
 The standalone [project foundation](project-foundation/spec.md) covers this repository's setup. Do not add future feature skeletons until their requirements exist.
 
 The root [project specification](../spec.md) summarizes project-wide scope and the verified baseline. Keep detailed requirements and acceptance evidence in the feature specs; keep checklist progress in [the roadmap](../ROADMAP.md).
+
+## Compact CRM inventory toolbar — delivered with verification limitations
+
+- [Property inventory header and filters](crm-property-inventory-toolbar/spec.md): delivered compact heading with description, search toolbar, advanced-filter disclosure and applied chips. [Implementation plan](../docs/superpowers/plans/2026-11-03-crm-property-inventory-toolbar.md). Frontend-only; existing sidebar and table remain outside the redesign scope. Native 200% browser zoom is unverified, and the full format check does not pass because of pre-existing CRLF-only differences.
 
 ## Public agency pages redesign — delivered with a verification limitation
 

@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/crm/status-badge";
 import type { LeadDetail } from "@/features/leads/data/types";
 import type { Task } from "../data/types";
 
@@ -26,7 +27,33 @@ export function TaskDate({ value }: { value: string }) {
   );
 }
 
-export function TaskState({ task }: { task: Task }) {
+export function TaskState({
+  task,
+  variant = "default",
+}: {
+  task: Task;
+  variant?: "default" | "workspace";
+}) {
+  if (variant === "workspace")
+    return (
+      <StatusBadge
+        tone={
+          task.isOverdue
+            ? "warning"
+            : task.status === "completed"
+              ? "success"
+              : "neutral"
+        }
+      >
+        {task.isOverdue
+          ? "Open · Overdue"
+          : task.status === "open"
+            ? "Open"
+            : task.status === "completed"
+              ? "Completed"
+              : "Cancelled"}
+      </StatusBadge>
+    );
   return (
     <span
       className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${task.isOverdue ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}

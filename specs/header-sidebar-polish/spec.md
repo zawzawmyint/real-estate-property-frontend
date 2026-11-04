@@ -22,7 +22,7 @@ Excluded: a CRM top header, persisted sidebar preferences, new navigation destin
 
 - Public visitors open Buy or Rent from the header; there is no staff entry in the public header or menu. Staff use the footer Staff sign-in link to `/login`, or enter directly at `/login` or `/crm`.
 - Staff use Overview and Properties from the desktop rail or mobile drawer. Nested property routes keep Properties current. View website returns to `/`.
-- The desktop account icon opens a left drawer; on mobile the complete sidebar contains the same account presentation. One `StaffAccountProvider`, mounted by the CRM layout, keeps identity reconciliation, pending state, duplicate submission guard and error feedback alive when either drawer closes and reopens.
+- The compact/expanded account triggers open one non-modal anchored popover; on mobile it remains inside the existing navigation drawer. One `StaffAccountProvider`, mounted by the CRM layout, keeps identity reconciliation, pending state, duplicate submission guard and error feedback alive when the popup closes and reopens. See the later [compact account popover](../crm-account-popover/spec.md).
 - Drawers close on a destination selection, Escape, or the relevant breakpoint change and use the existing focus/scroll-lock behavior.
 
 ## Contracts and access

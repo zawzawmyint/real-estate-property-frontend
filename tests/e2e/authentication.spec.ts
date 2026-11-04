@@ -2,29 +2,60 @@ import { expect, test } from "@playwright/test";
 import type { Page, TestInfo } from "@playwright/test";
 import { staffRoles, type StaffRole } from "../../src/lib/auth/roles";
 
+function staffAccount(page: Page) {
+  return page.getByRole("region", { name: "Staff account", exact: true });
+}
+
+function accountPopup(page: Page) {
+  return page.getByRole("dialog", { name: "Staff account menu", exact: true });
+}
+
+function workspaceDrawer(page: Page) {
+  return page.getByRole("dialog", { name: "Agency workspace", exact: true });
+}
+
 async function openStaffSidebar(page: Page) {
+  const mobile = (page.viewportSize()?.width ?? 1280) < 1024;
   const menu = page.getByRole("button", { name: "Menu", exact: true });
   const account = page.getByRole("button", {
     name: "Staff account",
     exact: true,
   });
-  const identity = page.getByRole("region", {
-    name: "Staff account",
-    exact: true,
-  });
 
-  // Shell and account now stream separately. Wait for the appropriate hydrated
-  // trigger instead of deciding from a transient shell/account visibility gap.
+  // Shell, drawer and account hydrate separately. Retry without toggling an
+  // already-open surface while waiting for the streamed account trigger.
   await expect(async () => {
-    if (await identity.isVisible()) return;
-    const trigger =
-      (page.viewportSize()?.width ?? 1280) < 1024 ? menu : account;
-    await expect(trigger).toBeVisible({ timeout: 1000 });
-    await expect(trigger).toBeEnabled({ timeout: 1000 });
-    if ((await trigger.getAttribute("aria-expanded")) !== "true")
-      await trigger.click({ timeout: 1000 });
-    await expect(identity).toBeVisible({ timeout: 1500 });
+    if (await staffAccount(page).isVisible()) return;
+    if (mobile && !(await workspaceDrawer(page).isVisible())) {
+      await expect(menu).toBeEnabled({ timeout: 1000 });
+      await menu.click({ timeout: 1000 });
+      await expect(workspaceDrawer(page)).toBeVisible({ timeout: 1500 });
+    }
+    await expect(account).toBeVisible({ timeout: 1000 });
+    await expect(account).toBeEnabled({ timeout: 1000 });
+    if ((await account.getAttribute("aria-expanded")) !== "true")
+      await account.click({ timeout: 1000 });
+    await expect(accountPopup(page)).toBeVisible({ timeout: 1500 });
+    await expect(staffAccount(page)).toBeVisible({ timeout: 1500 });
   }).toPass({ timeout: 10_000 });
+}
+
+async function closeStaffAccount(page: Page, closeWorkspace = false) {
+  await page.keyboard.press("Escape");
+  await expect(accountPopup(page)).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Staff account", exact: true }),
+  ).toBeFocused();
+  if ((page.viewportSize()?.width ?? 1280) < 1024) {
+    await expect(workspaceDrawer(page)).toBeVisible();
+    if (closeWorkspace) {
+      await page.keyboard.press("Escape");
+      await expect(workspaceDrawer(page)).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Menu", exact: true }),
+      ).toBeFocused();
+    }
+  }
 }
 
 async function signIn(
@@ -80,7 +111,9 @@ for (const role of staffRoles) {
 
     const label = role.charAt(0).toUpperCase() + role.slice(1);
 
-    await expect(page.getByText(label, { exact: true })).toBeVisible();
+    await expect(
+      staffAccount(page).getByText(label, { exact: true }),
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Sign out", exact: true }),
     ).toBeVisible();
@@ -99,7 +132,9 @@ for (const role of staffRoles) {
     expect(cookie!.expires * 1000 - Date.now()).toBeLessThanOrEqual(28_800_000);
     await page.reload();
     await openStaffSidebar(page);
-    await expect(page.getByText(label, { exact: true })).toBeVisible();
+    await expect(
+      staffAccount(page).getByText(label, { exact: true }),
+    ).toBeVisible();
     await page.goto("/login");
     await expect(page).toHaveURL(/\/crm$/);
     await openStaffSidebar(page);
@@ -149,15 +184,21 @@ test("concurrent browser contexts retain distinct staff identities", async ({
       openStaffSidebar(adminPage),
       openStaffSidebar(agentPage),
     ]);
-    await expect(adminPage.getByText("Admin", { exact: true })).toBeVisible();
-    await expect(agentPage.getByText("Agent", { exact: true })).toBeVisible();
+    await expect(
+      staffAccount(adminPage).getByText("Admin", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      staffAccount(agentPage).getByText("Agent", { exact: true }),
+    ).toBeVisible();
     await adminPage
       .getByRole("button", { name: "Sign out", exact: true })
       .click();
     await expect(adminPage).toHaveURL(/\/login$/);
     await agentPage.reload();
     await openStaffSidebar(agentPage);
-    await expect(agentPage.getByText("Agent", { exact: true })).toBeVisible();
+    await expect(
+      staffAccount(agentPage).getByText("Agent", { exact: true }),
+    ).toBeVisible();
   } finally {
     await Promise.all([admin.close(), agent.close()]);
   }
@@ -304,7 +345,9 @@ test("rapid submits validate once and stay pending through successful CRM naviga
 
   await expect(page).toHaveURL(/\/crm$/);
   await openStaffSidebar(page);
-  await expect(page.getByText("Agent", { exact: true })).toBeVisible();
+  await expect(
+    staffAccount(page).getByText("Agent", { exact: true }),
+  ).toBeVisible();
 });
 
 test("failed logout remains in the workspace with a retry action", async ({
@@ -413,6 +456,125 @@ test("CRM navigation handles narrow screens, focus return, nested routes and des
   await page.screenshot({ path: testInfo.outputPath("crm-navigation.png") });
 });
 
+test("desktop account triggers open a compact non-modal popup with keyboard and outside dismissal", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "desktop",
+    "Desktop trigger states need one sweep.",
+  );
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await signIn(
+    page,
+    "manager",
+    undefined,
+    `e2e-contact-${testInfo.project.name}-manager@example.com`,
+  );
+  await page.goto("/crm/properties");
+
+  const trigger = page.getByRole("button", {
+    name: "Staff account",
+    exact: true,
+  });
+  const heading = page.getByRole("heading", {
+    name: "Properties",
+    exact: true,
+  });
+
+  for (const expanded of [false, true]) {
+    if (expanded) {
+      await page
+        .getByRole("button", { name: "Expand sidebar", exact: true })
+        .click();
+      await expect(page.getByRole("complementary")).toHaveCSS("width", "240px");
+    }
+    await expect(trigger).toBeEnabled();
+    const triggerBox = await trigger.boundingBox();
+    const website = page.getByRole("link", {
+      name: "View website",
+      exact: true,
+    });
+    const websiteBox = await website.boundingBox();
+    expect(triggerBox!.width).toBeGreaterThanOrEqual(44);
+    expect(triggerBox!.height).toBeGreaterThanOrEqual(44);
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(accountPopup(page)).toBeVisible();
+    expect((await trigger.boundingBox())!.y).toBeCloseTo(triggerBox!.y, 1);
+    expect((await website.boundingBox())!.y).toBeCloseTo(websiteBox!.y, 1);
+    await expect(
+      staffAccount(page).getByText("Manager", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      staffAccount(page).getByRole("button", { name: "Sign out", exact: true }),
+    ).toBeVisible();
+    await expect(accountPopup(page)).not.toHaveAttribute("aria-modal", "true");
+    await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+    const popupBox = await accountPopup(page).boundingBox();
+    expect(popupBox!.width).toBeGreaterThanOrEqual(240);
+    expect(popupBox!.width).toBeLessThanOrEqual(300);
+    expect(popupBox!.height).toBeLessThan(360);
+    expect(popupBox!.x).toBeGreaterThanOrEqual(0);
+    expect(popupBox!.x + popupBox!.width).toBeLessThanOrEqual(1024);
+    expect(popupBox!.y + popupBox!.height).toBeLessThanOrEqual(900);
+    expect(
+      await heading.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+        );
+        return hit === element || element.contains(hit);
+      }),
+    ).toBe(true);
+    await closeStaffAccount(page);
+    await trigger.press("Space");
+    await expect(accountPopup(page)).toBeVisible();
+    await heading.click();
+    await expect(accountPopup(page)).toHaveCount(0);
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect((await trigger.boundingBox())!.y).toBeCloseTo(triggerBox!.y, 1);
+    expect((await website.boundingBox())!.y).toBeCloseTo(websiteBox!.y, 1);
+  }
+});
+
+test("mobile account popup stays inside the viewport and Escape dismisses it before the navigation drawer", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "desktop",
+    "One nested mobile viewport sweep is sufficient.",
+  );
+  await signIn(
+    page,
+    "manager",
+    undefined,
+    `e2e-contact-${testInfo.project.name}-manager@example.com`,
+  );
+
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 720 });
+    await openStaffSidebar(page);
+    await expect(workspaceDrawer(page)).toBeVisible();
+    await expect(accountPopup(page)).toBeVisible();
+    const popupBox = await accountPopup(page).boundingBox();
+    expect(popupBox!.width).toBeLessThanOrEqual(300);
+    expect(popupBox!.height).toBeLessThan(360);
+    expect(popupBox!.x).toBeGreaterThanOrEqual(0);
+    expect(popupBox!.y).toBeGreaterThanOrEqual(0);
+    expect(popupBox!.x + popupBox!.width).toBeLessThanOrEqual(width);
+    expect(popupBox!.y + popupBox!.height).toBeLessThanOrEqual(720);
+    await closeStaffAccount(page);
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await expect(workspaceDrawer(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(workspaceDrawer(page)).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Menu", exact: true }),
+    ).toBeFocused();
+  }
+});
+
 test("CRM account feedback remains usable with a long name at narrow widths", async ({
   page,
 }, testInfo) => {
@@ -509,7 +671,7 @@ test("CRM shell reflows across supported widths and enlarged layout", async ({
     page,
     "manager",
     undefined,
-    `e2e-navigation-${testInfo.project.name}@example.com`,
+    `e2e-contact-${testInfo.project.name}-manager@example.com`,
   );
 
   for (const width of [320, 375, 768, 1024, 1440]) {
@@ -517,36 +679,39 @@ test("CRM shell reflows across supported widths and enlarged layout", async ({
       await page.evaluate(() => getComputedStyle(document.body).fontFamily),
     ).toMatch(/poppins/i);
     await page.setViewportSize({ width, height: 900 });
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBe(true);
+    // Responsive charts resize through ResizeObserver after the viewport changes.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+        { message: `No horizontal overflow at ${width}px` },
+      )
+      .toBe(true);
     await expect(page.getByRole("banner")).toHaveCount(0);
     await openStaffSidebar(page);
     await expect(
       page.getByRole("button", { name: "Sign out", exact: true }),
     ).toBeVisible();
-    if (await page.getByRole("dialog").isVisible()) {
-      await expect(page.getByRole("dialog")).toHaveCSS("opacity", "1");
-      await page.screenshot({
-        path: testInfo.outputPath(`crm-sidebar-${width}.png`),
-        animations: "disabled",
-      });
-      await page.keyboard.press("Escape");
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-    }
+    await expect(accountPopup(page)).toHaveCSS("opacity", "1");
+    await page.screenshot({
+      path: testInfo.outputPath(`crm-sidebar-${width}.png`),
+      animations: "disabled",
+    });
+    await closeStaffAccount(page, true);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await page.screenshot({ path: testInfo.outputPath(`crm-${width}.png`) });
   }
 
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
+  await expect
+    .poll(() =>
+      page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    )
+    .toBe(true);
   await page.screenshot({
     path: testInfo.outputPath("crm-layout-200-percent.png"),
   });
@@ -576,8 +741,7 @@ test("sidebar reopening preserves pending sign-out and persistent failure feedba
   try {
     await page.getByRole("button", { name: "Sign out", exact: true }).click();
     await expect.poll(() => submissions).toBe(1);
-    await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await closeStaffAccount(page);
     await openStaffSidebar(page);
     await expect(
       page.getByRole("button", { name: "Signing out…", exact: true }),
@@ -591,8 +755,7 @@ test("sidebar reopening preserves pending sign-out and persistent failure feedba
     .getByRole("region", { name: "Staff account" })
     .getByRole("alert");
   await expect(feedback).toContainText("We couldn’t sign you out.");
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await closeStaffAccount(page);
   await openStaffSidebar(page);
   await expect(feedback).toContainText("We couldn’t sign you out.");
 });

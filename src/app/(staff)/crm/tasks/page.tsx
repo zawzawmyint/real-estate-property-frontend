@@ -19,8 +19,9 @@ export default async function TasksPage({
   return (
     <main id="main-content" className="min-w-0 flex-1 px-4 py-8 sm:px-8">
       <PageHeader
+        variant="workspace"
         title="Tasks"
-        description="Keep the next step in sight. Follow-ups are ordered by due time, earliest first."
+        description="Keep the next step in sight."
         actions={
           <Link href="/crm/tasks/new" className={buttonVariants()}>
             New task

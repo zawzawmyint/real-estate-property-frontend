@@ -18,7 +18,11 @@ import type { StaffSession } from "@/lib/auth/transport";
 import type { StaffRole } from "@/lib/auth/roles";
 import { useClientReady } from "@/lib/use-client-ready";
 import { Icon } from "@/components/ui/icon";
-import { NavigationDrawer } from "@/components/layout/navigation-drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SessionRetry } from "./session-retry";
 
 const roleLabels: Record<StaffRole, string> = {
@@ -136,27 +140,23 @@ export function StaffAccountProvider({
 
 export function StaffAccount({ compact = false }: { compact?: boolean }) {
   const account = useContext(StaffAccountContext);
+  // This streamed boundary can hydrate after its provider has become ready.
+  const hydrated = useClientReady();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const close = () => setOpen(false);
+    media.addEventListener("change", close);
+    return () => media.removeEventListener("change", close);
+  }, []);
 
   if (!account)
     throw new Error("StaffAccount requires a StaffAccountProvider.");
 
-  // Only this view suspends. The provider remains mounted above both drawers,
-  // preserving pending sign-out and errors while they close or change layout.
+  // The provider outlives the popup so pending sign-out and feedback survive dismissal.
   const staff = use(account.staff);
   if (!staff) return <SessionRetry compact={compact} />;
-
-  if (compact)
-    return (
-      <NavigationDrawer
-        triggerLabel="Staff account"
-        triggerIcon="user"
-        title="Staff account"
-        description="View your signed-in staff account and sign out."
-        desktopQuery="(max-width: 1023px)"
-      >
-        <StaffAccount />
-      </NavigationDrawer>
-    );
 
   const {
     identity: clientIdentity,
@@ -177,78 +177,137 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
     ).toUpperCase() || "S";
 
   return (
-    <section
-      aria-label="Staff account"
-      className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-2"
-    >
-      <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
+      <PopoverTrigger
+        disabled={!ready || !hydrated}
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            aria-label="Staff account"
+            title={
+              compact
+                ? `${identity.name} · ${roleLabels[identity.role]}`
+                : "Staff account"
+            }
+            className={
+              compact
+                ? "size-11 shrink-0 p-1.5 data-popup-open:bg-primary/5"
+                : "h-auto min-h-15 w-full min-w-0 justify-start gap-2.5 px-2 py-2 text-start data-popup-open:bg-primary/5"
+            }
+          />
+        }
+      >
         <span
           aria-hidden="true"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold tracking-wide text-primary ring-1 ring-inset ring-primary/10"
+          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/10"
         >
           {initials}
         </span>
-        <div className="min-w-16 flex-1 text-sm">
-          <p className="truncate font-semibold leading-5" title={identity.name}>
-            {identity.name}
-          </p>
-          <p className="text-xs leading-5 text-muted-foreground">
-            {roleLabels[identity.role]}
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="shrink-0 gap-2"
-          aria-label={pending ? "Signing out…" : "Sign out"}
-          title={pending ? "Signing out…" : "Sign out"}
-          onClick={signOut}
-          disabled={!ready || pending}
-          aria-busy={pending}
-        >
-          {pending ? (
-            <Spinner className="size-5 text-primary" />
-          ) : (
-            <Icon name="logout" />
-          )}
-          {pending ? "Signing out…" : "Sign out"}
-        </Button>
-      </div>
-      {sessionError && (
-        <Alert variant="destructive" className="basis-full">
-          <AlertDescription>
-            <p>Session verification is unavailable.</p>
+        {!compact && (
+          <>
+            <span className="min-w-0 flex-1">
+              <span
+                className="block truncate text-sm font-semibold leading-5"
+                title={identity.name}
+              >
+                {identity.name}
+              </span>
+              <span className="block text-xs leading-5 text-muted-foreground">
+                {roleLabels[identity.role]}
+              </span>
+            </span>
+            <Icon
+              name="chevron-down"
+              className="size-4 shrink-0 text-muted-foreground"
+            />
+          </>
+        )}
+      </PopoverTrigger>
+      <PopoverContent
+        side="right"
+        align="end"
+        sideOffset={12}
+        aria-label="Staff account menu"
+      >
+        <section aria-label="Staff account" className="min-w-0">
+          <div className="flex min-w-0 items-center gap-3 border-b border-border p-4">
+            <span
+              aria-hidden="true"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold tracking-wide text-primary ring-1 ring-inset ring-primary/10"
+            >
+              {initials}
+            </span>
+            <div className="min-w-0 flex-1 text-sm">
+              <p className="wrap-anywhere font-semibold leading-5">
+                {identity.name}
+              </p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {roleLabels[identity.role]}
+              </p>
+            </div>
+          </div>
+          <div className="p-2">
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              className="mt-2 max-w-full gap-2 whitespace-normal text-start"
-              aria-label={
-                checkingSession ? "Checking session…" : "Retry session check"
-              }
-              title={
-                checkingSession ? "Checking session…" : "Retry session check"
-              }
-              disabled={!ready || checkingSession}
-              aria-busy={checkingSession}
-              onClick={retrySession}
+              variant="ghost"
+              className="min-h-11 w-full justify-start gap-3 px-3 text-primary hover:bg-primary/5"
+              aria-label={pending ? "Signing out…" : "Sign out"}
+              title={pending ? "Signing out…" : "Sign out"}
+              onClick={signOut}
+              disabled={!ready || pending}
+              aria-busy={pending}
             >
-              {checkingSession ? (
+              {pending ? (
                 <Spinner className="size-5 text-primary" />
               ) : (
-                <Icon name="retry" />
+                <Icon name="logout" />
               )}
-              {checkingSession ? "Checking session…" : "Retry session check"}
+              {pending ? "Signing out…" : "Sign out"}
             </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      {message && (
-        <Alert variant="destructive" className="basis-full">
-          <AlertDescription>{message}</AlertDescription>
-        </Alert>
-      )}
-    </section>
+          </div>
+          {sessionError && (
+            <Alert variant="destructive" className="m-2 w-auto">
+              <AlertDescription>
+                <p>Session verification is unavailable.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 max-w-full gap-2 whitespace-normal text-start"
+                  aria-label={
+                    checkingSession
+                      ? "Checking session…"
+                      : "Retry session check"
+                  }
+                  title={
+                    checkingSession
+                      ? "Checking session…"
+                      : "Retry session check"
+                  }
+                  disabled={!ready || checkingSession}
+                  aria-busy={checkingSession}
+                  onClick={retrySession}
+                >
+                  {checkingSession ? (
+                    <Spinner className="size-5 text-primary" />
+                  ) : (
+                    <Icon name="retry" />
+                  )}
+                  {checkingSession
+                    ? "Checking session…"
+                    : "Retry session check"}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          {message && (
+            <Alert variant="destructive" className="m-2 w-auto">
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
+          )}
+        </section>
+      </PopoverContent>
+    </Popover>
   );
 }

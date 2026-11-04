@@ -34,7 +34,7 @@ export default async function PipelinePage({
   } catch {
     return (
       <main id="main-content" className="min-w-0 flex-1 p-6 sm:p-8">
-        <PageHeader title="Sales pipeline" />
+        <PageHeader variant="workspace" title="Sales pipeline" />
         <InvalidLeadFilters />
       </main>
     );
@@ -42,6 +42,7 @@ export default async function PipelinePage({
   return (
     <main id="main-content" className="min-w-0 flex-1 px-4 py-8 sm:px-8">
       <PageHeader
+        variant="workspace"
         title="Sales pipeline"
         description="Give every opportunity a clear next step."
         actions={

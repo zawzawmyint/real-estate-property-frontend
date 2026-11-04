@@ -73,8 +73,9 @@ export default async function PropertiesPage({
   }
 
   return (
-    <main id="main-content" className="min-w-0 flex-1 px-4 py-10 sm:px-8">
+    <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-8">
       <PageHeader
+        variant="workspace"
         title="Properties"
         description="Manage your agency’s property inventory."
         actions={
@@ -90,7 +91,7 @@ export default async function PropertiesPage({
           </Suspense>
         }
       />
-      <div className="space-y-6">
+      <div className="space-y-4">
         <PropertyInventoryFilters filters={filters} />
         <Suspense
           key={serializePropertyFilters(filters).toString()}

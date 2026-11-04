@@ -1,16 +1,46 @@
 import Link from "next/link";
 import { leadsHref } from "../data/filters";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/crm/status-badge";
 import { stageLabels, sourceLabels } from "../data/input";
 import type { LeadSummary } from "../data/types";
-export function StageBadge({ stage }: { stage: LeadSummary["stage"] }) {
+export function StageBadge({
+  stage,
+  workspace = false,
+}: {
+  stage: LeadSummary["stage"];
+  workspace?: boolean;
+}) {
+  if (workspace)
+    return (
+      <StatusBadge
+        tone={
+          stage === "won"
+            ? "success"
+            : stage === "contacted" || stage === "viewing_scheduled"
+              ? "info"
+              : stage === "offer"
+                ? "warning"
+                : "neutral"
+        }
+      >
+        {stageLabels[stage]}
+      </StatusBadge>
+    );
   return (
     <Badge variant={stage === "new" ? "default" : "outline"}>
       {stageLabels[stage]}
     </Badge>
   );
 }
-export function SourceBadge({ source }: { source: LeadSummary["source"] }) {
+export function SourceBadge({
+  source,
+  workspace = false,
+}: {
+  source: LeadSummary["source"];
+  workspace?: boolean;
+}) {
+  if (workspace) return <span className="text-sm">{sourceLabels[source]}</span>;
   return <Badge variant="outline">{sourceLabels[source]}</Badge>;
 }
 export function LeadDate({ value }: { value: string }) {

@@ -67,7 +67,8 @@ it("does not expose an enabled sign-out button before hydration", async () => {
   const html = await new Response(stream).text();
 
   expect(html.match(/<button\b[^>]*>/)?.[0]).toContain('disabled=""');
-  expect(html).toContain('aria-label="Sign out"');
+  expect(html).toContain('aria-label="Staff account"');
+  expect(html).not.toContain('aria-label="Sign out"');
   expect(html).toContain("Staff");
   expect(html).toContain("Agent");
 });

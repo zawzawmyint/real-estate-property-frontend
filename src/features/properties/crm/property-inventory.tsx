@@ -4,6 +4,7 @@ import { CollectionPagination } from "@/components/crm/collection-pagination";
 import Link from "next/link";
 import { NavigationPending } from "@/components/ui/navigation-pending";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/crm/status-badge";
 import { Icon } from "@/components/ui/icon";
 import {
   Empty,
@@ -42,17 +43,18 @@ export function PropertyInventory({
     {
       id: "property",
       header: "Property",
+      className: "w-[42%] min-w-80 whitespace-normal",
       cell: (property) => (
-        <div className="flex max-w-72 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-4">
           <Cover property={property} />
           <div className="min-w-0">
             <Link
-              className="line-clamp-2 font-medium text-primary underline-offset-4 hover:underline"
+              className="line-clamp-2 break-words font-semibold text-primary underline-offset-4 hover:underline"
               href={`/crm/properties/${property.id}`}
             >
               {property.title}
             </Link>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 break-words text-sm text-muted-foreground">
               {[property.community, property.city].filter(Boolean).join(", ") ||
                 "Location not set"}
             </p>
@@ -68,6 +70,8 @@ export function PropertyInventory({
     {
       id: "price",
       header: "Price",
+      headerClassName: "text-end",
+      className: "text-end tabular-nums",
       cell: (property) =>
         property.priceFils == null
           ? "Not set"
@@ -77,17 +81,30 @@ export function PropertyInventory({
       id: "state",
       header: "State",
       cell: (property) => (
-        <Badge variant="outline">{property.publishingState}</Badge>
+        <StatusBadge
+          tone={
+            property.publishingState === "published"
+              ? "success"
+              : property.publishingState === "draft"
+                ? "warning"
+                : "neutral"
+          }
+        >
+          {property.publishingState}
+        </StatusBadge>
       ),
     },
     {
       id: "availability",
       header: "Availability",
-      cell: (property) => property.availability,
+      cell: (property) => (
+        <span className="capitalize">{property.availability}</span>
+      ),
     },
     {
       id: "updated",
       header: "Updated",
+      className: "text-sm text-muted-foreground tabular-nums",
       cell: (property) =>
         new Date(property.updatedAt).toLocaleDateString("en-GB", {
           timeZone: "UTC",
@@ -96,6 +113,7 @@ export function PropertyInventory({
     {
       id: "actions",
       header: "Actions",
+      headerClassName: "text-end",
       cell: (property) => <Actions property={property} canEdit={canEdit} />,
     },
   ];
@@ -106,6 +124,7 @@ export function PropertyInventory({
         {filtered ? " matching your filters" : " in inventory"}
       </p>
       <DataTable
+        variant="workspace"
         rows={result.items}
         columns={columns}
         getRowKey={(property) => property.id}
@@ -154,7 +173,17 @@ export function PropertyInventory({
                 : formatPrice(property.priceFils, property.purpose)}
             </p>
             <div className="mb-3 flex flex-wrap gap-2">
-              <Badge variant="outline">{property.publishingState}</Badge>
+              <StatusBadge
+                tone={
+                  property.publishingState === "published"
+                    ? "success"
+                    : property.publishingState === "draft"
+                      ? "warning"
+                      : "neutral"
+                }
+              >
+                {property.publishingState}
+              </StatusBadge>
               <Badge variant="outline">{property.availability}</Badge>
               {property.isDemo && (
                 <Badge variant="outline">Demo property</Badge>
@@ -165,6 +194,7 @@ export function PropertyInventory({
         )}
       />
       <CollectionPagination
+        variant="workspace"
         page={result.page}
         pageSize={result.pageSize}
         total={result.total}
@@ -181,10 +211,10 @@ function Cover({ property }: { property: StaffProperty }) {
     <PropertyImage
       photo={photo}
       alt=""
-      className="h-16 w-20 shrink-0 rounded-lg"
+      className="h-18 w-24 shrink-0 rounded-lg"
     />
   ) : (
-    <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
+    <div className="flex h-18 w-24 shrink-0 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
       No photo
     </div>
   );
@@ -198,7 +228,7 @@ function Actions({
   canEdit: boolean;
 }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-nowrap justify-end gap-2">
       <Link
         href={`/crm/properties/${property.id}`}
         aria-label="View details"

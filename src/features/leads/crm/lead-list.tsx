@@ -5,6 +5,7 @@ import { CollectionPagination } from "@/components/crm/collection-pagination";
 import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icon";
 import type { LeadList as LeadListData } from "../data/types";
 import { leadQuery, leadsHref, type LeadFilters } from "../data/filters";
 import { AssignmentDialog } from "./assignment-dialog";
@@ -37,25 +38,35 @@ export function LeadList({
     {
       id: "lead",
       header: "Lead",
-      className: "max-w-56 py-5",
+      className: "min-w-40 max-w-64",
       cell: (lead) => (
-        <>
-          <Link
-            href={detail(lead.id)}
-            className="font-semibold text-primary underline-offset-4 hover:underline break-words"
-          >
-            {lead.name}
-          </Link>
-          <p className="mt-1 break-all text-xs text-muted-foreground">
-            {lead.phone || lead.email}
-          </p>
-        </>
+        <div className="flex items-start gap-3">
+          <Icon name="user" className="mt-0.5 size-4 text-primary" />
+          <div className="min-w-0">
+            <Link
+              href={detail(lead.id)}
+              className="font-semibold text-primary underline-offset-4 hover:underline break-words"
+            >
+              {lead.name}
+            </Link>
+            {lead.email && (
+              <p className="mt-1 break-all text-xs text-muted-foreground">
+                {lead.email}
+              </p>
+            )}
+            {lead.phone && (
+              <p className="mt-1 break-all text-xs text-muted-foreground">
+                {lead.phone}
+              </p>
+            )}
+          </div>
+        </div>
       ),
     },
     {
       id: "property",
       header: "Property / Preference",
-      className: "max-w-52",
+      className: "min-w-40 max-w-60",
       cell: (lead) => (
         <>
           <p className="break-words">
@@ -71,19 +82,19 @@ export function LeadList({
     {
       id: "source",
       header: "Source",
-      cell: (lead) => <SourceBadge source={lead.source} />,
+      cell: (lead) => <SourceBadge source={lead.source} workspace />,
     },
     {
       id: "stage",
       header: "Stage",
-      cell: (lead) => <StageBadge stage={lead.stage} />,
+      cell: (lead) => <StageBadge stage={lead.stage} workspace />,
     },
     ...(manager
       ? [
           {
             id: "assignee",
             header: "Assigned agent",
-            className: "max-w-40 whitespace-normal",
+            className: "min-w-32 max-w-44 whitespace-normal",
             cell: (lead: LeadRow) => (
               <AssigneeContext lead={lead} manager={manager} />
             ),
@@ -93,7 +104,7 @@ export function LeadList({
     {
       id: "received",
       header: "Received",
-      className: "text-xs text-muted-foreground",
+      className: "whitespace-nowrap text-xs text-muted-foreground",
       cell: (lead) => <LeadDate value={lead.createdAt} />,
     },
     ...(manager
@@ -112,7 +123,7 @@ export function LeadList({
       : []),
   ];
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <p>
           {result.total} {result.total === 1 ? "lead" : "leads"}
@@ -126,6 +137,7 @@ export function LeadList({
         {announcement}
       </p>
       <DataTable
+        variant="workspace"
         rows={result.items}
         columns={columns}
         getRowKey={(lead) => lead.id}
@@ -172,11 +184,18 @@ export function LeadList({
               >
                 {lead.name}
               </Link>
-              <StageBadge stage={lead.stage} />
+              <StageBadge stage={lead.stage} workspace />
             </div>
-            <p className="mt-2 break-all text-sm text-muted-foreground">
-              {lead.phone || lead.email}
-            </p>
+            {lead.email && (
+              <p className="mt-2 break-all text-sm text-muted-foreground">
+                {lead.email}
+              </p>
+            )}
+            {lead.phone && (
+              <p className="mt-1 break-all text-sm text-muted-foreground">
+                {lead.phone}
+              </p>
+            )}
             <p className="mt-5 break-words text-sm">
               {lead.property?.title || "No property selected"}
             </p>
@@ -185,7 +204,7 @@ export function LeadList({
               {budgetLabel(lead.budgetFils, lead.purpose)}
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
-              <SourceBadge source={lead.source} />
+              <SourceBadge source={lead.source} workspace />
               <LeadDate value={lead.createdAt} />
             </div>
             {manager && (
@@ -203,8 +222,9 @@ export function LeadList({
         )}
       />
       <CollectionPagination
+        variant="workspace"
         page={result.page}
-        pageSize={20}
+        pageSize={result.pageSize}
         total={result.total}
         href={(page) => leadsHref({ ...filters, page })}
         showTotal

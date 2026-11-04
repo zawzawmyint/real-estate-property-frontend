@@ -28,8 +28,9 @@ export default async function ViewingsPage({
   return (
     <main id="main-content" className="min-w-0 flex-1 px-4 py-8 sm:px-8">
       <PageHeader
+        variant="workspace"
         title="Viewings"
-        description="Arrange visits, keep track of appointments and capture the conversation afterwards."
+        description="Arrange visits and keep appointments on track."
         actions={
           <Link href="/crm/leads" className={buttonVariants()}>
             Choose a lead to schedule
@@ -37,12 +38,13 @@ export default async function ViewingsPage({
         }
       />
       <ViewingToolbar
+        variant="workspace"
         key={`toolbar-${date}-${status}`}
         date={date}
         status={status}
       />
       <Suspense key={`results-${date}-${status}`} fallback={<ViewingLoading />}>
-        <ViewingResults date={date} status={status} />
+        <ViewingResults date={date} status={status} variant="workspace" />
       </Suspense>
     </main>
   );
