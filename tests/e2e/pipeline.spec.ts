@@ -201,6 +201,10 @@ test("board has no page overflow at supported widths and preserves URL filters",
     });
   }
   await page
+    .getByRole("button", { name: /^Filters/ })
+    .filter({ visible: true })
+    .click();
+  await page
     .getByLabel("Source", { exact: true })
     .filter({ visible: true })
     .selectOption("website");
@@ -213,6 +217,55 @@ test("board has no page overflow at supported widths and preserves URL filters",
     .first()
     .click();
   await expect(page).not.toHaveURL(/source=website/);
+});
+
+test("pipeline shares workspace filters while retaining its board-specific controls", async ({
+  page,
+}) => {
+  await login(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/crm/leads/pipeline?view=all");
+  await expect(
+    page.getByText("Give every opportunity a clear next step.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Lead display" })
+      .getByRole("link", { name: "Pipeline", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(
+    page.getByRole("button", { name: "Refresh board", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Refresh leads", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  await expect(page.getByLabel("Stage", { exact: true })).toHaveCount(0);
+  await page.getByLabel("Source", { exact: true }).selectOption("website");
+  await expect(page).toHaveURL(/source=website/);
+  await page
+    .getByRole("button", { name: "Remove source filter", exact: true })
+    .click();
+  await expect
+    .poll(() => new URL(page.url()).searchParams.get("source"))
+    .toBeNull();
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  const sheet = page.getByRole("dialog", { name: "Filter leads" });
+  await expect(sheet.getByLabel("Stage", { exact: true })).toHaveCount(0);
+  await sheet.getByLabel("Source", { exact: true }).selectOption("website");
+  expect(new URL(page.url()).searchParams.get("source")).toBeNull();
+  await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  await expect(sheet.getByLabel("Source", { exact: true })).toHaveValue("");
+  await sheet.getByLabel("Source", { exact: true }).selectOption("website");
+  await sheet
+    .getByRole("button", { name: "Apply filters", exact: true })
+    .click();
+  await expect(page).toHaveURL(/source=website/);
+  await expect(sheet).not.toBeVisible();
 });
 
 test("pointer drag persists a cross-stage move and Escape cancels a drag", async ({

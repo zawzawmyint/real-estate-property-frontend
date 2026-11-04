@@ -5,6 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { CollectionToolbar } from "@/components/crm/collection-toolbar";
+import { StatusBadge } from "@/components/crm/status-badge";
 import { FilterPanel } from "@/components/layout/filter-panel";
 import { SelectField, TextField } from "@/components/forms/fields";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,7 +23,20 @@ import {
 } from "../data/calendar";
 import { getViewings } from "../data/queries";
 import type { Viewing, ViewingPage } from "../data/types";
-export function ViewingStatus({ status }: { status: Viewing["status"] }) {
+type CalendarVariant = "default" | "workspace";
+export function ViewingStatus({
+  status,
+  variant = "default",
+}: {
+  status: Viewing["status"];
+  variant?: CalendarVariant;
+}) {
+  if (variant === "workspace")
+    return (
+      <StatusBadge tone={status === "scheduled" ? "info" : "neutral"}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </StatusBadge>
+    );
   return (
     <span
       className={`inline-flex rounded-md border px-2 py-1 text-[11px] font-medium capitalize ${status === "scheduled" ? "border-primary/20 bg-primary/5 text-primary" : "border-border bg-muted text-muted-foreground"}`}
@@ -30,13 +45,25 @@ export function ViewingStatus({ status }: { status: Viewing["status"] }) {
     </span>
   );
 }
-function Appointment({ item }: { item: Viewing }) {
+function Appointment({
+  item,
+  variant = "default",
+}: {
+  item: Viewing;
+  variant?: CalendarVariant;
+}) {
   return (
     <Link
       href={`/crm/viewings/${item.id}`}
-      className="block min-h-11 rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className={`block min-h-11 rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${variant === "workspace" ? `border-s-[3px] ${item.status === "scheduled" ? "border-s-primary" : "border-s-border"}` : ""}`}
     >
-      <p className="text-sm font-semibold text-primary">
+      <p
+        className={
+          variant === "workspace"
+            ? "text-xs font-semibold text-foreground xl:text-sm"
+            : "text-sm font-semibold text-primary"
+        }
+      >
         {timeLabel(item.startsAt)}–{timeLabel(item.endsAt)}
       </p>
       {endDayLabel(item.startsAt, item.endsAt) && (
@@ -44,7 +71,15 @@ function Appointment({ item }: { item: Viewing }) {
           {endDayLabel(item.startsAt, item.endsAt)}
         </p>
       )}
-      <p className="mt-3 text-sm font-semibold break-words">{item.lead.name}</p>
+      <p
+        className={
+          variant === "workspace"
+            ? "mt-2 text-sm font-semibold break-words text-primary"
+            : "mt-3 text-sm font-semibold break-words"
+        }
+      >
+        {item.lead.name}
+      </p>
       <p className="mt-1 text-xs leading-5 break-words text-muted-foreground">
         {item.property.title}
       </p>
@@ -52,7 +87,7 @@ function Appointment({ item }: { item: Viewing }) {
         {item.assignedAgent?.name || "Unassigned"}
       </p>
       <div className="mt-3">
-        <ViewingStatus status={item.status} />
+        <ViewingStatus status={item.status} variant={variant} />
       </div>
     </Link>
   );
@@ -61,10 +96,12 @@ export function ViewingToolbar({
   date,
   status,
   leadId,
+  variant = "default",
 }: {
   date: string;
   status: string;
   leadId?: string;
+  variant?: CalendarVariant;
 }) {
   const ready = useClientReady();
   const router = useRouter();
@@ -72,6 +109,52 @@ export function ViewingToolbar({
   const search = useSearchParams();
   const href = (day: string) =>
     viewingHref(pathname, day, status, search.toString());
+  const controls = (
+    <>
+      <TextField
+        id="viewing-date"
+        name="date"
+        label="Week containing"
+        fieldClassName={
+          variant === "workspace"
+            ? "sm:w-auto sm:flex-row sm:items-center sm:gap-3 sm:[&>label]:w-auto sm:[&>label]:shrink-0"
+            : undefined
+        }
+        className={variant === "workspace" ? "bg-card sm:w-40" : undefined}
+        type="date"
+        defaultValue={date}
+        required
+      />
+      <SelectField
+        id="viewing-status"
+        name="status"
+        label="Status"
+        fieldClassName={
+          variant === "workspace"
+            ? "sm:w-auto sm:flex-row sm:items-center sm:gap-3 sm:[&>label]:w-auto sm:[&>label]:shrink-0"
+            : undefined
+        }
+        defaultValue={status}
+        className={
+          variant === "workspace"
+            ? "w-full bg-card sm:w-40"
+            : "w-full [&_select]:block [&_select]:h-12"
+        }
+      >
+        <option value="">All statuses</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </SelectField>
+      <Button
+        type="submit"
+        className={variant === "workspace" ? "self-end" : "h-12 self-end"}
+        disabled={!ready}
+      >
+        Apply
+      </Button>
+    </>
+  );
   return (
     <form
       onSubmit={(event) => {
@@ -87,63 +170,79 @@ export function ViewingToolbar({
         );
       }}
     >
-      <FilterPanel
-        disabled={!ready}
-        fieldsClassName="grid items-end gap-4 sm:grid-cols-[1fr_1fr_auto]"
-        before={
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap gap-2">
-              <Link
-                aria-label="Previous week"
-                href={href(shiftDay(date, -7))}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                <Icon name="collapse" />
-                <span className="sr-only sm:not-sr-only">Previous week</span>
-              </Link>
-              <Link
-                href={href(dubaiDate())}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                Today
-              </Link>
-              <Link
-                aria-label="Next week"
-                href={href(shiftDay(date, 7))}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                <span className="sr-only sm:not-sr-only">Next week</span>
-                <Icon name="expand" />
-              </Link>
-            </div>
-            <p className="text-xs text-muted-foreground">Dubai time · UTC+4</p>
+      {variant === "workspace" ? (
+        <CollectionToolbar className="flex flex-col gap-4 space-y-0 xl:flex-row xl:flex-wrap xl:items-center xl:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              aria-label="Previous week"
+              href={href(shiftDay(date, -7))}
+              className={buttonVariants({ variant: "outline", size: "icon" })}
+            >
+              <Icon name="collapse" />
+            </Link>
+            <p className="text-sm font-semibold">
+              {dayLabel(weekDays(date)[0])} – {dayLabel(weekDays(date)[6])}
+            </p>
+            <Link
+              aria-label="Next week"
+              href={href(shiftDay(date, 7))}
+              className={buttonVariants({ variant: "outline", size: "icon" })}
+            >
+              <Icon name="expand" />
+            </Link>
+            <Link
+              href={href(dubaiDate())}
+              className={buttonVariants({ variant: "ghost" })}
+            >
+              Today
+            </Link>
           </div>
-        }
-      >
-        <TextField
-          id="viewing-date"
-          name="date"
-          label="Week containing"
-          type="date"
-          defaultValue={date}
-          required
-        />
-        <SelectField
-          id="viewing-status"
-          name="status"
-          label="Status"
-          defaultValue={status}
-          className="w-full [&_select]:block [&_select]:h-12"
+          <fieldset
+            disabled={!ready}
+            className="flex min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center"
+          >
+            {controls}
+          </fieldset>
+        </CollectionToolbar>
+      ) : (
+        <FilterPanel
+          disabled={!ready}
+          fieldsClassName="grid items-end gap-4 sm:grid-cols-[1fr_1fr_auto]"
+          before={
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  aria-label="Previous week"
+                  href={href(shiftDay(date, -7))}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  <Icon name="collapse" />
+                  <span className="sr-only sm:not-sr-only">Previous week</span>
+                </Link>
+                <Link
+                  href={href(dubaiDate())}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  Today
+                </Link>
+                <Link
+                  aria-label="Next week"
+                  href={href(shiftDay(date, 7))}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  <span className="sr-only sm:not-sr-only">Next week</span>
+                  <Icon name="expand" />
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Dubai time · UTC+4
+              </p>
+            </div>
+          }
         >
-          <option value="">All statuses</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </SelectField>
-        <Button type="submit" className="h-12 self-end" disabled={!ready}>
-          Apply
-        </Button>
-      </FilterPanel>
+          {controls}
+        </FilterPanel>
+      )}
       {leadId && (
         <p className="mt-2 text-xs text-muted-foreground">
           Showing this lead’s appointments for the selected week.
@@ -160,6 +259,7 @@ export function ViewingCalendar({
   date: string;
   status: string;
   leadId?: string;
+  variant?: CalendarVariant;
 }) {
   const [source, setSource] = useState({ initial, revision: 0 });
   if (source.initial !== initial)
@@ -172,11 +272,13 @@ function CalendarPage({
   date,
   status,
   leadId,
+  variant = "default",
 }: {
   initial: ViewingPage;
   date: string;
   status: string;
   leadId?: string;
+  variant?: CalendarVariant;
 }) {
   const [data, setData] = useState(initial);
   const [pending, setPending] = useState(false);
@@ -189,15 +291,22 @@ function CalendarPage({
   const cards = (day: string) =>
     data.items
       .filter((item) => dubaiDate(item.startsAt) === day)
-      .map((item) => <Appointment key={item.id} item={item} />);
+      .map((item) => (
+        <Appointment key={item.id} item={item} variant={variant} />
+      ));
   return (
     <section aria-label="Viewing calendar" className="mt-6 min-w-0">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold">
+        <h2
+          className={
+            variant === "workspace" ? "sr-only" : "text-lg font-semibold"
+          }
+        >
           {dayLabel(days[0])} – {dayLabel(days[6])}
         </h2>
         <p role="status" className="text-xs text-muted-foreground">
           {data.items.length} of {data.total} viewings loaded
+          {variant === "workspace" && " · Dubai time"}
         </p>
       </div>
       <div className="overflow-hidden rounded-xl border border-border bg-card">
@@ -220,14 +329,31 @@ function CalendarPage({
           ))}
         </div>
         <div
-          className={`hidden min-h-80 grid-cols-7 divide-x divide-border ${leadId ? "" : "lg:grid"}`}
+          className={`hidden grid-cols-7 divide-x divide-border ${variant === "workspace" ? "min-h-[34rem]" : "min-h-80"} ${leadId ? "" : "lg:grid"}`}
         >
           {days.map((day) => (
-            <div key={day} className="min-w-0">
+            <div
+              key={day}
+              className={`min-w-0 ${variant === "workspace" && day === today ? "bg-primary/[0.035]" : ""}`}
+            >
               <h3
-                className={`min-h-16 border-b border-border p-3 text-xs font-medium ${day === today ? "bg-primary/5 text-primary" : "text-muted-foreground"}`}
+                className={`border-b border-border p-3 font-medium ${variant === "workspace" ? "h-32 text-sm" : "min-h-16 text-xs"} ${day === today ? "bg-primary/5 text-primary" : "text-muted-foreground"}`}
               >
-                {dayLabel(day)}
+                {variant === "workspace" ? (
+                  <>
+                    <span className="block">
+                      {dayLabel(day, true).split(" ")[0]?.replace(",", "")}
+                    </span>
+                    <span className="mt-2 block text-3xl font-semibold text-foreground">
+                      {Number(day.slice(-2))}
+                    </span>
+                    <span className="mt-1 block">
+                      {dayLabel(day).split(" ").at(-1)}
+                    </span>
+                  </>
+                ) : (
+                  dayLabel(day)
+                )}
                 {day === today && (
                   <span className="mt-1 block text-[10px]">Today</span>
                 )}
@@ -238,7 +364,7 @@ function CalendarPage({
                   (item) => dubaiDate(item.startsAt) === day,
                 ) && (
                   <p className="py-7 text-center text-xs text-muted-foreground">
-                    —
+                    {variant === "workspace" ? "No viewings" : "—"}
                   </p>
                 )}
               </div>

@@ -65,18 +65,18 @@ export function DashboardView({ summary }: { summary: DashboardSummary }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(({ title, value, description, icon }) => (
           <article key={title} aria-label={title} className="min-w-0">
-            <Card className="h-full gap-0 rounded-xl shadow-none">
-              <CardContent className="px-5">
+            <Card className="h-full gap-0 rounded-xl py-4 shadow-none">
+              <CardContent className="px-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-sm font-medium leading-6">{title}</h2>
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary">
+                  <h2 className="text-sm font-medium leading-5">{title}</h2>
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary">
                     <Icon name={icon} className="size-4" />
                   </span>
                 </div>
-                <p className="mt-4 text-5xl font-semibold leading-none tracking-tight text-primary tabular-nums">
+                <p className="mt-1 text-3xl font-semibold leading-none tracking-tight text-primary tabular-nums">
                   {value}
                 </p>
-                <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
                   {description}
                 </p>
               </CardContent>

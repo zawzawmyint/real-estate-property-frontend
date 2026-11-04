@@ -18,10 +18,12 @@ export async function ViewingResults({
   date,
   status,
   leadId,
+  variant = "default",
 }: {
   date: string;
   status: string;
   leadId?: string;
+  variant?: "default" | "workspace";
 }) {
   let initial;
   try {
@@ -42,6 +44,7 @@ export async function ViewingResults({
   }
   return (
     <ViewingCalendar
+      variant={variant}
       initial={initial}
       date={date}
       status={status}

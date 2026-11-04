@@ -727,11 +727,7 @@ test("CRM property controls retain visible labels and centered select chevrons",
     name: "Add property",
     exact: true,
   });
-  const search = page.getByRole("button", { name: "Search", exact: true });
-  const clear = page.getByRole("link", {
-    name: "Clear filters",
-    exact: true,
-  });
+  const search = page.getByRole("button", { name: "Apply", exact: true });
   const sort = page.getByLabel("Sort by", { exact: true });
   const chevron = sort
     .locator("xpath=..")
@@ -742,8 +738,10 @@ test("CRM property controls retain visible labels and centered select chevrons",
   await expect(
     page.getByRole("button", { name: "Add property", exact: true }),
   ).toHaveCount(0);
-  await expect(search).toHaveText("Search");
-  await expect(clear).toHaveText("Clear filters");
+  await expect(search).toHaveText("Apply");
+  await expect(
+    page.getByRole("link", { name: "Clear all", exact: true }),
+  ).toHaveCount(0);
   await expect(chevron.locator('[data-icon="chevron-down"]')).toBeVisible();
   const [selectBox, chevronBox] = await Promise.all([
     sort.boundingBox(),
@@ -822,12 +820,13 @@ test("authenticated inventory streams heading and filters before results and res
   });
 
   try {
+    await page.getByRole("button", { name: /^Filters/ }).click();
     await page
       .getByLabel("Publishing state", { exact: true })
       .selectOption("published");
-    await page.getByRole("button", { name: "Search", exact: true }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
     const searching = page.getByRole("button", {
-      name: "Searching…",
+      name: "Applying…",
       exact: true,
     });
     await expect(searching).toBeDisabled();
@@ -941,8 +940,8 @@ test("CRM missing photos use shared fallback without expanding inventory thumbna
     .first();
   await expect(thumbnail.locator('[data-state="unavailable"]')).toBeVisible();
   const bounds = await thumbnail.boundingBox();
-  expect(bounds?.height).toBe(64);
-  expect(bounds?.width).toBe(80);
+  expect(bounds?.height).toBe(72);
+  expect(bounds?.width).toBe(96);
   await expect(thumbnail.getByRole("img")).toHaveCount(0);
   await page.screenshot({
     path: testInfo.outputPath("crm-photo-fallback.png"),

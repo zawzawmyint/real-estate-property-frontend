@@ -23,6 +23,7 @@ export function DataTable<T>({
   label,
   empty,
   renderMobile,
+  variant = "default",
 }: {
   rows: readonly T[];
   columns: readonly DataColumn<T>[];
@@ -30,6 +31,7 @@ export function DataTable<T>({
   label: string;
   empty: ReactNode;
   renderMobile?: (row: T) => ReactNode;
+  variant?: "default" | "workspace";
 }) {
   if (!rows.length) return empty;
   return (
@@ -40,11 +42,24 @@ export function DataTable<T>({
           renderMobile && "hidden md:block",
         )}
       >
-        <Table aria-label={label}>
-          <TableHeader>
+        <Table
+          aria-label={label}
+          className={
+            variant === "workspace" ? "text-sm lg:text-base" : undefined
+          }
+        >
+          <TableHeader
+            className={variant === "workspace" ? "bg-muted/60" : undefined}
+          >
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.id} className={column.headerClassName}>
+                <TableHead
+                  key={column.id}
+                  className={cn(
+                    variant === "workspace" && "h-11 px-4 font-semibold",
+                    column.headerClassName,
+                  )}
+                >
                   {column.header}
                 </TableHead>
               ))}
@@ -54,7 +69,13 @@ export function DataTable<T>({
             {rows.map((row) => (
               <TableRow key={getRowKey(row)}>
                 {columns.map((column) => (
-                  <TableCell key={column.id} className={column.className}>
+                  <TableCell
+                    key={column.id}
+                    className={cn(
+                      variant === "workspace" && "px-4 py-3",
+                      column.className,
+                    )}
+                  >
                     {column.cell(row)}
                   </TableCell>
                 ))}

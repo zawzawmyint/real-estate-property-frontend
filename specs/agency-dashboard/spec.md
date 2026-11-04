@@ -2,6 +2,8 @@
 
 Status: Verified (2026-10-29) — P1-28, P1-29 and P1-30 are delivered with automated, browser and visual-QA evidence.
 
+Follow-up — 2026-11-03: [compact CRM overview presentation](../crm-overview-compact/spec.md) changes only the dashboard header and metric-card spacing. It preserves this feature's metrics, charts, read contract, calculations, refresh behavior and authorization; its verification evidence is recorded separately and does not change P1-28–P1-30 completion.
+
 ## Goal
 
 Give staff a trustworthy overview of lead acquisition and current pipeline outcomes at `/crm`, using existing lead data and server-enforced visibility.

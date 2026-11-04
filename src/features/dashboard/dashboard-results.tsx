@@ -23,6 +23,7 @@ export async function DashboardResults() {
     return (
       <div className="space-y-6">
         <PageHeader
+          variant="workspace"
           title="Overview"
           description="Your lead acquisition and current sales pipeline."
         />
@@ -43,10 +44,10 @@ export async function DashboardResults() {
   return (
     <>
       <PageHeader
+        variant="workspace"
         title={summary.scope === "agency" ? "Agency overview" : "My overview"}
         description="Your lead acquisition and current sales pipeline."
         actions={<DashboardRefresh />}
-        className="mb-5 border-b border-border pb-6"
       />
       <DashboardView summary={summary} />
     </>
@@ -62,9 +63,9 @@ export function DashboardLoading() {
       className="space-y-6"
     >
       <PageHeader
+        variant="workspace"
         title="Overview"
         description="Your lead acquisition and current sales pipeline."
-        className="mb-5 border-b border-border pb-6"
       />
       <p className="text-sm text-muted-foreground">Loading dashboard…</p>
       <div
@@ -74,11 +75,11 @@ export function DashboardLoading() {
         {[0, 1, 2, 3].map((key) => (
           <div
             key={key}
-            className="h-44 rounded-xl border border-border bg-card p-5"
+            className="h-32 rounded-xl border border-border bg-card p-4"
           >
             <div className="h-3 w-24 rounded bg-muted" />
-            <div className="mt-7 h-10 w-16 rounded bg-muted" />
-            <div className="mt-5 h-3 w-32 rounded bg-muted" />
+            <div className="mt-2 h-8 w-16 rounded bg-muted" />
+            <div className="mt-1 h-3 w-32 rounded bg-muted" />
           </div>
         ))}
       </div>

@@ -115,6 +115,7 @@ Give provisioned agency staff a clear, accessible sign-in experience and protect
 
 - The frontend now applies a cookie-presence-only Proxy gate to `/crm/:path*`; live server verification and Express authorization remain required. Development uses `agency.session`, and production uses `__Host-agency.session`.
 - The server-started session promise is held by one persistent account provider. Only account rendering suspends, preserving account feedback and pending sign-out across compact/expanded account views and menu transitions.
+- The later [compact CRM account popover](../crm-account-popover/spec.md) replaces account drawer/inline sign-out presentation with one non-modal anchored popup. It keeps the same provider, native Better Auth contract, duplicate guard and session recovery; only its presentation and popup focus behavior changed.
 - Properties and Leads render static headings and filter structures before session verification. Role-specific actions and private results wait for verification; Properties emits inventory only when concurrent inventory/session requests both succeed, while Leads renders provisional role-neutral filters inert until verified.
 - Focused browser coverage passed 49 tests with one conditional skip; API-contract generation, lint, typecheck, 138 unit tests and the final persistent-provider production build passed. The final combined desktop/mobile suite passed 97 tests with one conditional skip. Production HTTPS cookie topology remains unverified; see [CRM route guard and scoped loading](../crm-route-guard-loading/spec.md).
 

@@ -115,13 +115,19 @@ function TaskListPage({
   const columns: DataColumn<Task>[] = [
     {
       id: "task",
-      header: "Follow-up",
-      className: "max-w-sm whitespace-normal",
+      header: leadId ? "Follow-up" : "Task",
+      className: leadId
+        ? "max-w-sm whitespace-normal"
+        : "w-[38%] min-w-56 whitespace-normal",
       cell: (task) => (
         <div className="min-w-0">
           <Link
             href={`/crm/tasks/${task.id}`}
-            className="font-medium break-words text-primary hover:underline"
+            className={
+              leadId
+                ? "font-medium break-words text-primary hover:underline"
+                : "font-medium break-words text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+            }
           >
             {task.title}
           </Link>
@@ -157,18 +163,26 @@ function TaskListPage({
         </span>
       ),
     },
-    { id: "state", header: "State", cell: (task) => <TaskState task={task} /> },
+    {
+      id: "state",
+      header: "State",
+      cell: (task) => (
+        <TaskState task={task} variant={leadId ? "default" : "workspace"} />
+      ),
+    },
   ];
   return (
     <div className="mt-5 min-w-0 space-y-4" aria-busy={busy}>
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 text-muted-foreground ${leadId ? "text-xs" : "text-sm"}`}
+      >
         <p>
           {data.total} {data.total === 1 ? "task" : "tasks"} · Updated{" "}
           <TaskDate value={data.asOf} /> · Dubai
         </p>
         <Button
           variant="outline"
-          size="sm"
+          size={leadId ? "sm" : "default"}
           disabled={!ready || busy}
           onClick={() => void refresh(true)}
         >
@@ -183,6 +197,7 @@ function TaskListPage({
       )}
       <div className="min-w-0">
         <DataTable
+          variant={leadId ? "default" : "workspace"}
           rows={data.items}
           columns={columns}
           getRowKey={(task) => task.id}
@@ -210,7 +225,10 @@ function TaskListPage({
                 >
                   {task.title}
                 </Link>
-                <TaskState task={task} />
+                <TaskState
+                  task={task}
+                  variant={leadId ? "default" : "workspace"}
+                />
               </div>
               {!leadId && (
                 <Link
@@ -231,6 +249,7 @@ function TaskListPage({
         />
       </div>
       <CollectionPagination
+        variant={leadId ? "default" : "workspace"}
         showTotal
         page={data.page}
         pageSize={data.pageSize}

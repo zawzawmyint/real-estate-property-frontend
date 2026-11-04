@@ -1,6 +1,7 @@
 "use client";
-import { buttonVariants } from "@/components/ui/button-variants";
-import { FilterPanel } from "@/components/layout/filter-panel";
+import { CollectionToolbar } from "@/components/crm/collection-toolbar";
+import { FilterChip } from "@/components/crm/filter-chip";
+import { Icon } from "@/components/ui/icon";
 import { TextField, SelectField } from "@/components/forms/fields";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
@@ -52,6 +53,7 @@ export function LeadFilters({
     });
   const q = search.value;
   const [open, setOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [draft, setDraft] = useState(filters);
   function navigate(next: LeadFilters) {
     if (checkingSession) return;
@@ -75,6 +77,7 @@ export function LeadFilters({
     value: LeadFilters,
     change: (next: LeadFilters) => void,
     suffix: string,
+    includeSort = true,
   ) {
     return (
       <>
@@ -108,102 +111,217 @@ export function LeadFilters({
             </option>
           ))}
         </SelectField>
-        <SelectField
-          label="Sort by"
-          id={`lead-sort-${suffix}`}
-          value={value.sort}
-          onChange={(event) =>
-            change({
-              ...value,
-              sort: event.target.value as LeadFilters["sort"],
-            })
-          }
-        >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="updated">Recently updated</option>
-        </SelectField>
+        {includeSort && (
+          <SelectField
+            label="Sort by"
+            id={`lead-sort-${suffix}`}
+            value={value.sort}
+            onChange={(event) =>
+              change({
+                ...value,
+                sort: event.target.value as LeadFilters["sort"],
+              })
+            }
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="updated">Recently updated</option>
+          </SelectField>
+        )}
       </>
     );
   }
+  const disabled = !ready || checkingSession;
+  function removeFilter(key: "q" | "stage" | "source" | "agentId") {
+    if (key === "q") {
+      setSearch({ source: filters.q || "", value: "", requested: "" });
+    } else navigate({ ...filters, [key]: undefined });
+    document.getElementById("lead-search")?.focus();
+  }
   return (
-    <FilterPanel
-      busy={pending}
-      disabled={!ready || checkingSession}
-      fieldsClassName={
-        pipeline
-          ? "md:grid-cols-[minmax(12rem,2fr)_repeat(2,minmax(8rem,1fr))]"
-          : "md:grid-cols-[minmax(12rem,2fr)_repeat(3,minmax(8rem,1fr))]"
-      }
-      before={
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <nav
-            aria-label="Lead display"
-            className="flex rounded-lg border border-border bg-background p-1"
-          >
-            {[
-              [false, "List"],
-              [true, "Pipeline"],
-            ].map(([isPipeline, label]) => (
-              <Link
-                key={String(label)}
-                aria-current={pipeline === isPipeline ? "page" : undefined}
-                href={
-                  isPipeline
-                    ? pipelineHref({
-                        ...filters,
-                        view: manager ? "all" : "mine",
-                      })
-                    : leadsHref(filters)
-                }
-                className={`inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium ${pipeline === isPipeline ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+    <div aria-busy={pending}>
+      <CollectionToolbar
+        filters={
+          advancedOpen ? (
+            <fieldset
+              id="lead-advanced-filters"
+              disabled={disabled}
+              className="hidden min-w-0 gap-4 rounded-lg border border-border bg-card p-4 md:grid md:grid-cols-2"
+            >
+              {controls(filters, navigate, "desktop", false)}
+              {manager && filters.view === "all" && (
+                <div className="space-y-3 md:col-span-2">
+                  <p className="text-sm font-medium">Assigned agent</p>
+                  <SearchPicker
+                    kind="agent"
+                    value={filters.agentId || ""}
+                    currentLabel="Selected agent"
+                    disabled={disabled}
+                    onChange={(agentId) => navigate({ ...filters, agentId })}
+                  />
+                </div>
+              )}
+            </fieldset>
+          ) : undefined
+        }
+        navigation={
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <nav
+              aria-label="Lead display"
+              className="flex gap-5 sm:border-e sm:border-border sm:pe-6"
+            >
+              {[
+                [false, "List"],
+                [true, "Pipeline"],
+              ].map(([isPipeline, label]) => (
+                <Link
+                  key={String(label)}
+                  aria-current={pipeline === isPipeline ? "page" : undefined}
+                  href={
+                    isPipeline
+                      ? pipelineHref({
+                          ...filters,
+                          view: manager ? "all" : "mine",
+                        })
+                      : leadsHref(filters)
+                  }
+                  className={`inline-flex min-h-11 items-center border-b-2 text-sm font-medium ${pipeline === isPipeline ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            <nav aria-label="Lead views" className="flex flex-wrap gap-5">
+              {(checkingSession
+                ? []
+                : manager
+                  ? [
+                      ["all", "All leads"],
+                      ["unassigned", "Unassigned"],
+                    ]
+                  : [["mine", "My leads"]]
+              ).map(([view, label]) => (
+                <Link
+                  key={view}
+                  href={href({
+                    ...filters,
+                    view: view as LeadFilters["view"],
+                    agentId: undefined,
+                    page: 1,
+                  })}
+                  aria-current={filters.view === view ? "page" : undefined}
+                  className={`inline-flex min-h-11 items-center border-b-2 text-sm font-medium ${filters.view === view ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            {!pipeline && (
+              <Button
+                type="button"
+                variant="outline"
+                className="sm:ms-auto"
+                disabled={disabled || pending}
+                onClick={() => startTransition(() => router.refresh())}
               >
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <nav
-            aria-label="Lead views"
-            className="flex min-h-11 gap-6 border-b border-border"
-          >
-            {(checkingSession
-              ? []
-              : manager
-                ? [
-                    ["unassigned", "Unassigned"],
-                    ["all", "All leads"],
-                  ]
-                : [["mine", "My leads"]]
-            ).map(([view, label]) => (
+                <Icon name="retry" />
+                Refresh leads
+              </Button>
+            )}
+          </div>
+        }
+        chips={
+          !checkingSession &&
+          (count > 0 || filters.q || filters.sort !== "newest") ? (
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              {filters.q && (
+                <FilterChip
+                  disabled={disabled}
+                  removeLabel="Remove search filter"
+                  onRemove={() => removeFilter("q")}
+                >
+                  Search: {filters.q}
+                </FilterChip>
+              )}
+              {filters.stage && (
+                <FilterChip
+                  disabled={disabled}
+                  removeLabel="Remove stage filter"
+                  onRemove={() => removeFilter("stage")}
+                >
+                  Stage:{" "}
+                  {stageLabels[filters.stage as keyof typeof stageLabels]}
+                </FilterChip>
+              )}
+              {filters.source && (
+                <FilterChip
+                  disabled={disabled}
+                  removeLabel="Remove source filter"
+                  onRemove={() => removeFilter("source")}
+                >
+                  Source:{" "}
+                  {sourceLabels[filters.source as keyof typeof sourceLabels]}
+                </FilterChip>
+              )}
+              {filters.agentId && (
+                <FilterChip
+                  disabled={disabled}
+                  removeLabel="Remove assigned agent filter"
+                  onRemove={() => removeFilter("agentId")}
+                >
+                  Assigned agent
+                </FilterChip>
+              )}
               <Link
-                key={view}
-                href={href({
-                  ...filters,
-                  view: view as LeadFilters["view"],
-                  agentId: undefined,
-                  page: 1,
-                })}
-                aria-current={filters.view === view ? "page" : undefined}
-                className={`inline-flex min-h-11 items-center border-b-2 text-sm font-medium ${filters.view === view ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                href={href({ view: filters.view, sort: "newest", page: 1 })}
               >
-                {label}
+                Clear filters
               </Link>
-            ))}
-          </nav>
-          {!pipeline && (
+            </div>
+          ) : undefined
+        }
+      >
+        <fieldset
+          disabled={disabled}
+          className="grid min-w-0 gap-3 md:grid-cols-[minmax(12rem,1.5fr)_auto_minmax(10rem,1fr)]"
+        >
+          <div className="relative min-w-0">
+            <Icon
+              name="search"
+              className="pointer-events-none absolute start-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground"
+            />
+            <TextField
+              label="Search leads"
+              fieldClassName="min-w-0 gap-0 [&>label]:sr-only"
+              id="lead-search"
+              type="search"
+              maxLength={120}
+              placeholder="Search leads"
+              value={q}
+              className="bg-card ps-10"
+              onChange={(event) =>
+                setSearch((current) => ({
+                  ...current,
+                  value: event.target.value,
+                }))
+              }
+            />
+          </div>
+          <div className="hidden md:block">
             <Button
               type="button"
               variant="outline"
-              disabled={!ready || pending || checkingSession}
-              onClick={() => startTransition(() => router.refresh())}
+              className="w-full border-primary text-primary"
+              disabled={disabled}
+              aria-expanded={advancedOpen}
+              aria-controls={advancedOpen ? "lead-advanced-filters" : undefined}
+              onClick={() => setAdvancedOpen(!advancedOpen)}
             >
-              Refresh leads
+              <Icon name="filter" />
+              Filters{count ? ` · ${count}` : ""}
             </Button>
-          )}
-        </div>
-      }
-      after={
-        <div className="flex flex-wrap items-center gap-3">
+          </div>
           <div className="md:hidden">
             <Sheet
               open={open}
@@ -213,13 +331,9 @@ export function LeadFilters({
               }}
             >
               <SheetTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    disabled={!ready || checkingSession}
-                  />
-                }
+                render={<Button variant="outline" disabled={disabled} />}
               >
+                <Icon name="filter" />
                 Filters{count ? ` (${count})` : ""}
               </SheetTrigger>
               <SheetContent className="w-[min(100%,24rem)] overflow-y-auto">
@@ -242,6 +356,7 @@ export function LeadFilters({
                 </div>
                 <SheetFooter>
                   <Button
+                    disabled={disabled}
                     onClick={() => {
                       navigate(draft);
                       setOpen(false);
@@ -256,54 +371,27 @@ export function LeadFilters({
               </SheetContent>
             </Sheet>
           </div>
-          {manager && filters.view === "all" && (
-            <details className="hidden min-w-64 rounded-lg border border-border bg-card p-3 md:block">
-              <summary className="cursor-pointer text-sm font-medium">
-                Assigned agent{filters.agentId ? " · Filter active" : ""}
-              </summary>
-              <div className="mt-4 max-w-sm">
-                <SearchPicker
-                  kind="agent"
-                  value={filters.agentId || ""}
-                  currentLabel="Selected agent"
-                  onChange={(agentId) => navigate({ ...filters, agentId })}
-                />
-              </div>
-            </details>
-          )}
-          {!checkingSession &&
-            (count > 0 || filters.q || filters.sort !== "newest") && (
-              <Link
-                className={buttonVariants({ variant: "outline" })}
-                href={href({
-                  view: filters.view,
-                  sort: "newest",
-                  page: 1,
-                })}
-              >
-                Clear filters{count ? ` (${count})` : ""}
-              </Link>
-            )}
-        </div>
-      }
-    >
-      <TextField
-        label="Search leads"
-        id="lead-search"
-        type="search"
-        maxLength={120}
-        placeholder="Name, phone, email or property"
-        value={q}
-        onChange={(event) =>
-          setSearch((current) => ({
-            ...current,
-            value: event.target.value,
-          }))
-        }
-      />
-      <div className="hidden md:contents [&>*]:hidden md:[&>*]:flex">
-        {controls(filters, navigate, "desktop")}
-      </div>
-    </FilterPanel>
+          <div className="hidden md:block">
+            <SelectField
+              label="Sort by"
+              fieldClassName="min-w-0 gap-0 [&>label]:sr-only"
+              id="lead-sort-workspace"
+              value={filters.sort}
+              className="w-full bg-card"
+              onChange={(event) =>
+                navigate({
+                  ...filters,
+                  sort: event.target.value as LeadFilters["sort"],
+                })
+              }
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="updated">Recently updated</option>
+            </SelectField>
+          </div>
+        </fieldset>
+      </CollectionToolbar>
+    </div>
   );
 }

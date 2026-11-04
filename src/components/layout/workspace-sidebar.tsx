@@ -40,7 +40,7 @@ export function WorkspaceSidebar({
           <Icon name="external" />
           {!compact && <span>View website</span>}
         </Link>
-        {account}
+        <div className="min-w-0">{account}</div>
       </div>
     </div>
   );
