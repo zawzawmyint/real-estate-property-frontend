@@ -1,6 +1,6 @@
 # Phase 1 review remediation
 
-Status: Verified implementation and release checks — Git-delivery acceptance remains pending.
+Status: Verified implementation, release checks and pushed scoped Git delivery — no deployment or Phase 1 closure.
 
 ## Goal
 
@@ -47,7 +47,7 @@ Resolve the ten selected findings from the [November 4 review](../../docs/review
 - [x] F05: Seven independent shortcut cases retain exact URL/result assertions without raised timeouts; their focused applicable-project run passed.
 - [x] F06: Completion-spec summaries no longer contradict current evidence; historical sections are labelled and guidance references the approved redesign photo.
 - [x] F07: Both roadmaps have matching IDs/status and current evidence; backend-local relative links have been reviewed.
-- [ ] F08: The review, verification plan and affected specs are included together in the reviewed Git delivery when a commit is authorized; ignored evidence is identified as local-only. Before a commit this criterion remains open.
+- [x] F08: The review, verification plan and affected specs are included in the authorized scoped deliveries: frontend `655587e6dc10ea467223c1b1c06c4984f86bba1b` and backend `5086b6507f0c12e99a5e309ef6313429a7509c9f`. Ignored evidence remains local-only.
 - [x] F09: Both repository quality gates and focused browser coverage pass; the clean serial legacy regression, exact-data dashboard acceptance and guarded normal-runtime inspection have candidate-specific evidence. This does not close the broader P1-14/P1-18 acceptance matrices.
 
 ## Validation
@@ -71,9 +71,9 @@ Resolve the ten selected findings from the [November 4 review](../../docs/review
 ## Implementation evidence
 
 - Historical candidate identity before the gallery focus fix: frontend HEAD `7a97dbb` plus digest `64fc7171aeb668a661998831747f031aa8f8445cb02caaa7bbbaff2ccf68a5c3`. Its valid serial attempt reached 183 passes and 10 intentional skips before the two-photo gallery autofocus failure; it was interrupted after 194 completed cases. The failure preserved dialog trap/return-focus behavior but initially scrolled Close out of view.
-- Final candidate identity: frontend HEAD `7a97dbb` plus reviewed source/test/config digest `2d71f35e4b630c5782f6b0c692aaa9b1b89d25627c0f19cfa3420aefe439c28f`; backend HEAD `3690d3a` plus reviewed digest `20f08ac413902b9358ca1e26f470a1d618c6136d4af6455fd2d0d59257813c5c`. Both repositories remain dirty; these identifiers do not claim a commit.
+- Historical verified candidate identity: frontend HEAD `7a97dbb` plus reviewed source/test/config digest `2d71f35e4b630c5782f6b0c692aaa9b1b89d25627c0f19cfa3420aefe439c28f`; backend HEAD `3690d3a` plus reviewed digest `20f08ac413902b9358ca1e26f470a1d618c6136d4af6455fd2d0d59257813c5c`. At verification time both repositories were dirty; these historical identifiers do not identify the later delivery commits.
 - Backend `bun run check` passed: lint, formatting, typecheck, build and 132 tests in 35 files. Focused ingress/current-staff coverage passed 31 tests in seven files. The backend report is local-only at `backend/var/review-remediation-report.md`.
 - Frontend final `bun run check` passed: API check, lint, formatting, typecheck, 297 unit tests in 47 files and production build. Focused post-fix gallery coverage passed two cases with two intentional skips.
 - Fresh serial regression passed 341 cases with 65 intentional skips and no failures (406 registered, 24.0 minutes). Fresh exact-data dashboard acceptance passed 16/16 in 1.3 minutes. Both used disposable mutation fixtures.
 - Fresh guarded normal runtime used the actual frontend checkout on port 3100 and normal backend public reads only through a proxy blocking writes/cookies/auth. Gallery focus/arrows/Close and empty inquiry validation passed; browser errors/warnings and DevTools configuration/session errors were empty. The normal backend process was not used for mutation verification. A non-failing Next streaming digest observed during recovery tests remains a diagnostic with unproven cause and was absent from the fresh runtime.
-- P1-14/P1-18 remain unchecked; F08 remains open until an authorized scoped commit exists.
+- The historical dirty-candidate HEADs and digests above remain verification evidence only. Scoped delivery is frontend `655587e6dc10ea467223c1b1c06c4984f86bba1b` and backend `5086b6507f0c12e99a5e309ef6313429a7509c9f`. The unresolved pre-hydration property-form defect remains open. P1-14/P1-18 remain unchecked.

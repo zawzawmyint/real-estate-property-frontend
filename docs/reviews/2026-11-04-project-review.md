@@ -8,7 +8,7 @@ This remains a November 4 historical review snapshot: its branch, clean-tree and
 
 The ten selected findings are verified in the [November 5 remediation specification](../../specs/phase-one-review-remediation/spec.md); the backend-owned behavior is in the companion repository's `specs/phase-one-review-remediation/contract.md`. Both dirty tested candidates are identified by their historical HEADs plus reviewed source/test/config digests in that specification, rather than by HEAD alone. Backend `bun run check` passed with 132 tests in 35 files; frontend final `bun run check` passed with 297 unit tests in 47 files; the clean serial run passed 341 cases with 65 intentional skips and no failures, and the separate dashboard run passed 16/16. Local reports, traces and captures under `.delivery-work/` are ignored and are not Git-delivery evidence.
 
-The final serial browser, exact-data dashboard and guarded normal-runtime check passed. P1-14/P1-18 remain unchecked, and F08 remains open until an authorized scoped commit includes the reviewed delivery files. The remediation did not close Phase 1 or authorize deployment.
+The final serial browser, exact-data dashboard and guarded normal-runtime check passed. P1-14/P1-18 remain unchecked. F08 is now verified by authorized implementation commits frontend `655587e` and backend `5086b65`, pushed to their working branches on November 5. The remediation did not close Phase 1 or authorize deployment.
 
 The separate [November 5 browser UI verification](2026-11-05-browser-ui-verification.md) records later local disposable-data and visible localhost journeys. It confirms one unresolved pre-hydration property-form submission defect; it does not change this review's historical conclusions or Phase 1 status.
 
