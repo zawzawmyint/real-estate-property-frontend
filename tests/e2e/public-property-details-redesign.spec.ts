@@ -284,7 +284,7 @@ test("one through five real gallery photos reflow without blank slots and retain
   const signIn = await page.request.post("/api/v1/auth/sign-in/email", {
     headers,
     data: {
-      email: "e2e-property-desktop-manager@example.com",
+      email: "e2e-gallery-manager@example.com",
       password,
       rememberMe: true,
     },

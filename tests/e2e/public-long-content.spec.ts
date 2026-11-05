@@ -1,5 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { expect, test, type Locator } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Locator,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 
 const headers = { Origin: "http://localhost:3100" };
 
@@ -20,6 +26,68 @@ async function expectReadableText(locator: Locator, width: number) {
   expect.soft(bounds.right).toBeLessThanOrEqual(width + 1);
   // Vertical line clamping on cards is intentional; clipped horizontal text is not.
   expect.soft(bounds.scrollWidth).toBeLessThanOrEqual(bounds.clientWidth + 1);
+}
+
+async function expectReadableGallery(
+  page: Page,
+  title: string,
+  width: number,
+  testInfo: TestInfo,
+  kind: string,
+) {
+  const open = page.getByRole("button", { name: "Open cover photo" });
+  await open.click();
+  const dialog = page.getByRole("dialog");
+  const heading = dialog.getByRole("heading", {
+    name: title,
+    exact: true,
+  });
+  await expect(heading).toBeFocused();
+  expect(await dialog.evaluate((element) => element.scrollTop)).toBe(0);
+  await expectReadableText(heading, width);
+  const text = await heading.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return {
+      overflow: style.textOverflow,
+      whiteSpace: style.whiteSpace,
+      right: range.getBoundingClientRect().right,
+      bottom: range.getBoundingClientRect().bottom,
+      height: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    };
+  });
+  expect.soft(text.overflow).not.toBe("ellipsis");
+  expect.soft(text.whiteSpace).not.toBe("nowrap");
+  expect.soft(text.scrollHeight).toBeLessThanOrEqual(text.height + 1);
+  const close = dialog.getByRole("button", {
+    name: "Close",
+    exact: true,
+  });
+  const closeBox = (await close.boundingBox())!;
+  expect.soft(text.right).toBeLessThanOrEqual(closeBox.x);
+  expect.soft(text.bottom).toBeLessThanOrEqual(900);
+  await expect(close).toBeInViewport();
+  const next = dialog.getByRole("button", { name: "Next photo" });
+  await next.scrollIntoViewIfNeeded();
+  await next.click();
+  await expect(dialog.getByText("2 / 2", { exact: true })).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(dialog.getByText("1 / 2", { exact: true })).toBeVisible();
+  await heading.scrollIntoViewIfNeeded();
+  await page.keyboard.press("Tab");
+  await expect
+    .poll(() =>
+      dialog.evaluate((element) => element.contains(document.activeElement)),
+    )
+    .toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath(`long-gallery-${kind}-${width}.png`),
+  });
+  await close.click();
+  await expect(dialog).toHaveCount(0);
+  await expect(open).toBeFocused();
 }
 
 test("maximum-length property text stays readable on mobile and at zoom-equivalent width", async ({
@@ -100,12 +168,14 @@ test("maximum-length property text stays readable on mobile and at zoom-equivale
     expect(created.status(), await created.text()).toBe(201);
     propertyId = ((await created.json()) as { id: string }).id;
 
-    const uploaded = await page.request.post(
-      `/api/v1/staff/properties/${propertyId}/photos`,
-      { headers: { ...headers, "Content-Type": "image/webp" }, data: photo },
-    );
+    for (let index = 0; index < 2; index++) {
+      const uploaded = await page.request.post(
+        `/api/v1/staff/properties/${propertyId}/photos`,
+        { headers: { ...headers, "Content-Type": "image/webp" }, data: photo },
+      );
 
-    expect(uploaded.status(), await uploaded.text()).toBe(201);
+      expect(uploaded.status(), await uploaded.text()).toBe(201);
+    }
 
     const published = await page.request.patch(
       `/api/v1/staff/properties/${propertyId}`,
@@ -150,6 +220,10 @@ test("maximum-length property text stays readable on mobile and at zoom-equivale
         fullPage: true,
       });
 
+      if (width <= 390) {
+        await expectReadableGallery(page, title, width, testInfo, "unbroken");
+      }
+
       await page.goto(
         `/properties?purpose=sale&location=${encodeURIComponent(community)}`,
       );
@@ -180,6 +254,44 @@ test("maximum-length property text stays readable on mobile and at zoom-equivale
         path: testInfo.outputPath(`long-property-card-${width}.png`),
         fullPage: true,
       });
+    }
+    await page.goto(`/crm/properties?q=${encodeURIComponent(title)}`, {
+      waitUntil: "domcontentloaded",
+    });
+    const inventoryCard = page.getByRole("article").filter({
+      has: page.getByRole("link", { name: title, exact: true }),
+    });
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      await expectReadableText(
+        inventoryCard.getByText(location, { exact: true }),
+        width,
+      );
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(width);
+    }
+
+    const ordinaryTitle =
+      "Fictional spacious apartment with beautiful views and room for family living "
+        .repeat(3)
+        .slice(0, 160)
+        .trim();
+    const renamed = await page.request.patch(
+      `/api/v1/staff/properties/${propertyId}`,
+      { headers, data: { title: ordinaryTitle } },
+    );
+    expect(renamed.status(), await renamed.text()).toBe(200);
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/properties/${propertyId}`);
+      await expectReadableGallery(
+        page,
+        ordinaryTitle,
+        width,
+        testInfo,
+        "ordinary",
+      );
     }
   } finally {
     if (propertyId) {

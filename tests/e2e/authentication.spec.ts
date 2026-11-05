@@ -378,6 +378,7 @@ test("failed logout remains in the workspace with a retry action", async ({
 test("CRM navigation handles narrow screens, focus return, nested routes and desktop resizing", async ({
   page,
 }, testInfo) => {
+  test.setTimeout(60_000);
   await signIn(
     page,
     "manager",
@@ -416,7 +417,8 @@ test("CRM navigation handles narrow screens, focus return, nested routes and des
   await navigation
     .getByRole("link", { name: "Properties", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/crm\/properties$/);
+  // A cold App Router response can arrive before its streamed route commits.
+  await expect(page).toHaveURL(/\/crm\/properties$/, { timeout: 20_000 });
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Properties", exact: true }),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
@@ -24,6 +24,7 @@ export function PropertyGallery({
   purpose: PublicPropertyDetail["purpose"];
 }) {
   const [index, setIndex] = useState(0);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   const move = (direction: number) =>
     setIndex(
@@ -100,6 +101,7 @@ export function PropertyGallery({
         </DialogTrigger>
       </section>
       <DialogContent
+        initialFocus={titleRef}
         className="property-gallery-dialog max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-5xl gap-4 overflow-y-auto p-4 sm:max-w-5xl sm:p-6"
         onKeyDown={(event) => {
           if (photos.length < 2) return;
@@ -109,7 +111,13 @@ export function PropertyGallery({
           }
         }}
       >
-        <DialogTitle className="truncate pe-12 text-lg">{title}</DialogTitle>
+        <DialogTitle
+          ref={titleRef}
+          tabIndex={-1}
+          className="min-w-0 pe-12 text-lg [overflow-wrap:anywhere]"
+        >
+          {title}
+        </DialogTitle>
         <DialogDescription>
           Browse the property photos. Use the left and right arrow keys to move
           between photos.
