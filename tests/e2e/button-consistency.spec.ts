@@ -13,21 +13,34 @@ async function expectSlidingFill(page: Page, action: Locator) {
       ),
     )
     .toBeLessThan(-20);
-  await action.hover();
-  const samples = await action.evaluate(async (el) => {
-    const positions: number[] = [];
-    const start = performance.now();
-    while (performance.now() - start < 430) {
-      positions.push(
-        new DOMMatrixReadOnly(getComputedStyle(el, "::before").transform).m41,
+  // Observe pointer entry in the browser so the transition cannot run while
+  // Playwright resolves a new locator evaluation after hovering.
+  const sampling = await action.evaluateHandle((el) => ({
+    observed: new Promise<boolean>((resolve) => {
+      el.addEventListener(
+        "pointerenter",
+        () => {
+          const width = el.getBoundingClientRect().width;
+          const start = performance.now();
+          const sample = () => {
+            const transform = getComputedStyle(el, "::before").transform;
+            const position = new DOMMatrixReadOnly(transform).m41;
+            if (position < -1 && position > -width * 0.95) resolve(true);
+            else if (performance.now() - start >= 430) resolve(false);
+            else requestAnimationFrame(sample);
+          };
+          requestAnimationFrame(sample);
+        },
+        { once: true },
       );
-      await new Promise(requestAnimationFrame);
-    }
-    return { positions, width: el.getBoundingClientRect().width };
-  });
-  expect(
-    samples.positions.some((x) => x < -1 && x > -samples.width * 0.95),
-  ).toBe(true);
+    }),
+  }));
+  try {
+    await action.hover();
+    expect(await sampling.evaluate(({ observed }) => observed)).toBe(true);
+  } finally {
+    await sampling.dispose();
+  }
   await expect
     .poll(() =>
       action.evaluate(

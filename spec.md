@@ -56,6 +56,8 @@ The loading and control clarity maintenance keeps the shared Dubai skyline for l
 
 The [project review remediation](specs/project-review-remediation/spec.md) verifies CRM error recovery, UUID not-found handling, shared media/filter/upload definitions, public-form hydration guards, and the complete browser regression suite. This maintenance preserves API contracts, permissions and roadmap scope.
 
+The [November 5 Phase 1 review remediation](specs/phase-one-review-remediation/spec.md) verifies scoped gallery/inquiry recovery and shortcut-test fixes, with the companion backend implementing signed-only production inquiry ingress and transaction-scoped current-staff validation. Both repository quality gates, the clean serial browser run, exact-data dashboard acceptance and guarded normal runtime pass. Git-delivery acceptance remains open; P1-14/P1-18 remain unchecked.
+
 ## Planned product scope
 
 The [public property pages redesign](specs/public-property-pages-redesign/spec.md) and [implementation plan](docs/superpowers/plans/2026-11-02-public-property-pages-redesign.md) record the delivered frontend-only listings/detail presentation upgrade. Existing backend contracts remain unchanged. Quality checks, focused integration coverage, normal-runtime inspection and visual QA passed, but canonical native-browser 200% zoom remains blocked and is not claimed as verified; no additional roadmap acceptance is checked off.

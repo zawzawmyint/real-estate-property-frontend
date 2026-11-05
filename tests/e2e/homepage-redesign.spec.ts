@@ -137,35 +137,34 @@ for (const [label, purpose] of [
   });
 }
 
-test("type and community shortcuts open sale-filtered existing results", async ({
-  page,
-}) => {
-  const shortcuts = [
-    ["A home for every way of living", "Apartments", "type", "apartment"],
-    ["A home for every way of living", "Villas", "type", "villa"],
-    ["A home for every way of living", "Townhouses", "type", "townhouse"],
-    ["A home for every way of living", "Penthouses", "type", "penthouse"],
-    [
-      "Explore Dubai, neighbourhood by neighbourhood.",
-      "Dubai Marina",
-      "location",
-      "Dubai Marina",
-    ],
-    [
-      "Explore Dubai, neighbourhood by neighbourhood.",
-      "Downtown Dubai",
-      "location",
-      "Downtown Dubai",
-    ],
-    [
-      "Explore Dubai, neighbourhood by neighbourhood.",
-      "Palm Jumeirah",
-      "location",
-      "Palm Jumeirah",
-    ],
-  ] as const;
-  test.setTimeout(60_000);
-  for (const [regionName, label, key, value] of shortcuts) {
+const shortcuts = [
+  ["A home for every way of living", "Apartments", "type", "apartment"],
+  ["A home for every way of living", "Villas", "type", "villa"],
+  ["A home for every way of living", "Townhouses", "type", "townhouse"],
+  ["A home for every way of living", "Penthouses", "type", "penthouse"],
+  [
+    "Explore Dubai, neighbourhood by neighbourhood.",
+    "Dubai Marina",
+    "location",
+    "Dubai Marina",
+  ],
+  [
+    "Explore Dubai, neighbourhood by neighbourhood.",
+    "Downtown Dubai",
+    "location",
+    "Downtown Dubai",
+  ],
+  [
+    "Explore Dubai, neighbourhood by neighbourhood.",
+    "Palm Jumeirah",
+    "location",
+    "Palm Jumeirah",
+  ],
+] as const;
+for (const [regionName, label, key, value] of shortcuts) {
+  test(`${label} shortcuts open sale-filtered existing results`, async ({
+    page,
+  }) => {
     await page.goto("/");
     const region = page.getByRole("region", { name: regionName, exact: true });
     await expect(region).toContainText(/sale/i);
@@ -181,8 +180,8 @@ test("type and community shortcuts open sale-filtered existing results", async (
     await expect(
       page.getByRole("heading", { name: "Properties for sale" }),
     ).toBeVisible();
-  }
-});
+  });
+}
 
 test("public header and closing footer retain navigation across public routes", async ({
   page,

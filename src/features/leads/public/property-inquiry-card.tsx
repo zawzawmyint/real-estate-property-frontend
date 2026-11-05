@@ -5,10 +5,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextField, TextareaField } from "@/components/forms/fields";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useClientReady } from "@/lib/use-client-ready";
 import { inquiryFormSchema, type InquiryValues } from "../data/input";
 import { sendInquiry } from "../data/actions";
+import { receiptAfterFailure } from "../data/submissions";
 export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
   const ready = useClientReady();
   const [pending, startTransition] = useTransition();
@@ -16,6 +26,7 @@ export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
   const [success, setSuccess] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [uncertain, setUncertain] = useState(false);
+  const [editConfirmation, setEditConfirmation] = useState(false);
   const [retryAt, setRetryAt] = useState<number>();
   const guard = useRef(false);
   const receipt = useRef<{ id: string; values: InquiryValues } | undefined>(
@@ -47,11 +58,15 @@ export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
           setSuccess(true);
           return;
         }
+        receipt.current = receiptAfterFailure(
+          receipt.current,
+          uncertain,
+          result.error,
+        );
         if (result.error.status === 404) {
           setUnavailable(true);
           setMessage("This property is no longer accepting inquiries");
         } else if (result.error.status === 429) {
-          if (!uncertain) receipt.current = undefined;
           const seconds = result.error.retryAfter || 900;
           setRetryAt(Date.now() + seconds * 1000);
           setMessage(
@@ -60,7 +75,6 @@ export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
         } else {
           setMessage(result.error.message);
           if (result.error.uncertain) setUncertain(true);
-          else if (!uncertain) receipt.current = undefined;
         }
         requestAnimationFrame(() => summary.current?.focus());
       } catch {
@@ -106,6 +120,10 @@ export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
             }
             guard.current = true;
             setMessage("");
+            if (uncertain && receipt.current) {
+              await save(receipt.current.values);
+              return;
+            }
             if (!uncertain) {
               const data = new FormData(event.currentTarget);
               for (const key of ["name", "phone", "email", "message"] as const)
@@ -191,8 +209,51 @@ export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
             pendingLabel="Sending inquiry…"
             disabled={!ready || unavailable}
           />
+          {uncertain && (
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={!ready || busy}
+              onClick={() => setEditConfirmation(true)}
+            >
+              Edit as a new inquiry
+            </Button>
+          )}
         </form>
       )}
+      <Dialog open={editConfirmation} onOpenChange={setEditConfirmation}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Start a different inquiry?</DialogTitle>
+            <DialogDescription>
+              Your earlier inquiry may already be saved. Sending edited details
+              will create a separate inquiry. Retry the same inquiry if you only
+              want to confirm its receipt.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditConfirmation(false)}
+            >
+              Keep original inquiry
+            </Button>
+            <Button
+              onClick={() => {
+                receipt.current = undefined;
+                setUncertain(false);
+                setMessage("");
+                setEditConfirmation(false);
+                requestAnimationFrame(() =>
+                  document.getElementById("inquiry-name")?.focus(),
+                );
+              }}
+            >
+              Edit as new inquiry
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </aside>
   );
 }

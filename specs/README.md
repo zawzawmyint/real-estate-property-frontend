@@ -1,5 +1,9 @@
 # Feature specifications
 
+## Phase 1 review remediation — implemented; final acceptance pending
+
+- [November review remediation](phase-one-review-remediation/spec.md): verified gallery/inquiry recovery fixes, production relay enforcement, shared backend staff validation, shortcut-test reliability and documentation reconciliation. [Implementation plan](../docs/superpowers/plans/2026-11-05-phase-one-review-remediation.md). Repository checks, clean serial browser, exact-data dashboard and guarded normal runtime pass; Git-delivery acceptance remains pending. P1-14/P1-18 remain unchecked.
+
 ## Compact CRM account popover — delivered with a formatter limitation
 
 - [Staff account popover](crm-account-popover/spec.md): replaces CRM account drawers and inline sign-out with a shared non-modal Base UI popover, retaining the existing provider, Better Auth behavior and mobile navigation drawer. Browser, unit, lint, type, production-build and normal-runtime evidence is recorded. The repository-wide formatter retains inherited CRLF-only differences.

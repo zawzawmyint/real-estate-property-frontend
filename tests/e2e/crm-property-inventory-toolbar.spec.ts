@@ -194,14 +194,16 @@ test("public routes and another CRM screen retain their own controls", async ({
   page,
 }) => {
   for (const route of ["/", "/properties", "/agents", "/contact"]) {
-    const response = await page.goto(route);
+    const response = await page.goto(route, { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
-    await expect(page.locator("h1")).toBeVisible();
+    const heading = page.locator("h1");
+    await expect(heading).toHaveCount(1);
+    await expect(heading).toBeVisible();
     await expect(
       page.getByRole("group", { name: "Inventory search and filters" }),
     ).toHaveCount(0);
   }
-  await page.goto("/crm/tasks");
+  await page.goto("/crm/tasks", { waitUntil: "commit" });
   await expect(
     page.getByRole("heading", { name: "Tasks", exact: true }),
   ).toBeVisible();

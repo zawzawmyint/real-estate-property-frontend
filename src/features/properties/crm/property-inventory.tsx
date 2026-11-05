@@ -160,7 +160,7 @@ export function PropertyInventory({
                 >
                   {property.title}
                 </Link>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-sm wrap-anywhere text-muted-foreground">
                   {[property.community, property.city]
                     .filter(Boolean)
                     .join(", ") || "Location not set"}
