@@ -15,6 +15,7 @@ import {
 import { PropertyLifecycleControls } from "./property-lifecycle-controls";
 import { PropertyReadOnly } from "./property-read-only";
 import type { StaffRole } from "@/lib/auth/roles";
+import { useClientReady } from "@/lib/use-client-ready";
 import {
   createProperty,
   deleteProperty,
@@ -45,6 +46,7 @@ export function PropertyForm({
   role: StaffRole;
 }) {
   const router = useRouter();
+  const ready = useClientReady();
   const [property, setProperty] = useState(initialProperty);
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -183,7 +185,14 @@ export function PropertyForm({
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (guard.current || pending || readOnly || archived || uncertainCreate)
+    if (
+      !ready ||
+      guard.current ||
+      pending ||
+      readOnly ||
+      archived ||
+      uncertainCreate
+    )
       return;
 
     guard.current = true;
@@ -284,10 +293,11 @@ export function PropertyForm({
 
   return (
     <form
+      method="post"
       noValidate
       onSubmit={submit}
       className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_16rem]"
-      aria-busy={pending}
+      aria-busy={!ready || pending}
     >
       <div className="min-w-0 space-y-6">
         {message && (
@@ -338,14 +348,14 @@ export function PropertyForm({
         <PropertyFormFields
           form={form}
           pending={pending}
-          disabled={pending || Boolean(archived) || uncertainCreate}
+          disabled={!ready || pending || Boolean(archived) || uncertainCreate}
         />
         <PropertyFormSection title="Photos">
           {property ? (
             <PropertyPhotos
               property={property}
               validationError={photosError}
-              disabled={pending || Boolean(archived)}
+              disabled={!ready || pending || Boolean(archived)}
               onChange={setProperty}
               onBusyChange={setPhotosBusy}
             />
@@ -359,8 +369,8 @@ export function PropertyForm({
       <PropertyLifecycleControls
         property={property}
         role={role}
-        pending={pending}
-        pendingLabel={photosBusy ? undefined : actionLabel}
+        pending={!ready || pending}
+        pendingLabel={!ready || photosBusy ? undefined : actionLabel}
         uncertainCreate={uncertainCreate}
         confirmOpen={confirmOpen}
         onConfirmOpenChange={setConfirmOpen}

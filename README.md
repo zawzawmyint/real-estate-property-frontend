@@ -30,11 +30,13 @@ bun run format:check  Check formatting
 bun run test          API transport/config unit tests
 bun run test:watch    Unit tests in watch mode
 bun run test:e2e      Browser integration; backend must be running
-bun run api:generate  Regenerate property and lead API types from committed contract snapshots
-bun run api:check     Verify generated property and lead API types match their snapshots
+bun run api:generate  Regenerate property, lead and public-chat API types from committed contract snapshots
+bun run api:check     Verify generated property, lead and public-chat API types match their snapshots
 ```
 
 For browser setup, run `bunx playwright install chromium` once. Browser integration uses real Express/SQLite, covers desktop/mobile staff and property workflows, and saves screenshots under ignored `test-results/`. Set `E2E_REUSE_FRONTEND=1` only when deliberately reusing an already-running frontend during local investigation. The implemented forms use React Hook Form, Zod and locally owned Base Nova primitives; see [architecture](docs/architecture.md), the [property specification](specs/property-management/spec.md) and [development](docs/development.md).
+
+The P2-08 public chatbot launcher is disabled by default. Set this repository's server-side `PUBLIC_CHAT_ENABLED=true` only when the backend has separately enabled it, has a generated FAQ index and has its server-only OpenRouter key. The local public-chat snapshot in `docs/contracts/public-chat.openapi.yaml` is generated from the backend operation with repository-local property-summary references. Set `STAFF_E2E_PUBLIC_CHAT=1` only for the opt-in browser fixture.
 
 ## Shared project documentation
 

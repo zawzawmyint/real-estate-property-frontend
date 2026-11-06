@@ -185,6 +185,71 @@ async function patch(page: Page, id: string, data: object) {
   return result;
 }
 
+for (const mode of ["create", "edit"] as const) {
+  test(`${mode} property prevents native submission before hydration`, async ({
+    page,
+  }) => {
+    await signIn(page);
+    const property =
+      mode === "edit" ? await createProperty(page, 0) : undefined;
+    const path = property
+      ? `/crm/properties/${property.id}/edit`
+      : "/crm/properties/new";
+    const scripts = Promise.withResolvers<void>();
+
+    await page.route("**/_next/static/**/*.js*", async (route) => {
+      await scripts.promise;
+      await route.continue();
+    });
+
+    const title = page.getByLabel("Title", { exact: true });
+    const owner = page.getByLabel("Owner name", { exact: true });
+    const phone = page.getByLabel("Owner phone", { exact: true });
+    const save = page.getByRole("button", {
+      name: property ? "Save changes" : "Save draft",
+      exact: true,
+    });
+
+    try {
+      await page.goto(path, { waitUntil: "commit" });
+      await expect(save).toBeVisible();
+      await expect(title).toBeDisabled({ timeout: 3000 });
+      await expect(owner).toBeDisabled();
+      await expect(phone).toBeDisabled();
+      await expect(save).toBeDisabled();
+      if (property) {
+        await expect(
+          page.getByLabel("Add photos", { exact: true }),
+        ).toBeDisabled();
+        await expect(
+          page.getByRole("button", { name: "Publish", exact: true }),
+        ).toBeDisabled();
+      }
+
+      await save.evaluate((button: HTMLButtonElement) => button.click());
+      await expect(page).toHaveURL(`${origin}${path}`);
+    } finally {
+      scripts.resolve();
+    }
+
+    await expect(owner).toBeEnabled();
+    await expect(phone).toBeEnabled();
+    const updatedTitle = `Hydrated ${mode} ${randomUUID().slice(0, 8)}`;
+    await title.fill(updatedTitle);
+    await save.click();
+
+    if (property) {
+      await expect(
+        page.getByText("Changes saved.", { exact: true }),
+      ).toBeVisible();
+    } else {
+      await expect(page).toHaveURL(/\/crm\/properties\/[\w-]+\/edit$/);
+    }
+    await page.reload();
+    await expect(title).toHaveValue(updatedTitle);
+  });
+}
+
 test("staff creates a draft in the real form and sees saved data after reload", async ({
   page,
 }, testInfo) => {

@@ -28,4 +28,4 @@ This UI round exercised the running local application only; it does not replace 
 
 ## Follow-up
 
-Do not treat the browser evidence as a fix for the property-form hydration defect. Keep the defect open until create and edit property forms prevent input and submission before client readiness, with delayed-loading browser coverage for both flows.
+The property-form hydration defect was fixed and verified on November 6. The create and edit forms now keep their fields and mutation controls disabled until their client handlers are ready, and use a POST fallback. Delayed-loading create/edit coverage and normal save persistence passed on desktop and mobile. Current implementation and evidence are recorded in the [property-management specification](../../specs/property-management/spec.md).

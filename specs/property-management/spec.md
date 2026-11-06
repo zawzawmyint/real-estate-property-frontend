@@ -59,6 +59,7 @@ Use the [selected homepage mockup](../../docs/design/homepage-maroon-ivory-charc
 - **Form:** single page, two-column desktop layout (main form and narrow publishing panel), one column on mobile. Sections: Basics, Price and property facts, Location, Photos, Private owner details (Admin/Manager only). Place Save draft/Save changes, Publish/Unpublish and Archive/Restore in the action panel as appropriate; destructive Delete is separate and Admin-only. No multistep wizard.
 - **Photos:** labelled native file input with optional drop target, thumbnails, individual pending/error state, Set as cover, Move earlier/later and Remove controls. First photo is cover; choosing a cover moves it to first. Buttons support ordering without drag-and-drop. Upload sequentially and refetch after each response. Never show a local preview as a saved upload.
 - Show pending actions and prevent duplicate submissions. Preserve the existing React Hook Form/Zod pattern, synchronous submission guard, accessible `FieldError`, persistent `Alert` feedback and transition-aware refresh/navigation. On uncertain upload results refetch the photo list before offering retry.
+- Use the shared client-readiness hook to keep property fields, photo controls and lifecycle controls disabled until their handlers are ready. Use POST for the native form fallback so it cannot put field values in the URL.
 
 ### Component reuse
 
@@ -74,6 +75,7 @@ Keyboard-operable filters, dialogs and photo ordering; explicit labels; status t
 
 ## Acceptance criteria
 
+- [x] CRM property create and edit forms disable fields and mutation controls until client JavaScript is ready. A save attempted during that window cannot navigate with private owner values in the URL. Normal saves work after readiness.
 - [x] Admin/Manager can save a draft, complete all fields/photos, publish, edit, unpublish, archive and restore; Admin can delete an archived property. Role restrictions survive direct requests and stale sessions.
 - [x] All P1-12 fields persist correctly; Studio, AED fils conversion and annual rental display round-trip without precision loss.
 - [x] Publish refuses incomplete/invalid properties and zero-photo records; a public listing never exposes private owner fields or internal identifiers beyond its public property/photo IDs.
@@ -100,3 +102,5 @@ Deploy backend/migration before frontend; snapshot SQLite and public media toget
 ## Implementation evidence
 
 Backend `bun run check` passed with 56 tests in 13 files; three additive migrations and property-aware `db:check` passed in an isolated database. A development database/media backup was captured at `.delivery-work/properties/local-backup-before-properties` before migration. Frontend lint, typecheck, API drift check, 51-unit-test run and production Webpack build passed. The final browser run passed 40 desktop/mobile checks, including 12 property checks; separate populated-page width checks passed at 27 viewport/page combinations from 360px through 1440px. See the [implementation plan](../../docs/plans/property-management.md).
+
+November 6 property-form hydration remediation: before the change, delayed-client-JavaScript browser checks showed enabled create and edit controls. Four new focused delayed-JavaScript cases passed across create/edit forms and desktop/mobile. The two existing real create-draft cases also passed. All six cases used a fresh isolated fixture. `bun run check` passed with API drift, lint, formatting, TypeScript, 297 unit tests and a production Webpack build. Runtime inspection on port 3100 identified this checkout with `/crm/properties/new` open and no reported configuration or browser-session errors.

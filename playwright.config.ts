@@ -32,6 +32,8 @@ export default defineConfig({
       env: {
         API_URL: "http://127.0.0.1:4312",
         E2E_TEST_RUN: "1",
+        PUBLIC_CHAT_ENABLED:
+          process.env.STAFF_E2E_PUBLIC_CHAT === "1" ? "true" : "false",
         INQUIRY_TRUSTED_CLIENT_HEADER: "x-e2e-client-ip",
         INQUIRY_RELAY_SECRET:
           process.env.INQUIRY_RELAY_SECRET ??
