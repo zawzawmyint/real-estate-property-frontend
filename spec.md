@@ -58,6 +58,8 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 The [November 5 Phase 1 review remediation](specs/phase-one-review-remediation/spec.md) verifies scoped gallery/inquiry recovery and shortcut-test fixes, with the companion backend implementing signed-only production inquiry ingress and transaction-scoped current-staff validation. Both repository quality gates, the clean serial browser run, exact-data dashboard acceptance and guarded normal runtime pass. Git-delivery acceptance remains open; P1-14/P1-18 remain unchecked.
 
+The [property-management specification](specs/property-management/spec.md) records the November 6 remediation for CRM property forms before client readiness. Create and edit form controls remain disabled until their handlers are ready, with browser coverage for delayed JavaScript and normal saves.
+
 ## Planned product scope
 
 The [public property pages redesign](specs/public-property-pages-redesign/spec.md) and [implementation plan](docs/superpowers/plans/2026-11-02-public-property-pages-redesign.md) record the delivered frontend-only listings/detail presentation upgrade. Existing backend contracts remain unchanged. Quality checks, focused integration coverage, normal-runtime inspection and visual QA passed, but canonical native-browser 200% zoom remains blocked and is not claimed as verified; no additional roadmap acceptance is checked off.

@@ -1,5 +1,16 @@
 # Feature specifications
 
+## Software design diagrams
+
+- [Sales pipeline](sales-pipeline/spec.md#software-design-at-a-glance) shows stage changes, confirmation and conflict recovery.
+- [Property chatbot UI](public-property-chatbot/spec.md#software-design-at-a-glance) shows question submission and reply rendering.
+
+The companion backend repository's `specs/README.md` indexes the diagrams for staff access, property management, public agency pages, leads, viewings, tasks, dashboard and chatbot routing. Start with the [system design](../docs/shared/system-design.md) for the shared architecture.
+
+## Verified public property chatbot
+
+- [Public property chatbot](public-property-chatbot/spec.md): verified P2-08 opt-in public FAQ retrieval and live public-listing handoff. The generated local [OpenAPI snapshot](../docs/contracts/public-chat.openapi.yaml) follows the backend-owned contract. Real-business publication remains gated on approved FAQ and visitor-data wording.
+
 ## Phase 1 review remediation — implemented; final acceptance pending
 
 - [November review remediation](phase-one-review-remediation/spec.md): verified gallery/inquiry recovery fixes, production relay enforcement, shared backend staff validation, shortcut-test reliability and documentation reconciliation. [Implementation plan](../docs/superpowers/plans/2026-11-05-phase-one-review-remediation.md). Repository checks, clean serial browser, exact-data dashboard and guarded normal runtime pass; Git-delivery acceptance remains pending. P1-14/P1-18 remain unchecked.

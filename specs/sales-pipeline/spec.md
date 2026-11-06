@@ -16,6 +16,31 @@ Deliver the sales pipeline described below, including the approved review remedi
 
 Let authorized CRM staff scan leads by sales stage and move a lead to its next stage from a clear, responsive board.
 
+## Software design at a glance
+
+```mermaid
+flowchart TD
+    board["Pipeline board · drag a card or use Move to stage"]
+    terminal{"Moving to Won or Lost?"}
+    confirm["Ask for confirmation"]
+    action["Send the target stage and expected version"]
+    result{"What did the API return?"}
+    updated["Reload authorized columns and announce the move"]
+    review["Refresh current data and ask staff to review"]
+    failure["Handle session loss, access changes, or errors"]
+
+    board --> terminal
+    terminal -->|"Yes"| confirm -->|"Confirmed"| action
+    terminal -->|"No"| action
+    action --> result
+    result -->|"Saved"| updated
+    result -->|"Conflict or uncertain save"| review
+    result -->|"Other failure"| failure
+```
+
+- The [pipeline board](../../src/features/leads/crm/pipeline/pipeline-board.tsx) presents the columns and move controls. The [pipeline hook](../../src/features/leads/crm/pipeline/use-pipeline.ts) coordinates confirmation, saving and refresh.
+- The [lead Server Action](../../src/features/leads/data/actions.ts) uses the existing stage endpoint. Express owns the permission and version checks and records activity for a committed stage change.
+
 ## Scope
 
 Included: a CRM pipeline route/view for the existing six stages; search/source/agent filters supported by lead listing; per-column pagination; moving leads between columns with `@dnd-kit/react`; a direct keyboard and touch-friendly stage control; responsive and accessible loading, empty and error states.

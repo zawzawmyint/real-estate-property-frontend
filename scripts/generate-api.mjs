@@ -6,6 +6,7 @@ for (const domain of [
   "properties",
   "leads",
   "public-agency",
+  "public-chat",
   "viewings",
   "tasks",
   "dashboard",
