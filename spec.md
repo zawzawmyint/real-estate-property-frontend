@@ -10,6 +10,8 @@ This file defines project-wide scope and boundaries and indexes existing specifi
 
 ## Delivered maintenance
 
+- The [CRM property matching](specs/property-matching/spec.md) feature verifies P2-03: a compact lead-detail panel sends explicit Buy/Rent, maximum AED, area, property type and exact-bedroom filters through a same-origin handler to the backend-owned read-only match route. It retains current lead authorization, local retry/pagination state and shareable public-listing links; no extraction, provider, migration or deployment is included. Frontend checks, targeted desktop/mobile browser coverage, OpenAPI snapshot parity and authenticated isolated runtime inspection passed.
+
 - The [compact CRM account popover](specs/crm-account-popover/spec.md) replaces the account drawer/inline sign-out presentation with an anchored non-modal popup while retaining existing Better Auth session and sign-out behavior, provider state, navigation and mobile drawer. Browser, unit, lint, type, production-build and normal-runtime evidence is recorded. No backend contract, dependency or public-page change is included; the repository-wide formatter retains inherited CRLF-only differences.
 
 - The [compact CRM overview](specs/crm-overview-compact/spec.md) applies the workspace header and shorter metric cards to `/crm`. It preserves existing authorized metrics, charts, calculations, refresh behavior and sidebar. Browser, unit, lint, type, production-build and normal-runtime evidence is recorded; no backend contract or public-page change is included. The repository-wide formatter retains inherited CRLF-only differences.

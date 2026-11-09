@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  parseAedFilterToFils,
+  propertyPurposes,
+  propertyTypes,
+} from "@/features/properties/data/input";
 
 export const stages = [
   "new",
@@ -164,3 +169,30 @@ export const agencyInquiryFormSchema = z
   })
   .superRefine(requireContact);
 export type AgencyInquiryValues = z.infer<typeof agencyInquiryFormSchema>;
+
+export const propertyMatchSchema = z.object({
+  purpose: z.enum(propertyPurposes),
+  budget: z
+    .string()
+    .trim()
+    .transform((value, context) => {
+      if (!value) return undefined;
+
+      try {
+        return parseAedFilterToFils(value);
+      } catch {
+        context.addIssue({
+          code: "custom",
+          message:
+            "Enter AED 0 to 10,000,000,000 with up to two decimal places.",
+        });
+        return z.NEVER;
+      }
+    }),
+  location: z.string().trim().max(120, "Enter up to 120 characters."),
+  type: z.union([z.literal(""), z.enum(propertyTypes)]),
+  bedrooms: z
+    .string()
+    .regex(/^(?:[0-9]|1[0-9]|20)?$/, "Choose a bedroom count from 0 to 20.")
+    .transform((value) => (value === "" ? undefined : Number(value))),
+});

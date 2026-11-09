@@ -1,4 +1,4 @@
-import type { components } from "@/lib/api/generated/leads";
+import type { components, operations } from "@/lib/api/generated/leads";
 
 export type StaffSummary = components["schemas"]["LeadStaffSummary"];
 export type PropertyContext = components["schemas"]["LeadPropertyContext"];
@@ -19,6 +19,10 @@ export type NoteResult = components["schemas"]["LeadNoteResult"];
 export type InquiryInput = components["schemas"]["InquiryInput"];
 export type AgencyInquiryInput = components["schemas"]["AgencyInquiryInput"];
 export type InquiryReceipt = components["schemas"]["InquiryReceipt"];
+type MatchOperation = operations["listLeadPropertyMatches"];
+export type PropertyMatchQuery = MatchOperation["parameters"]["query"];
+export type PropertyMatchPage =
+  MatchOperation["responses"][200]["content"]["application/json"];
 
 export type ActionError = {
   code: string;
