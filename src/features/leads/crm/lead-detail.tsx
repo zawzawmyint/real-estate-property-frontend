@@ -23,6 +23,7 @@ import {
   receiptAfterNoteConflict,
 } from "../data/submissions";
 import { AssignmentDialog } from "./assignment-dialog";
+import { LeadPropertyMatching } from "./lead-property-matching";
 import {
   LeadDate,
   StageBadge,
@@ -98,6 +99,7 @@ export function LeadDetail({
       return true;
     }
     if (error instanceof LeadApiError && error.status === 401) {
+      setDenied(true);
       startTransition(() => router.replace("/login"));
       return true;
     }
@@ -369,6 +371,11 @@ export function LeadDetail({
                 </p>
               )}
             </div>
+            <LeadPropertyMatching
+              key={lead.id}
+              lead={lead}
+              onAccessError={handleDenied}
+            />
           </LeadSection>
           <LeadSection title="Lead stage">
             <form

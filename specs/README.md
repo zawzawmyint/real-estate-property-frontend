@@ -7,6 +7,10 @@
 
 The companion backend repository's `specs/README.md` indexes the diagrams for staff access, property management, public agency pages, leads, viewings, tasks, dashboard and chatbot routing. Start with the [system design](../docs/shared/system-design.md) for the shared architecture.
 
+## Verified CRM property matching
+
+- [CRM property matching](property-matching/spec.md): verified P2-03 lead-detail matching panel for explicit Buy/Rent, maximum AED, area, type and exact-bedroom criteria. It uses the backend-owned read-only route through a same-origin handler and the generated leads snapshot, returns only shareable public listing summaries, and preserves local filters for retry and pagination. No extraction, provider, migration or deployment is included.
+
 ## Verified public property chatbot
 
 - [Public property chatbot](public-property-chatbot/spec.md): verified P2-08 opt-in public FAQ retrieval and live public-listing handoff. The generated local [OpenAPI snapshot](../docs/contracts/public-chat.openapi.yaml) follows the backend-owned contract. Real-business publication remains gated on approved FAQ and visitor-data wording.

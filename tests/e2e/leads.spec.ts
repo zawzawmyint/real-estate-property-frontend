@@ -301,7 +301,7 @@ test("reassignment revokes former-agent reads, activity and stale writes", async
 
   expect(reassigned.status(), await reassigned.text()).toBe(200);
   await signIn(page, "agent");
-  for (const suffix of ["", "/activity"]) {
+  for (const suffix of ["", "/activity", "/property-matches?purpose=sale"]) {
     const denied = await page.request.get(
       `/api/v1/staff/leads/${lead.id}${suffix}`,
     );
@@ -327,6 +327,157 @@ test("reassignment revokes former-agent reads, activity and stale writes", async
   await expect(
     page.getByRole("heading", { name: lead.name, exact: true }),
   ).toBeVisible();
+});
+
+test("property matching finds a studio from a general inquiry and retains filters on retry", async ({
+  page,
+}, info) => {
+  if (info.project.name === "mobile")
+    await page.setViewportSize({ width: 320, height: 780 });
+  const suffix = randomUUID().replaceAll("-", "").slice(0, 8);
+  const name = `Matching inquiry ${suffix.replace(/\d/g, (digit) => String.fromCharCode(97 + Number(digit)))}`;
+  await page.setExtraHTTPHeaders({
+    "x-e2e-client-ip": `2001:db8::${suffix.slice(0, 4)}:${suffix.slice(4)}`,
+  });
+  await page.goto("/contact");
+  await page.getByLabel("Full name", { exact: true }).fill(name);
+  await page.getByLabel("I'm looking to", { exact: true }).selectOption("rent");
+  await page.getByLabel("Email", { exact: true }).fill("matching@example.com");
+  await page
+    .getByLabel("Message", { exact: true })
+    .fill(
+      "I am looking for a studio in Business Bay, up to AED 68,000 a year.",
+    );
+  await page.getByRole("button", { name: "Send enquiry", exact: true }).click();
+  await expect(page.getByText("Your enquiry has been received.")).toBeVisible();
+
+  await signIn(page);
+  const response = await page.request.get(
+    `/api/v1/staff/leads?view=unassigned&q=${encodeURIComponent(name)}`,
+  );
+  expect(response.status()).toBe(200);
+  const { items } = await response.json();
+  expect(items).toHaveLength(1);
+  const lead = items[0];
+  expect(lead).toMatchObject({ name, property: null, budgetFils: null });
+
+  await page.goto(`/crm/leads/${lead.id}`);
+  const trigger = page.getByRole("button", {
+    name: "Find matching properties",
+  });
+  await expect(trigger).toBeEnabled();
+  await trigger.focus();
+  await trigger.press("Enter");
+  const panel = page.getByRole("region", { name: "Property matches" });
+  const annualBudget = panel.getByLabel("Maximum annual rent (AED)");
+  await expect(panel.getByLabel("Purpose")).toHaveValue("rent");
+  await expect(annualBudget).toHaveValue("");
+  await annualBudget.fill("68000");
+  await panel.getByLabel("Area").fill("Business Bay");
+  await panel.getByLabel("Bedrooms").selectOption("0");
+
+  await page.route(
+    "**/property-matches?*",
+    (route) =>
+      route.fulfill({ status: 503, json: { code: "API_UNAVAILABLE" } }),
+    { times: 1 },
+  );
+  await panel.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(annualBudget).toHaveValue("68000");
+  await expect(panel.getByLabel("Area")).toHaveValue("Business Bay");
+  await panel.getByRole("button", { name: "Retry search" }).click();
+  const listing = panel.getByRole("link", {
+    name: "A thoughtfully arranged city studio",
+  });
+  await expect(listing).toHaveAttribute("href", /^\/properties\/[\w-]+$/);
+  await expect(
+    panel.getByText("AED 68,000/year", { exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: info.outputPath("property-matching.png"),
+    fullPage: true,
+  });
+  const [publicListing] = await Promise.all([
+    page.waitForEvent("popup"),
+    listing.click(),
+  ]);
+  await expect(
+    publicListing.getByRole("heading", {
+      name: "A thoughtfully arranged city studio",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await publicListing.close();
+
+  const saved = await page.request.get(`/api/v1/staff/leads/${lead.id}`);
+  expect(await saved.json()).toMatchObject({
+    version: lead.version,
+    budgetFils: null,
+    property: null,
+  });
+});
+
+test("property matching resets the budget on purpose changes and removes stale lead access", async ({
+  page,
+}) => {
+  const first = await signIn(page, "agent");
+  const second = await signIn(page, "other-agent");
+  await signIn(page);
+  const properties = await page.request.get("/api/v1/properties?purpose=rent");
+  expect(properties.status()).toBe(200);
+  const { items } = await properties.json();
+  const lead = await createLead(page, {
+    purpose: "rent",
+    propertyId: items[0].id,
+    budgetFils: 6_800_000,
+    assignedAgentId: first.id,
+  });
+  await signIn(page, "agent");
+  await page.goto(`/crm/leads/${lead.id}`);
+  await page.getByRole("button", { name: "Find matching properties" }).click();
+  const panel = page.getByRole("region", { name: "Property matches" });
+  await expect(panel.getByLabel("Maximum annual rent (AED)")).toHaveValue(
+    "68000",
+  );
+  await panel.getByLabel("Area").fill("Business Bay");
+  await panel.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(
+    panel.getByRole("link", { name: "A thoughtfully arranged city studio" }),
+  ).toBeVisible();
+
+  await panel.getByLabel("Purpose").selectOption("sale");
+  await expect(panel.getByLabel("Maximum price (AED)")).toHaveValue("");
+  await expect(
+    panel.getByRole("link", { name: "A thoughtfully arranged city studio" }),
+  ).toHaveCount(0);
+  await panel.getByLabel("Area").fill("Nonexistent test district");
+  await panel.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(panel.getByText(/no matching properties/i)).toBeVisible();
+  await expect(panel.getByLabel("Area")).toHaveValue(
+    "Nonexistent test district",
+  );
+
+  await signIn(page);
+  const reassigned = await page.request.patch(
+    `/api/v1/staff/leads/${lead.id}/assignment`,
+    {
+      headers,
+      data: { expectedVersion: lead.version, assignedAgentId: second.id },
+    },
+  );
+  expect(reassigned.status()).toBe(200);
+  await signIn(page, "agent");
+  await panel.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByText(/lead is no longer available/i)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: lead.name, exact: true }),
+  ).toHaveCount(0);
+  await expect(panel).toHaveCount(0);
 });
 
 test("note submission keys replay without duplicate records", async ({

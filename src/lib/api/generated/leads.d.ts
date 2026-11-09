@@ -1,5 +1,25 @@
 /** Generated from docs/contracts/leads.openapi.yaml. Do not edit. */
 export interface paths {
+  "/api/v1/staff/leads/{id}/property-matches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Find available public properties for a lead
+     * @description Live staff session required. Admin and Manager can access all leads; Agent can access currently assigned leads only. Uses confirmed query values and returns published, available listings in newest order with a fixed page size of 10. Price cap is inclusive, using sale total or annual rent.
+     */
+    get: operations["listLeadPropertyMatches"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/inquiries": {
     parameters: {
       query?: never;
@@ -395,6 +415,39 @@ export interface components {
       note: components["schemas"]["LeadActivity"];
       leadVersion: number;
     };
+    Photo: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uri */
+      url: string;
+      width: number;
+      height: number;
+    };
+    PublicPropertySummary: {
+      /** Format: uuid */
+      id: string;
+      /** @description True for explicitly seeded illustrative demo inventory. */
+      isDemo: boolean;
+      title: string;
+      /** @enum {string} */
+      purpose: "sale" | "rent";
+      /** @enum {string} */
+      type: "apartment" | "villa" | "townhouse" | "penthouse";
+      priceFils: number;
+      city: string;
+      community: string;
+      bedrooms: number;
+      bathrooms: number;
+      /** @description Positive sqft decimal, at most 1000000, at most two decimal places. Responses always use two decimal places. */
+      areaSqft: string;
+      coverPhoto: components["schemas"]["Photo"];
+    };
+    PublicPropertyList: {
+      items: components["schemas"]["PublicPropertySummary"][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
   };
   responses: never;
   parameters: never;
@@ -404,6 +457,81 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  listLeadPropertyMatches: {
+    parameters: {
+      query: {
+        purpose: "sale" | "rent";
+        maxPriceFils?: number;
+        location?: string;
+        type?: "apartment" | "villa" | "townhouse" | "penthouse";
+        exactBedrooms?: number;
+        page?: number;
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Page of published and available properties */
+      200: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicPropertyList"];
+        };
+      };
+      /** @description Invalid search */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Session required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Staff access required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Lead unavailable */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Unexpected error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
   submitAgencyInquiry: {
     parameters: {
       query?: never;
