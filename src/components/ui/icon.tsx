@@ -12,6 +12,10 @@ const paths = {
     "m5 19 14-14M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z",
   tasks: "M9 5H5v16h14V5h-4M9 3h6v4H9zM8 12l2 2 5-5M8 18h8",
   calendar: "M4 5h16v16H4zM8 3v4M16 3v4M4 10h16M8 14h2M14 14h2M8 18h2",
+  bell: "M18 8a6 6 0 0 0-12 0c0 7-3 8-3 10h18c0-2-3-3-3-10M10 21a2 2 0 0 0 4 0",
+  clock: "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM12 6v6l4 2",
+  "user-plus":
+    "M15 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM3 21v-2a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v2M19 7v6m-3-3h6",
   "chevron-down": "m6 9 6 6 6-6",
   image: "M3 3h18v18H3zM3 17l6-6 4 4 3-3 5 5M16 7h.01",
   overview: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",

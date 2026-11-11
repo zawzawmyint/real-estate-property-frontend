@@ -10,6 +10,7 @@ for (const domain of [
   "viewings",
   "tasks",
   "dashboard",
+  "notifications",
 ]) {
   const schema = new URL(
     `../docs/contracts/${domain}.openapi.yaml`,

@@ -13,10 +13,12 @@ export function WorkspaceShell({
   children,
   account,
   compactAccount,
+  toolbar,
 }: {
   children: ReactNode;
   account: ReactNode;
   compactAccount: ReactNode;
+  toolbar: ReactNode;
 }) {
   const [expanded, setExpanded] = useState(false);
   const ready = useClientReady();
@@ -65,8 +67,18 @@ export function WorkspaceShell({
         </div>
       </aside>
       <div className="flex min-w-0 flex-col">
-        <div className="px-6 pt-4 sm:px-10 lg:hidden">
-          <WorkspaceMenu account={account} />
+        <div
+          role="region"
+          aria-label="Workspace controls"
+          className="flex min-h-14 items-center justify-between gap-2 border-b border-border px-4 sm:px-6 lg:px-8"
+        >
+          <div className="lg:hidden">
+            <WorkspaceMenu account={account} />
+          </div>
+          <span className="hidden text-sm font-medium text-muted-foreground lg:inline">
+            Workspace
+          </span>
+          <div className="flex items-center gap-2">{toolbar}</div>
         </div>
         {children}
       </div>

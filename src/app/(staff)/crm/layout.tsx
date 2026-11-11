@@ -4,6 +4,7 @@ import {
 } from "@/features/auth/staff-account-region";
 import { StaffAccountProvider } from "@/features/auth/staff-account";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { NotificationBell } from "@/features/notifications/notification-bell";
 
 export default function StaffLayout({
   children,
@@ -15,6 +16,7 @@ export default function StaffLayout({
       <WorkspaceShell
         account={<StaffAccountRegion />}
         compactAccount={<StaffAccountRegion compact />}
+        toolbar={<NotificationBell />}
       >
         {children}
       </WorkspaceShell>
