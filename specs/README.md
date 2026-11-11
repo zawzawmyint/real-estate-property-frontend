@@ -7,8 +7,9 @@
 
 The companion backend repository's `specs/README.md` indexes the diagrams for staff access, property management, public agency pages, leads, viewings, tasks, dashboard and chatbot routing. Start with the [system design](../docs/shared/system-design.md) for the shared architecture.
 
-## Verified CRM property matching
+## Verified Phase 2 CRM enhancements
 
+- [CRM notifications](crm-notifications/spec.md): verified P2-02 assignment/reassignment notifications with a persistent inbox, unread/read state and SSE. Verified supplemental viewing, task-reminder and staff-inquiry alerts share the inbox. Email/WhatsApp delivery, Redis fanout and deployed-ingress verification remain follow-up work.
 - [CRM property matching](property-matching/spec.md): verified P2-03 lead-detail matching panel for explicit Buy/Rent, maximum AED, area, type and exact-bedroom criteria. It uses the backend-owned read-only route through a same-origin handler and the generated leads snapshot, returns only shareable public listing summaries, and preserves local filters for retry and pagination. No extraction, provider, migration or deployment is included.
 
 ## Verified public property chatbot

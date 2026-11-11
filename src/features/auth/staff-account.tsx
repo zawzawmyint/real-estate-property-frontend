@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -33,7 +34,8 @@ const roleLabels: Record<StaffRole, string> = {
 
 type StaffAccountState = {
   staff: Promise<StaffSession | null>;
-  identity: Pick<StaffSession, "name" | "role"> | null;
+  identity: Pick<StaffSession, "id" | "name" | "role"> | null;
+  sessionId: string | null;
   ready: boolean;
   pending: boolean;
   sessionError: boolean;
@@ -44,6 +46,13 @@ type StaffAccountState = {
 };
 
 const StaffAccountContext = createContext<StaffAccountState | null>(null);
+
+export function useStaffAccount() {
+  const account = useContext(StaffAccountContext);
+  if (!account)
+    throw new Error("StaffAccount requires a StaffAccountProvider.");
+  return account;
+}
 
 export function StaffAccountProvider({
   staff,
@@ -96,7 +105,7 @@ export function StaffAccountProvider({
     }
   }
 
-  async function retrySession() {
+  const retrySession = useCallback(async () => {
     if (!ready || sessionCheckInFlight.current) return;
 
     sessionCheckInFlight.current = true;
@@ -110,20 +119,21 @@ export function StaffAccountProvider({
       sessionCheckInFlight.current = false;
       setRetryingSession(false);
     }
-  }
+  }, [ready, refetch]);
 
   return (
     <StaffAccountContext.Provider
       value={{
         staff,
         identity: data?.user ?? null,
+        sessionId: data?.session?.id ?? null,
         ready,
         pending,
         sessionError: Boolean(error),
         checkingSession: isPending || retryingSession,
         message,
         signOut,
-        retrySession: () => void retrySession(),
+        retrySession,
       }}
     >
       {children}
@@ -139,7 +149,7 @@ export function StaffAccountProvider({
 }
 
 export function StaffAccount({ compact = false }: { compact?: boolean }) {
-  const account = useContext(StaffAccountContext);
+  const account = useStaffAccount();
   // This streamed boundary can hydrate after its provider has become ready.
   const hydrated = useClientReady();
   const [open, setOpen] = useState(false);
@@ -150,9 +160,6 @@ export function StaffAccount({ compact = false }: { compact?: boolean }) {
     media.addEventListener("change", close);
     return () => media.removeEventListener("change", close);
   }, []);
-
-  if (!account)
-    throw new Error("StaffAccount requires a StaffAccountProvider.");
 
   // The provider outlives the popup so pending sign-out and feedback survive dismissal.
   const staff = use(account.staff);
