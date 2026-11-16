@@ -1,5 +1,85 @@
 /** Generated from docs/contracts/properties.openapi.yaml. Do not edit. */
 export interface paths {
+  "/api/v1/staff/properties/imports/template": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download the draft property CSV import template
+     * @description Current Admin/Manager only. UTF-8 BOM, CRLF, header only, filename property-import-template.csv. No-store and nosniff.
+     */
+    get: operations["getPropertyImportTemplate"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/staff/properties/imports/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Validate new draft properties without writing
+     * @description Current Admin/Manager only, trusted Origin and JSON. The body limit is 6 MiB; CSV limit 1048576 UTF-8 bytes, 500 data records, 65536 raw bytes per record including quotes and terminating newline. Reject malformed encoding, NUL, unknown/duplicate/empty headers, malformed CSV and column-count differences. Header order is flexible; title and purpose are required. All other template fields are optional. Quoted multiline fields count as one record; blank lines are ignored. Phones remain strings. Money is positive decimal AED with at most two fractional digits. No writes. Every row must be valid before confirmation.
+     */
+    post: operations["previewPropertyImport"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/staff/properties/imports/commit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Atomically create new draft properties after preview
+     * @description Current Admin/Manager only, trusted Origin, JSON and the same limits as preview. Revalidates exact CSV and live session in a serialized atomic transaction. Draft, available, featured=false, isDemo=false, no photos; never upserts. Digest is lowercase SHA-256 of UTF-8 property-import:v1 followed by a NUL byte and the exact CSV bytes (including BOM). Schema/version or digest mismatch is 409 IMPORT_PREVIEW_STALE. UUID is durably bound to actor/content/version; mismatched actor/content is generic 409 IMPORT_CONFLICT. A retry returns original IDs even if properties were subsequently deleted. No CSV or owner fields are retained in receipts. Database failure rolls back every property and receipt and returns a safe 5xx.
+     */
+    post: operations["commitPropertyImport"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/staff/properties/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download filtered properties as CSV
+     * @description All staff; authorization and data are read in one bounded live-session transaction. Agent files omit owner_name and owner_phone entirely; Admin/Manager append these columns. Exports all matches across pages. Reject unknown, duplicate and pagination query keys. Maximum 5000 records and 10485760 UTF-8 bytes; overflow returns JSON before CSV headers. UTF-8 BOM, comma-separated, CRLF records, formula escaping; nulls blank, booleans true/false, monetary and area values fixed two decimal places, timestamps UTC ISO 8601.
+     */
+    get: operations["exportPropertiesCsv"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/health": {
     parameters: {
       query?: never;
@@ -250,6 +330,35 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    PropertyImportIssue: {
+      /** @description Logical CSV record number including header as record 1. */
+      rowNumber: number;
+      column: string;
+      message: string;
+    };
+    PropertyImportPreview: {
+      /** @constant */
+      schemaVersion: 1;
+      digest: string;
+      valid: boolean;
+      totalRows: number;
+      validRows: number;
+      issueCount: number;
+      issues: components["schemas"]["PropertyImportIssue"][];
+      /** @description Template order title,purpose,type,description,price_aed,city,community,bedrooms,bathrooms,area_sqft,owner_name,owner_phone. */
+      columns: string[];
+      previewRows: {
+        rowNumber: number;
+        values: string[];
+      }[];
+    };
+    PropertyImportResult: {
+      /** Format: uuid */
+      submissionId: string;
+      createdCount: number;
+      propertyIds: string[];
+      replayed: boolean;
+    };
     Photo: {
       /** Format: uuid */
       id: string;
@@ -470,6 +579,216 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getPropertyImportTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV template attachment */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+      401: components["responses"]["Error"];
+      403: components["responses"]["Error"];
+    };
+  };
+  previewPropertyImport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          csv: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Bounded validation preview, including domain-invalid rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PropertyImportPreview"];
+        };
+      };
+      400: components["responses"]["Error"];
+      401: components["responses"]["Error"];
+      403: components["responses"]["Error"];
+      413: components["responses"]["Error"];
+      415: components["responses"]["Error"];
+    };
+  };
+  commitPropertyImport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: uuid */
+          submissionId: string;
+          /** @description Currently 1; another version returns IMPORT_PREVIEW_STALE. */
+          schemaVersion: number;
+          digest: string;
+          csv: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Original batch returned; replayed is true */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PropertyImportResult"];
+        };
+      };
+      /** @description New batch created; replayed is false */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PropertyImportResult"];
+        };
+      };
+      400: components["responses"]["Error"];
+      401: components["responses"]["Error"];
+      403: components["responses"]["Error"];
+      409: components["responses"]["Error"];
+      413: components["responses"]["Error"];
+      415: components["responses"]["Error"];
+      /** @description IMPORT_VALIDATION_FAILED; the entire batch is rejected */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            error: {
+              /** @constant */
+              code: "IMPORT_VALIDATION_FAILED";
+              /** @constant */
+              message: "Fix every invalid row before importing.";
+              requestId: string;
+            };
+            issues: components["schemas"]["PropertyImportIssue"][];
+            issueCount: number;
+          };
+        };
+      };
+    };
+  };
+  exportPropertiesCsv: {
+    parameters: {
+      query?: {
+        purpose?: "sale" | "rent";
+        type?: "apartment" | "villa" | "townhouse" | "penthouse";
+        location?: string;
+        minPriceFils?: number;
+        maxPriceFils?: number;
+        minBedrooms?: number;
+        featured?: "true" | "false";
+        sort?: "newest" | "price_asc" | "price_desc" | "updated_desc";
+        q?: string;
+        publishingState?: "draft" | "published" | "archived";
+        availability?: "available" | "sold" | "rented";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV attachment (empty matches return BOM plus header). Fixed columns are defined in specs/csv-import-export/contract.md. */
+      200: {
+        headers: {
+          /** @description Export-start calendar date in Asia/Dubai. */
+          "Content-Disposition"?: string;
+          "Cache-Control"?: "no-store";
+          "X-Content-Type-Options"?: "nosniff";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv; charset=utf-8": string;
+        };
+      };
+      /** @description VALIDATION_ERROR: invalid query or contradictory ranges */
+      400: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiError"];
+        };
+      };
+      /** @description UNAUTHENTICATED: live staff session required */
+      401: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiError"];
+        };
+      };
+      /** @description FORBIDDEN: access denied */
+      403: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiError"];
+        };
+      };
+      /** @description EXPORT_LIMIT_EXCEEDED: Too many results to export. Narrow your filters and try again. */
+      422: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiError"];
+        };
+      };
+      /** @description Safe internal error */
+      500: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiError"];
+        };
+      };
+    };
+  };
   getHealth: {
     parameters: {
       query?: never;

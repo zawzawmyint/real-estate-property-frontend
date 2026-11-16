@@ -1,5 +1,6 @@
 "use client";
 import { CollectionToolbar } from "@/components/crm/collection-toolbar";
+import { cancelCsvExports } from "@/components/crm/csv-export";
 import { FilterChip } from "@/components/crm/filter-chip";
 import { Icon } from "@/components/ui/icon";
 import { TextField, SelectField } from "@/components/forms/fields";
@@ -57,6 +58,8 @@ export function LeadFilters({
   const [draft, setDraft] = useState(filters);
   function navigate(next: LeadFilters) {
     if (checkingSession) return;
+    if (!pipeline && href({ ...next, page: 1 }) !== href(filters))
+      cancelCsvExports();
     startTransition(() => router.push(href({ ...next, page: 1 })));
   }
   useEffect(() => {
@@ -64,12 +67,13 @@ export function LeadFilters({
     if (q.trim() === (filters.q || "").trim()) return;
     const timer = setTimeout(() => {
       setSearch((current) => ({ ...current, requested: q.trim() }));
+      if (!pipeline) cancelCsvExports();
       startTransition(() =>
         router.push(href({ ...filters, q: q.trim(), page: 1 })),
       );
     }, 300);
     return () => clearTimeout(timer);
-  }, [q, filters, router, checkingSession, href]);
+  }, [q, filters, router, checkingSession, href, pipeline]);
   const count = [filters.stage, filters.source, filters.agentId].filter(
     Boolean,
   ).length;

@@ -13,7 +13,18 @@ export function parseLeadFilters(
   params: URLSearchParams,
   role: StaffRole,
 ): LeadFilters {
+  const allowed = ["view", "q", "stage", "source", "agentId", "sort", "page"];
+  for (const [key, value] of params) {
+    if (
+      !allowed.includes(key) ||
+      params.getAll(key).length !== 1 ||
+      (key !== "q" && !value.trim())
+    )
+      throw new Error("Invalid lead filters");
+  }
   const value = Object.fromEntries(params);
+  if (value.q !== undefined) value.q = value.q.trim();
+  if (value.agentId !== undefined) value.agentId = value.agentId.trim();
   const view = value.view || (role === "agent" ? "mine" : "unassigned");
   const sort = value.sort || "newest";
   if (
@@ -22,6 +33,7 @@ export function parseLeadFilters(
     (value.stage && !stages.includes(value.stage as never)) ||
     (value.source && !["website", "call", "walk_in"].includes(value.source)) ||
     (value.q?.length ?? 0) > 120 ||
+    (value.agentId?.length ?? 0) > 200 ||
     (value.page && !/^\d+$/.test(value.page)) ||
     (role === "agent" && (view !== "mine" || value.agentId)) ||
     (value.agentId && view !== "all")
@@ -48,6 +60,11 @@ export function leadQuery(filters: LeadFilters) {
 }
 export function leadsHref(filters: LeadFilters) {
   return `/crm/leads?${leadQuery(filters)}`;
+}
+export function leadExportQuery(filters: LeadFilters) {
+  const params = new URLSearchParams(leadQuery(filters));
+  params.delete("page");
+  return params.toString();
 }
 export function safeLeadReturn(value: unknown, role: StaffRole) {
   if (typeof value !== "string" || value.length > 2000) return "/crm/leads";

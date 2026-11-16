@@ -8,6 +8,7 @@ import { requireStaffSession } from "@/lib/auth/server";
 import { getStaffProperty } from "@/lib/api/server";
 import { PropertyApiError } from "@/features/properties/data/request";
 import { PropertyReadOnly } from "@/features/properties/crm/property-read-only";
+import { propertyIdSchema } from "@/features/properties/data/action-input";
 
 export const metadata: Metadata = {
   title: "Property details · Agency workspace",
@@ -21,6 +22,9 @@ export default async function PropertyDetailsPage({
 }) {
   const staff = await requireStaffSession();
   const { id } = await params;
+
+  if (!propertyIdSchema.safeParse(id).success) notFound();
+
   const canEdit = staff.role !== "agent";
   let property;
 

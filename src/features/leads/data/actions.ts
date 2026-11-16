@@ -28,11 +28,8 @@ import type {
 const path = (id: string) =>
   `staff/leads/${encodeURIComponent(z.uuid().parse(id))}`;
 export async function createLead(input: CreateLead) {
-  return runLeadMutation<LeadDetail>(
-    "staff/leads",
-    "POST",
-    () => createLeadSchema.parse(input),
-    { receipt: true },
+  return runLeadMutation<LeadDetail>("staff/leads", "POST", () =>
+    createLeadSchema.parse(input),
   );
 }
 export async function updateLead(id: string, input: PatchLead) {
@@ -74,7 +71,6 @@ export async function addLeadNote(id: string, input: NoteInput) {
       path(id);
       return noteSchema.parse(input);
     },
-    { receipt: true },
   );
 }
 export async function sendInquiry(
@@ -90,7 +86,7 @@ export async function sendInquiry(
         z.uuid().parse(propertyId);
         return inquirySchema.parse(input);
       },
-      { publicHeaders: relay, receipt: true },
+      { publicHeaders: relay },
     );
   } catch {
     return {
@@ -114,7 +110,7 @@ export async function sendAgencyInquiry(
       "public/inquiries",
       "POST",
       () => agencyInquirySchema.parse(input),
-      { publicHeaders: relay, receipt: true },
+      { publicHeaders: relay },
     );
   } catch {
     return {

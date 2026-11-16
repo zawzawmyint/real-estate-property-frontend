@@ -162,3 +162,30 @@ it("fails closed in production without explicit trusted ingress configuration", 
     ),
   ).toThrow();
 });
+
+it.each([
+  ["lead", { id, version: "1" }],
+  ["note", { note: { id }, leadVersion: "1" }],
+  ["public", { received: false }],
+])("retains the %s response guard", async (kind, receipt) => {
+  vi.mocked(fetch).mockResolvedValue(Response.json(receipt));
+  const result =
+    kind === "lead"
+      ? await createLead(input)
+      : kind === "note"
+        ? await addLeadNote(id, {
+            submissionId: id,
+            expectedVersion: 1,
+            kind: "call",
+            body: "Called",
+          })
+        : await sendInquiry(id, {
+            submissionId: id,
+            name: "Ada",
+            email: "ada@example.com",
+          });
+  expect(result).toMatchObject({
+    ok: false,
+    error: { code: "INVALID_RESPONSE", uncertain: true },
+  });
+});

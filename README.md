@@ -2,7 +2,7 @@
 
 Start with the [project specification](spec.md) for scope, boundaries and current status, then read the relevant feature spec before implementation. Keep the root spec synchronized after verified feature delivery.
 
-Next.js public website and agency CRM, independently versioned from the Express backend. Staff authentication, property management, public property discovery, property inquiries and role-scoped lead management are implemented. `/crm` is protected by an Express-verified session.
+Next.js public website and agency CRM, independently versioned from the Express backend. Staff authentication, property management, public property discovery, property inquiries, role-scoped lead management, CRM CSV exports, and Admin/Manager property-draft and New/unassigned lead CSV imports are implemented. `/crm` is protected by an Express-verified session. See the [lead import specification](specs/lead-import/spec.md), [property import specification](specs/property-import/spec.md), and historical [CSV export slice](specs/csv-import-export/spec.md).
 
 ## Local setup
 

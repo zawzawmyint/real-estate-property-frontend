@@ -1,5 +1,21 @@
 # Feature specifications
 
+## Verified maintenance
+
+- [Review recovery remediation](review-recovery-remediation/spec.md): verified maintenance for malformed CRM record IDs, property-import recovery guidance, and unused lead receipt-option removal. It does not change checklist completion or cover production secret/media-origin issues.
+
+## Lead import — verified
+
+- [Lead CSV import](lead-import/spec.md): verified Admin/Manager import of New/unassigned/unlinked leads using shared CSV parser/review UI, whole-batch validation and durable recovery. [Implementation plan](../docs/superpowers/plans/2026-11-13-lead-import.md). P2-04 is complete; duplicate detection remains P2-05.
+
+## Property import — verified
+
+- [Property CSV import](property-import/spec.md): verified Admin/Manager property-draft import with whole-batch validation, durable retry receipts and shared CSV parsing/review UI. [Implementation plan](../docs/superpowers/plans/2026-11-12-property-import.md). P2-04 is complete.
+
+## Phase 2 data tools — export-only delivery
+
+- [CSV import/export](csv-import-export/spec.md): historical verified export-only downloads for all staff within existing access, with the backend-owned contract represented by local generated snapshots. [Implementation plan](../docs/superpowers/plans/2026-11-11-csv-export.md). See the separate verified property and lead imports; P2-04 is complete.
+
 ## Software design diagrams
 
 - [Sales pipeline](sales-pipeline/spec.md#software-design-at-a-glance) shows stage changes, confirmation and conflict recovery.

@@ -3,10 +3,12 @@ import Link from "next/link";
 import { requireStaffSession } from "@/lib/auth/server";
 import { SessionServiceError } from "@/lib/auth/transport";
 import { SessionRetry } from "@/features/auth/session-retry";
-import { parseLeadFilters } from "../data/filters";
+import { leadExportQuery, parseLeadFilters } from "../data/filters";
+import { CsvExportButton } from "@/components/crm/csv-export-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
 import { LeadFilters } from "./lead-filters";
 import { LeadResults } from "./lead-results";
 
@@ -72,17 +74,42 @@ export async function LeadResultRegion({ query }: { query: string }) {
   );
 }
 
-export async function CreateLeadAction() {
+export async function CreateLeadAction({ query }: { query?: string } = {}) {
+  let context;
   try {
-    await requireStaffSession();
+    context = await inventoryContext(query || "");
   } catch (error) {
     if (!(error instanceof SessionServiceError)) throw error;
     return null;
   }
+  if (!context.filters) return null;
   return (
-    <Link href="/crm/leads/new" className={`${buttonVariants()} gap-2`}>
-      <Icon name="plus" />
-      New lead
-    </Link>
+    <div className="flex min-w-0 flex-wrap items-center gap-3">
+      {query !== undefined && (
+        <CsvExportButton
+          entity="leads"
+          query={leadExportQuery(context.filters)}
+          scope={query}
+        />
+      )}
+      {query !== undefined && context.staff.role !== "agent" && (
+        <Link
+          href="/crm/leads/import"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "gap-2 px-3 sm:px-5",
+          )}
+        >
+          Import CSV
+        </Link>
+      )}
+      <Link
+        href="/crm/leads/new"
+        className={cn(buttonVariants(), "gap-2 px-3 sm:px-5")}
+      >
+        <Icon name="plus" />
+        New lead
+      </Link>
+    </div>
   );
 }
