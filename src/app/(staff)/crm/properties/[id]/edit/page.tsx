@@ -6,6 +6,7 @@ import { getStaffProperty } from "@/lib/api/server";
 import { PropertyForm } from "@/features/properties/crm/property-form";
 import { PropertyApiError } from "@/features/properties/data/request";
 import { Badge } from "@/components/ui/badge";
+import { propertyIdSchema } from "@/features/properties/data/action-input";
 
 export const metadata: Metadata = {
   title: "Edit property · Agency workspace",
@@ -19,6 +20,8 @@ export default async function EditPropertyPage({
 }) {
   const staff = await requireStaffSession();
   const { id } = await params;
+
+  if (!propertyIdSchema.safeParse(id).success) notFound();
 
   if (staff.role === "agent") redirect(`/crm/properties/${id}`);
 

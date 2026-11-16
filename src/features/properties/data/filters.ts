@@ -155,6 +155,13 @@ export function searchParamsToURL(
   return result;
 }
 
+export function propertyExportQuery(filters: PropertyFilters) {
+  const params = serializePropertyFilters(filters);
+  params.delete("page");
+  params.delete("pageSize");
+  return params.toString();
+}
+
 export function formatPrice(fils: number, purpose?: string): string {
   return `AED ${new Intl.NumberFormat("en-AE", { maximumFractionDigits: 2 }).format(fils / 100)}${purpose === "rent" ? "/year" : ""}`;
 }

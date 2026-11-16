@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { requireStaffSession } from "@/lib/auth/server";
 import { getStaffTask } from "@/features/tasks/data/server";
@@ -16,9 +16,11 @@ export default async function TaskPage({
 }) {
   await requireStaffSession();
   const { id } = await params;
+
+  if (!z.uuid().safeParse(id).success) notFound();
+
   let initial, lead;
   try {
-    if (!z.uuid().safeParse(id).success) throw new Error("Invalid task");
     initial = await getStaffTask(id);
     lead = await getStaffLead(initial.task.lead.id);
   } catch (error) {

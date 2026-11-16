@@ -52,6 +52,8 @@ This file defines project-wide scope and boundaries and indexes existing specifi
 
 Public property inquiries, staff lead creation and role-scoped lead follow-up are implemented. Admin/Manager distribute active-agent assignments; agents only access their current assignments. See the [lead-management specification](specs/lead-management/spec.md) and its [local contract snapshot](docs/contracts/leads.md).
 
+P2-04 is verified: authenticated CRM staff can export filtered leads and properties through the existing same-origin API rewrite, while Admin/Manager can template, preview and atomically import property drafts or New/unassigned/unlinked leads with explicit retry/reload recovery. The shared CSV workflow preserves feature-owned validation, receipt and permission contracts; the backend remains authoritative for live authorization and role-dependent owner columns. The historical [CSV import/export specification](specs/csv-import-export/spec.md) records the export-only slice; [property import](specs/property-import/spec.md) and [lead import](specs/lead-import/spec.md) record the implemented import slices. Duplicate detection remains separate P2-05.
+
 ## Verified presentation maintenance
 
 The current presentation-maintenance slice refines the shared CRM staff-account row and property-image loading/failure placeholders without changing authentication, property API, image-delivery or authorization contracts. See the verified [staff account and property image polish specification](specs/account-and-image-polish/spec.md).
@@ -62,7 +64,7 @@ The [project review remediation](specs/project-review-remediation/spec.md) verif
 
 The [November 5 Phase 1 review remediation](specs/phase-one-review-remediation/spec.md) verifies scoped gallery/inquiry recovery and shortcut-test fixes, with the companion backend implementing signed-only production inquiry ingress and transaction-scoped current-staff validation. Both repository quality gates, the clean serial browser run, exact-data dashboard acceptance and guarded normal runtime pass. Git-delivery acceptance remains open; P1-14/P1-18 remain unchecked.
 
-The [property-management specification](specs/property-management/spec.md) records the November 6 remediation for CRM property forms before client readiness. Create and edit form controls remain disabled until their handlers are ready, with browser coverage for delayed JavaScript and normal saves.
+The [property-management specification](specs/property-management/spec.md) records the historical November 6 remediation for CRM property forms before client readiness. Create and edit form controls remain disabled until their handlers are ready, with browser coverage for delayed JavaScript and normal saves. The related [November 16 route and recovery maintenance](specs/review-recovery-remediation/spec.md) is verified by full frontend/backend quality gates, 30 targeted fresh browser cases and isolated runtime inspection; production secret/media-origin issues remain outside its scope.
 
 ## Planned product scope
 

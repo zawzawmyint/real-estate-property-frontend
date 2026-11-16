@@ -1,5 +1,85 @@
 /** Generated from docs/contracts/leads.openapi.yaml. Do not edit. */
 export interface paths {
+  "/api/v1/staff/leads/imports/template": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download the lead CSV import template
+     * @description Current Admin/Manager only. Header-only UTF-8 BOM and CRLF; filename lead-import-template.csv. No writes.
+     */
+    get: operations["getLeadImportTemplate"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/staff/leads/imports/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Validate new leads without writing
+     * @description No-store. Current Admin/Manager authorization runs before POST body consumption, then trusted Origin, JSON type, UTF-8 charset and 6 MiB parser. CSV maximum 1048576 UTF-8 bytes, 500 data records, 65536 raw record bytes including quoting/newline. Reject malformed UTF-8, NUL and unpaired surrogates. Ignore empty lines; quoted multiline values stay one logical record. Trim headers, allow reorder, reject unknown/duplicate/empty or inconsistent columns and empty batches. Require name,purpose,source and at least one phone/email header. Columns name,phone,email,purpose,budget_aed,source. Existing trimmed name (1-120), valid phone (3-40, digits/plus/parentheses/spaces/hyphens, at least one digit), valid lowercase email (max 254); every row needs a contact and any supplied invalid contact rejects. Preserve phone leading zeroes. Lowercase purpose sale/rent and manual source call/walk_in only. Optional positive plain decimal AED budget with <=2 fractional digits maps exactly to 1..1000000000000 fils. Null fields are blank. Validates every row; accurate total counts with at most 20 preview rows and 100 issues. Domain-invalid rows return valid=false. No leads, activities, receipts or notifications are written. Digest is lowercase SHA256 of UTF-8 lead-import:v1 followed by a NUL byte and the exact CSV UTF-8 bytes including BOM.
+     */
+    post: operations["previewLeadImport"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/staff/leads/imports/commit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Atomically create reviewed new unassigned leads
+     * @description No-store. Current Admin/Manager authorization runs before POST body consumption, then trusted Origin, JSON type, UTF-8 charset and 6 MiB parser. CSV maximum 1048576 UTF-8 bytes, 500 data records, 65536 raw record bytes including quoting/newline. Reject malformed UTF-8, NUL and unpaired surrogates. Ignore empty lines; quoted multiline values stay one logical record. Trim headers, allow reorder, reject unknown/duplicate/empty or inconsistent columns and empty batches. Require name,purpose,source and at least one phone/email header. Columns name,phone,email,purpose,budget_aed,source. Existing trimmed name (1-120), valid phone (3-40, digits/plus/parentheses/spaces/hyphens, at least one digit), valid lowercase email (max 254); every row needs a contact and any supplied invalid contact rejects. Preserve phone leading zeroes. Lowercase purpose sale/rent and manual source call/walk_in only. Optional positive plain decimal AED budget with <=2 fractional digits maps exactly to 1..1000000000000 fils. Null fields are blank. Revalidates live staff, CSV, digest and version. Acquire SQLite write reservation before live actor/receipt reads; all leads, normalized search fields, one actor-attributed created activity per row and aggregate LeadImportReceipt commit atomically. New stage, version 1, unassigned/unlinked, actor creator; no original messages, notifications or single-lead submission receipts. Never deduplicate/upsert. Same actor/UUID/content/version returns original IDs/count and preserves later edits/assignments. Another actor/content/version gives generic IMPORT_CONFLICT before stale-preview details. Unsupported positive schemaVersion or mismatched digest gives IMPORT_PREVIEW_STALE. Digest namespace lead-import:v1 then NUL and exact CSV bytes including BOM. Receipt retains no raw CSV/contact snapshots.
+     */
+    post: operations["commitLeadImport"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/staff/leads/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download filtered leads as CSV
+     * @description All staff; authorization and data are read in one bounded live-session transaction. Agents default to mine and cannot export other agents or unassigned leads. Admin/Manager default to unassigned; agentId requires view=all. Exports all matches across pages. Reject unknown, duplicate and pagination query keys. Maximum 5000 records and 10485760 UTF-8 bytes; overflow returns JSON before CSV headers. UTF-8 BOM, comma-separated, CRLF records, formula escaping; nulls blank, booleans true/false, monetary and area values fixed two decimal places, timestamps UTC ISO 8601.
+     */
+    get: operations["exportLeadsCsv"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/staff/leads/{id}/property-matches": {
     parameters: {
       query?: never;
@@ -317,6 +397,47 @@ export interface components {
       /** @constant */
       received: true;
     };
+    LeadImportIssue: {
+      /** @description Logical nonempty CSV record, header is 1. */
+      rowNumber: number;
+      column: string;
+      message: string;
+    };
+    LeadImportPreview: {
+      /** @constant */
+      schemaVersion: 1;
+      digest: string;
+      valid: boolean;
+      totalRows: number;
+      validRows: number;
+      issueCount: number;
+      issues: components["schemas"]["LeadImportIssue"][];
+      /** @description Template order name,phone,email,purpose,budget_aed,source. */
+      columns: string[];
+      previewRows: {
+        rowNumber: number;
+        values: string[];
+      }[];
+    };
+    LeadImportResult: {
+      /** Format: uuid */
+      submissionId: string;
+      createdCount: number;
+      leadIds: string[];
+      replayed: boolean;
+    };
+    LeadImportValidationError: {
+      error: {
+        /** @constant */
+        code: "IMPORT_VALIDATION_FAILED";
+        /** @constant */
+        message: "Fix every invalid row before importing.";
+        /** Format: uuid */
+        requestId: string;
+      };
+      issues: components["schemas"]["LeadImportIssue"][];
+      issueCount: number;
+    };
     LeadApiError: {
       error: {
         code: string;
@@ -457,6 +578,366 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getLeadImportTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV template attachment */
+      200: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          "X-Content-Type-Options"?: "nosniff";
+          "Content-Disposition"?: 'attachment; filename="lead-import-template.csv"';
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv; charset=utf-8": string;
+        };
+      };
+      /** @description UNAUTHENTICATED: current staff session required. */
+      401: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description FORBIDDEN: only current Admin/Manager staff may import. */
+      403: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
+  previewLeadImport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          csv: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Bounded preview including domain-invalid rows. */
+      200: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadImportPreview"];
+        };
+      };
+      /** @description VALIDATION_ERROR for request shape, or IMPORT_INVALID_CSV for structural/header/encoding errors. */
+      400: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description UNAUTHENTICATED: current staff session required. */
+      401: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description FORBIDDEN: only current Admin/Manager staff may import. */
+      403: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description IMPORT_LIMIT_EXCEEDED or transport body too large. */
+      413: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description UNSUPPORTED_MEDIA_TYPE: require UTF-8 application/json. */
+      415: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe persistence failure; whole batch rolls back. */
+      500: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
+  commitLeadImport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: uuid */
+          submissionId: string;
+          /** @description Currently 1; unsupported positive version requires another preview. */
+          schemaVersion: number;
+          digest: string;
+          csv: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Original batch IDs/count; replayed=true. */
+      200: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadImportResult"];
+        };
+      };
+      /** @description New batch; replayed=false. */
+      201: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadImportResult"];
+        };
+      };
+      /** @description VALIDATION_ERROR for request shape, or IMPORT_INVALID_CSV for structural/header/encoding errors. */
+      400: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description UNAUTHENTICATED: current staff session required. */
+      401: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description FORBIDDEN: only current Admin/Manager staff may import. */
+      403: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description IMPORT_CONFLICT (private generic response) or IMPORT_PREVIEW_STALE. */
+      409: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description IMPORT_LIMIT_EXCEEDED or transport body too large. */
+      413: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description UNSUPPORTED_MEDIA_TYPE: require UTF-8 application/json. */
+      415: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description IMPORT_VALIDATION_FAILED: zero batch writes. */
+      422: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadImportValidationError"];
+        };
+      };
+      /** @description Safe persistence failure; whole batch rolls back. */
+      500: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
+  exportLeadsCsv: {
+    parameters: {
+      query?: {
+        view?: "unassigned" | "all" | "mine";
+        q?: string;
+        stage?:
+          "new" | "contacted" | "viewing_scheduled" | "offer" | "won" | "lost";
+        source?: "website" | "call" | "walk_in";
+        agentId?: string;
+        sort?: "newest" | "oldest" | "updated";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV attachment (empty matches return BOM plus header). Fixed columns are defined in specs/csv-import-export/contract.md. */
+      200: {
+        headers: {
+          /** @description Export-start calendar date in Asia/Dubai. */
+          "Content-Disposition"?: string;
+          "Cache-Control"?: "no-store";
+          "X-Content-Type-Options"?: "nosniff";
+          "X-Request-Id"?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv; charset=utf-8": string;
+        };
+      };
+      /** @description VALIDATION_ERROR: invalid query or contradictory ranges */
+      400: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description UNAUTHENTICATED: live staff session required */
+      401: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description FORBIDDEN: access denied */
+      403: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description EXPORT_LIMIT_EXCEEDED: Too many results to export. Narrow your filters and try again. */
+      422: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe internal error */
+      500: {
+        headers: {
+          "X-Request-Id"?: string;
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
   listLeadPropertyMatches: {
     parameters: {
       query: {

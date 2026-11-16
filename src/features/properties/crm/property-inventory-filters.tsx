@@ -1,6 +1,7 @@
 "use client";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { CollectionToolbar } from "@/components/crm/collection-toolbar";
+import { cancelCsvExports } from "@/components/crm/csv-export";
 import { FilterChip } from "@/components/crm/filter-chip";
 import { TextField, SelectField } from "@/components/forms/fields";
 
@@ -63,6 +64,7 @@ export function PropertyInventoryFilters({
     query.set("page", "1");
     restoreFocus.current = true;
     setError("");
+    if (query.toString() !== appliedQuery) cancelCsvExports();
     startTransition(() => router.push(`/crm/properties?${query}`));
   }
 
@@ -80,7 +82,8 @@ export function PropertyInventoryFilters({
 
     try {
       const parsed = parsePropertyFilters(query, true);
-
+      if (serializePropertyFilters(parsed).toString() !== appliedQuery)
+        cancelCsvExports();
       startTransition(() =>
         router.push(`/crm/properties?${serializePropertyFilters(parsed)}`),
       );

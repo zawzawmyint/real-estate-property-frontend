@@ -8,7 +8,11 @@ import type { PropertyActionResult } from "./types";
 
 export async function runPropertyMutation<T>(
   operation: (staffHeaders: Record<string, string>) => Promise<T>,
-  options: { create?: boolean; adminOnly?: boolean } = {},
+  options: {
+    create?: boolean;
+    adminOnly?: boolean;
+    expectedStaffId?: string;
+  } = {},
 ): Promise<PropertyActionResult<T>> {
   let dispatched = false;
 
@@ -31,6 +35,20 @@ export async function runPropertyMutation<T>(
           code: "FORBIDDEN",
           status: 403,
           message: "You do not have permission to perform this action.",
+        },
+      };
+
+    if (
+      options.expectedStaffId !== undefined &&
+      staff.id !== options.expectedStaffId
+    )
+      return {
+        ok: false,
+        error: {
+          code: "SESSION_CHANGED",
+          status: 403,
+          message:
+            "Your staff session changed. Reload this page before importing.",
         },
       };
 
