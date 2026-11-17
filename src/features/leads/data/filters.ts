@@ -6,6 +6,7 @@ export type LeadFilters = {
   stage?: string;
   source?: string;
   agentId?: string;
+  duplicates?: "only";
   sort: "newest" | "oldest" | "updated";
   page: number;
 };
@@ -13,7 +14,16 @@ export function parseLeadFilters(
   params: URLSearchParams,
   role: StaffRole,
 ): LeadFilters {
-  const allowed = ["view", "q", "stage", "source", "agentId", "sort", "page"];
+  const allowed = [
+    "view",
+    "q",
+    "stage",
+    "source",
+    "agentId",
+    "sort",
+    "page",
+    "duplicates",
+  ];
   for (const [key, value] of params) {
     if (
       !allowed.includes(key) ||
@@ -32,6 +42,7 @@ export function parseLeadFilters(
     !["newest", "oldest", "updated"].includes(sort) ||
     (value.stage && !stages.includes(value.stage as never)) ||
     (value.source && !["website", "call", "walk_in"].includes(value.source)) ||
+    (value.duplicates !== undefined && value.duplicates !== "only") ||
     (value.q?.length ?? 0) > 120 ||
     (value.agentId?.length ?? 0) > 200 ||
     (value.page && !/^\d+$/.test(value.page)) ||
@@ -48,6 +59,7 @@ export function parseLeadFilters(
     ...(value.stage ? { stage: value.stage } : {}),
     ...(value.source ? { source: value.source } : {}),
     ...(value.agentId ? { agentId: value.agentId } : {}),
+    ...(value.duplicates ? { duplicates: "only" as const } : {}),
     sort: sort as LeadFilters["sort"],
     page,
   };

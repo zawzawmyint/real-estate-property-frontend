@@ -80,11 +80,17 @@ export const createLeadSchema = z
     budgetFils: z.number().int().min(1).max(1e12).nullable().optional(),
     propertyId: z.uuid().nullable().optional(),
     assignedAgentId: z.string().min(1).nullable().optional(),
+    duplicateAcknowledgement: z
+      .strictObject({ reviewToken: z.string().regex(/^[a-f0-9]{64}$/) })
+      .optional(),
   })
   .superRefine(requireContact);
 export const patchLeadSchema = z
   .strictObject({
     expectedVersion: z.number().int().positive(),
+    duplicateAcknowledgement: z
+      .strictObject({ reviewToken: z.string().regex(/^[a-f0-9]{64}$/) })
+      .optional(),
     name: contact.name.optional(),
     phone: contact.phone,
     email: contact.email,
@@ -95,7 +101,10 @@ export const patchLeadSchema = z
   .refine(
     (value) =>
       Object.entries(value).some(
-        ([key, val]) => key !== "expectedVersion" && val !== undefined,
+        ([key, val]) =>
+          key !== "expectedVersion" &&
+          key !== "duplicateAcknowledgement" &&
+          val !== undefined,
       ),
     "Provide a change.",
   );

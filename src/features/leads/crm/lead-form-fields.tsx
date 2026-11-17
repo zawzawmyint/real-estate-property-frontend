@@ -31,11 +31,15 @@ export function LeadFormFields({
   disabled,
   lead,
   manager,
+  onPhoneChange,
+  onPhoneBlur,
 }: {
   form: UseFormReturn<LeadFormValues>;
   disabled: boolean;
   lead?: LeadDetail;
   manager: boolean;
+  onPhoneChange?: () => void;
+  onPhoneBlur?: () => void;
 }) {
   const {
     register,
@@ -74,6 +78,15 @@ export function LeadFormFields({
           {input("phone", "Phone", {
             type: "tel",
             autoComplete: "tel",
+            help: "Use a UAE local number, or include + or 00 and the country code for other countries.",
+            onChange: (event) => {
+              void register("phone").onChange(event);
+              onPhoneChange?.();
+            },
+            onBlur: (event) => {
+              void register("phone").onBlur(event);
+              onPhoneBlur?.();
+            },
           })}
           {input("email", "Email", {
             type: "email",

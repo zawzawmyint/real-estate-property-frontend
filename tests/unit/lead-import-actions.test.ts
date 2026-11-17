@@ -20,7 +20,16 @@ const identity = {
   digest: "a".repeat(64),
 };
 const preview = {
-  schemaVersion: 1,
+  schemaVersion: 2,
+  duplicateReview: {
+    affectedRows: 0,
+    existingMatchRows: 0,
+    withinFileRows: 0,
+    warningCount: 0,
+    warnings: [],
+    truncated: false,
+    reviewToken: "a".repeat(64),
+  },
   digest: identity.digest,
   valid: true,
   totalRows: 1,

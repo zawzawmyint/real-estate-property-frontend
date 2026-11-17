@@ -108,6 +108,10 @@ export async function runLeadOperation<T>(
           message: error.message,
           ...(error.requestId ? { requestId: error.requestId } : {}),
           ...(error.retryAfter ? { retryAfter: error.retryAfter } : {}),
+          ...(error.duplicateReview
+            ? { duplicateReview: error.duplicateReview }
+            : {}),
+          ...(error.fieldErrors ? { fieldErrors: error.fieldErrors } : {}),
           ...(dispatched && (error.status === 0 || error.status >= 500)
             ? { uncertain: true }
             : {}),

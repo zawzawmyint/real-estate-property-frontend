@@ -1,4 +1,6 @@
 "use server";
+import { createHash } from "node:crypto";
+import { z } from "zod";
 import { decodeImportFile, importIdentitySchema } from "@/lib/csv/import";
 import { runLeadOperation } from "./action-boundary";
 import { LeadApiError } from "./request";
@@ -11,6 +13,55 @@ import {
   type ImportResult,
 } from "./import-types";
 import type { ActionResult } from "./types";
+import { duplicateAcknowledgementSchema } from "./duplicate-types";
+
+const leadImportIdentitySchema = importIdentitySchema.extend({
+  schemaVersion: z.union([z.literal(1), z.literal(2)]),
+});
+
+export async function recoverLeadImport(
+  file: File,
+  identity: unknown,
+  expectedStaffId: string,
+): Promise<ImportOutcome<ImportResult>> {
+  return fileOutcome(
+    await runLeadOperation(
+      async (headers, markDispatched) => {
+        const pending = importIdentitySchema.parse(identity);
+        const csv = await decodeImportFile(file);
+        if (
+          createHash("sha256")
+            .update("lead-import:v1\0" + csv)
+            .digest("hex") !== pending.digest
+        )
+          throw new LeadApiError(
+            409,
+            "IMPORT_RECOVERY_FILE_MISMATCH",
+            "Choose the original file to resolve the earlier import, or explicitly acknowledge the duplicate risk before starting again.",
+          );
+        const result = await requestImport(
+          "commit",
+          { ...pending, csv },
+          headers,
+          resultSchema,
+          markDispatched,
+        );
+        if (result.submissionId !== pending.submissionId || !result.replayed)
+          throw new LeadApiError(
+            502,
+            "INVALID_RESPONSE",
+            "The earlier import could not be confirmed. Retry with the same file.",
+          );
+        return result;
+      },
+      {
+        manager: true,
+        expectedStaffId:
+          typeof expectedStaffId === "string" ? expectedStaffId : "",
+      },
+    ),
+  );
+}
 
 export async function previewLeadImport(
   file: File,
@@ -38,13 +89,20 @@ export async function commitLeadImport(
   file: File,
   identity: unknown,
   expectedStaffId: string,
+  acknowledgement?: unknown,
 ): Promise<ImportOutcome<ImportResult>> {
   let diagnostics: ImportValidationError | undefined;
   const result = await runLeadOperation(
     async (headers, markDispatched) => {
       const input = {
-        ...importIdentitySchema.parse(identity),
+        ...leadImportIdentitySchema.parse(identity),
         csv: await decodeImportFile(file),
+        ...(acknowledgement !== undefined
+          ? {
+              duplicateAcknowledgement:
+                duplicateAcknowledgementSchema.parse(acknowledgement),
+            }
+          : {}),
       };
       try {
         const receipt = await requestImport(

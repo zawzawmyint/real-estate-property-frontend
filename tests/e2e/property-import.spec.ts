@@ -1,3 +1,4 @@
+import { signInDataToolsStaff } from "../fixtures/data-tools-staff";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
@@ -62,20 +63,7 @@ function csvFile(prefix: string, invalid = false) {
 }
 
 async function signIn(page: Page, role: "admin" | "manager" | "agent") {
-  const origin = test.info().project.use.baseURL ?? "http://localhost:3100";
-  const response = await page.request.post("/api/v1/auth/sign-in/email", {
-    headers: { Origin: origin },
-    data: {
-      email: `e2e-property-${test.info().project.name}-${role}@example.com`,
-      password: process.env.STAFF_E2E_PASSWORD,
-      rememberMe: true,
-    },
-  });
-  expect(response.status(), await response.text()).toBe(200);
-  const session = await page.request.get("/api/v1/auth/get-session");
-  const actor = (await session.json()).user as { id: string; role: string };
-  expect(actor.role).toBe(role);
-  return actor;
+  return signInDataToolsStaff(page, "property-import", role);
 }
 
 async function inventory(page: Page, prefix: string) {

@@ -1,6 +1,8 @@
+import { signInDataToolsStaff } from "../fixtures/data-tools-staff";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
+import { createReviewedLead } from "../fixtures/create-lead";
 
 test.setTimeout(120_000);
 const columns = ["name", "phone", "email", "purpose", "budget_aed", "source"];
@@ -47,22 +49,7 @@ function csvFile(prefix: string, invalid = false) {
 }
 
 async function signIn(page: Page, role: "admin" | "manager" | "agent") {
-  const origin = test.info().project.use.baseURL ?? "http://localhost:3100";
-  const response = await page.request.post("/api/v1/auth/sign-in/email", {
-    headers: { Origin: origin },
-    data: {
-      email: `e2e-property-${test.info().project.name}-${role}@example.com`,
-      password: process.env.STAFF_E2E_PASSWORD,
-      rememberMe: true,
-    },
-  });
-  expect(response.status(), await response.text()).toBe(200);
-  const session = await page.request.get("/api/v1/auth/get-session");
-  return (await session.json()).user as {
-    id: string;
-    name: string;
-    role: string;
-  };
+  return signInDataToolsStaff(page, "lead-import", role);
 }
 
 type Lead = {
@@ -98,6 +85,17 @@ async function activity(page: Page, id: string) {
 async function preview(page: Page, file: ReturnType<typeof csvFile>) {
   await page.getByLabel("CSV file", { exact: true }).setInputFiles(file);
   await page.getByRole("button", { name: "Preview CSV", exact: true }).click();
+}
+
+async function acknowledgeDuplicateWarnings(page: Page) {
+  const acknowledgement = page.getByLabel(
+    "I reviewed the duplicate phone warnings and want to import every valid row as a separate lead.",
+    { exact: true },
+  );
+  await expect(acknowledgement).toBeVisible();
+  await expect(acknowledgement).not.toBeChecked();
+  await acknowledgement.check();
+  await expect(acknowledgement).toBeChecked();
 }
 
 async function complete(page: Page) {
@@ -161,12 +159,19 @@ test("manager template and all-or-nothing import create New unassigned leads wit
     name: "Import 3 leads",
     exact: true,
   });
+  await expect(
+    page.getByText("Possible duplicate phone numbers"),
+  ).toBeVisible();
+  await expect(confirm).toBeDisabled();
+  await acknowledgeDuplicateWarnings(page);
   await expect(confirm).toBeEnabled();
   await page
     .getByLabel("CSV file", { exact: true })
     .setInputFiles(csvFile(`${prefix} changed`));
   await expect(confirm).toHaveCount(0);
   await preview(page, file);
+  await expect(confirm).toBeDisabled();
+  await acknowledgeDuplicateWarnings(page);
   await expect(confirm).toBeEnabled();
   expect(
     await page.evaluate(
@@ -218,7 +223,7 @@ test("manager template and all-or-nothing import create New unassigned leads wit
   ).toBeVisible();
 });
 
-test("lost confirmation survives reload and replay preserves later lead changes", async ({
+test("stale duplicate confirmation re-previews, then a lost retry response preserves replay identity", async ({
   page,
 }, info) => {
   await signIn(page, "manager");
@@ -226,6 +231,27 @@ test("lost confirmation survives reload and replay preserves later lead changes"
   const prefix = uniqueLabel("retry");
   const file = csvFile(prefix);
   await preview(page, file);
+  await acknowledgeDuplicateWarnings(page);
+  const staleMatch = await createReviewedLead(page.request, {
+    headers: { Origin: info.project.use.baseURL ?? "http://localhost:3100" },
+    data: {
+      submissionId: randomUUID(),
+      name: uniqueLabel("stale match"),
+      phone: "0501234567",
+      purpose: "sale",
+      source: "call",
+    },
+  });
+  expect(staleMatch.status(), await staleMatch.text()).toBe(201);
+  await page
+    .getByRole("button", { name: "Import 3 leads", exact: true })
+    .click();
+  await expect(
+    page.getByText(/Matching phone numbers changed\. Preview the same file/),
+  ).toBeVisible();
+  expect((await inventory(page, prefix)).total).toBe(0);
+  await preview(page, file);
+  await acknowledgeDuplicateWarnings(page);
   let dropped = false;
   await page.route("**/crm/leads/import", async (route) => {
     if (
@@ -264,6 +290,7 @@ test("lost confirmation survives reload and replay preserves later lead changes"
   await page.unroute("**/crm/leads/import");
   await page.reload();
   await preview(page, file);
+  await acknowledgeDuplicateWarnings(page);
   await page
     .getByRole("button", { name: "Retry confirmation", exact: true })
     .click();
@@ -319,6 +346,7 @@ test("Agent retains manual/export access but cannot import; Admin imports into t
   const prefix = uniqueLabel("admin");
   await page.goto("/crm/leads/import");
   await preview(page, csvFile(prefix));
+  await acknowledgeDuplicateWarnings(page);
   await page
     .getByRole("button", { name: "Import 3 leads", exact: true })
     .click();
@@ -360,6 +388,7 @@ test("file diagnostics and actor binding protect confirmation; lead recovery doe
   const prefix = uniqueLabel("actor");
   const file = csvFile(prefix);
   await preview(page, file);
+  await acknowledgeDuplicateWarnings(page);
   await expect(
     page.getByRole("button", { name: "Import 3 leads", exact: true }),
   ).toBeEnabled();
@@ -378,6 +407,7 @@ test("file diagnostics and actor binding protect confirmation; lead recovery doe
   ).toEqual(propertyPending);
   await page.reload();
   await preview(page, file);
+  await acknowledgeDuplicateWarnings(page);
   await page
     .getByRole("button", { name: "Import 3 leads", exact: true })
     .dblclick();
@@ -420,6 +450,7 @@ test("blocked recovery storage requires acknowledgement and retains safe in-memo
   await expect(page.getByText(/Reload recovery is unavailable/i)).toBeVisible();
   const prefix = uniqueLabel("storage");
   await preview(page, csvFile(prefix));
+  await acknowledgeDuplicateWarnings(page);
   await page
     .getByRole("button", { name: "Import 3 leads", exact: true })
     .click();

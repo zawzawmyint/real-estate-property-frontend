@@ -2,8 +2,9 @@ import { z } from "zod";
 import { issueSchema } from "@/lib/csv/import";
 import type { components } from "@/lib/api/generated/leads";
 import type { ActionError, ActionResult } from "./types";
+import { importDuplicateReviewSchema } from "./duplicate-types";
 
-export type ImportPreview = components["schemas"]["LeadImportPreview"];
+export type ImportPreview = z.infer<typeof previewSchema>;
 export type ImportResult = components["schemas"]["LeadImportResult"];
 export type ImportIssue = z.infer<typeof issueSchema>;
 export type ImportOutcome<T> =
@@ -17,7 +18,8 @@ export type ImportOutcome<T> =
 
 export const previewSchema = z
   .strictObject({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
+    duplicateReview: importDuplicateReviewSchema,
     digest: z.string().regex(/^[a-f0-9]{64}$/),
     valid: z.boolean(),
     totalRows: z.number().int().min(1).max(500),

@@ -1,3 +1,4 @@
+import { createReviewedLead } from "../fixtures/create-lead";
 import { createHash, randomUUID } from "node:crypto";
 import { expect, test, type Cookie, type Page } from "@playwright/test";
 
@@ -37,7 +38,7 @@ async function signIn(page: Page, identity = "manager") {
 async function assignedLead(page: Page) {
   const agent = await signIn(page, "agent");
   await signIn(page);
-  const response = await page.request.post("/api/v1/staff/leads", {
+  const response = await createReviewedLead(page.request, {
     headers,
     data: {
       submissionId: randomUUID(),

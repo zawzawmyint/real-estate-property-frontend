@@ -1,5 +1,9 @@
 # Feature specifications
 
+## Lead duplicate detection — verified
+
+- [Lead duplicate detection](lead-duplicate-detection/spec.md), [backend contract snapshot](../docs/contracts/lead-duplicate-detection.md) and [implementation plan](../docs/superpowers/plans/2026-11-16-lead-duplicate-detection.md): P2-05 phone warnings, explicit acknowledgement, scoped review and CSV integration are verified. Deployment and normal-database migration remain separate operations.
+
 ## Verified maintenance
 
 - [Review recovery remediation](review-recovery-remediation/spec.md): verified maintenance for malformed CRM record IDs, property-import recovery guidance, and unused lead receipt-option removal. It does not change checklist completion or cover production secret/media-origin issues.

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test, type Cookie, type Page } from "@playwright/test";
+import { createReviewedLead } from "./create-lead";
 
 export const taskHeaders = { Origin: "http://localhost:3100" };
 const sessions = new Map<
@@ -37,7 +38,7 @@ export async function signInTask(
 export async function taskLead(page: Page, suite = "task") {
   const agent = await signInTask(page, "agent", suite);
   await signInTask(page, "manager", suite);
-  const response = await page.request.post("/api/v1/staff/leads", {
+  const response = await createReviewedLead(page.request, {
     headers: taskHeaders,
     data: {
       submissionId: randomUUID(),

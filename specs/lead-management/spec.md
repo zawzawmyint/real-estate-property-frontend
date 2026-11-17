@@ -12,7 +12,7 @@ Included: property inquiry form; role-scoped CRM leads inbox/list; manual create
 
 Roadmap coverage: P1-03 through P1-09, P1-20 through P1-22 and P1-16 are verified. This scope does not complete P1-10 or the wider mobile-layout P1-18 item.
 
-Excluded: Kanban/drag-and-drop, automatic routing, notifications, auto-replies, duplicate-person detection/merging, viewings/calendar, tasks/reminders, reporting, CSV, attachments, client accounts, full audit log, marketing consent/subscriptions, lead deletion and bulk actions. A manually selected Viewing Scheduled stage does not create a calendar booking. Public contact/agent pages remain separate.
+Excluded: Kanban/drag-and-drop, automatic routing, notifications, auto-replies, duplicate-person merging, viewings/calendar, tasks/reminders, reporting, CSV, attachments, client accounts, full audit log, marketing consent/subscriptions, lead deletion and bulk actions. Phone duplicate review is implemented separately in [lead duplicate detection](../lead-duplicate-detection/spec.md); it does not merge people. A manually selected Viewing Scheduled stage does not create a calendar booking. Public contact/agent pages remain separate.
 
 ## User flow
 
@@ -49,6 +49,8 @@ Dirty form navigation requires a discard confirmation where app navigation is in
 ## Contracts and access
 
 Express owns persistence, ownership, validation, idempotency, atomic history and safe DTOs. The authoritative backend contract is represented locally by `docs/contracts/leads.md` and `docs/contracts/leads.openapi.yaml`; generated lead types are checked alongside property types. No sibling source imports.
+
+The duplicate-detection extension adds a backend-owned body-based review, explicit acknowledgement for matching new/changed canonical phones, scoped `duplicateCount` and the `duplicates=only` list/export filter. Public forms disclose no matching status and repeated inquiries remain separate. See the [feature specification](../lead-duplicate-detection/spec.md) and [contract snapshot](../../docs/contracts/lead-duplicate-detection.md); final P2-05 browser/runtime acceptance remains pending.
 
 Implementation must add approved routes to backend OpenAPI and a frontend-local OpenAPI snapshot, and extend `scripts/generate-api.mjs` to generate/check leads alongside existing property types without breaking property generation. Server reads and validated business Server Actions use the existing private API transport, with live session checks and allowlisted cookie/Origin forwarding. Browser reconciliation reads use `/api/v1`. Public submission uses a feature-owned Server Action that forwards the per-submission UUID and trusted Origin; the browser cannot choose source, stage, assignment or actor. Rate limiting must identify the real client through the deployment's explicitly trusted proxy chain rather than treating every Server Action as the same client.
 

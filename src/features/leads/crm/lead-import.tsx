@@ -1,7 +1,12 @@
 "use client";
 import { CsvImport } from "@/components/crm/csv-import";
 import { pendingStorageKey } from "@/components/crm/csv-import-state";
-import { previewLeadImport, commitLeadImport } from "../data/import-actions";
+import {
+  previewLeadImport,
+  commitLeadImport,
+  recoverLeadImport,
+} from "../data/import-actions";
+import { LeadImportDuplicateWarning } from "./lead-import-duplicate-warning";
 
 const columns = ["name", "phone", "email", "purpose", "budget_aed", "source"];
 
@@ -12,7 +17,30 @@ export function LeadImport({ staffId }: { staffId: string }) {
       storageKey={pendingStorageKey("leads", staffId)}
       itemLabels={{ singular: "lead", plural: "leads" }}
       preview={(file) => previewLeadImport(file, staffId)}
-      commit={(file, identity) => commitLeadImport(file, identity, staffId)}
+      recoverLegacy={(file, identity) =>
+        recoverLeadImport(file, identity, staffId)
+      }
+      requiresAcknowledgement={(preview) =>
+        preview.duplicateReview.affectedRows > 0
+      }
+      renderWarnings={(preview, acknowledged, onChange, disabled) => (
+        <LeadImportDuplicateWarning
+          review={preview.duplicateReview}
+          acknowledged={acknowledged}
+          onChange={onChange}
+          disabled={disabled}
+        />
+      )}
+      commit={(file, identity, preview, acknowledged) =>
+        commitLeadImport(
+          file,
+          identity,
+          staffId,
+          acknowledged
+            ? { reviewToken: preview.duplicateReview.reviewToken }
+            : undefined,
+        )
+      }
       columns={[
         { id: "row", header: "Row", cell: (row) => row.rowNumber },
         ...columns.map((column, index) => ({
