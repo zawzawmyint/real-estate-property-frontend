@@ -25,6 +25,7 @@ export type PropertyMatchPage =
   MatchOperation["responses"][200]["content"]["application/json"];
 
 export type ActionError = {
+  duplicateReview?: import("./duplicate-types").DuplicateReview;
   code: string;
   message: string;
   status?: number;

@@ -182,7 +182,7 @@ export function PropertyInquiryCard({ propertyId }: { propertyId: string }) {
               error={errors[key]?.message}
               help={
                 key === "phone"
-                  ? "Provide a phone number or email address."
+                  ? "Use a UAE local number, or include + or 00 and the country code for other countries. You can provide email instead."
                   : undefined
               }
               maxLength={

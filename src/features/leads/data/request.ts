@@ -1,4 +1,6 @@
 import { ApiError } from "@/lib/api/transport";
+import { z } from "zod";
+import { duplicateReviewSchema, type DuplicateReview } from "./duplicate-types";
 export class LeadApiError extends ApiError {
   constructor(
     status: number,
@@ -6,6 +8,8 @@ export class LeadApiError extends ApiError {
     message: string,
     requestId?: string,
     public readonly retryAfter?: number,
+    public readonly duplicateReview?: DuplicateReview,
+    public readonly fieldErrors?: Record<string, string[]>,
   ) {
     super(status, code, message, requestId);
   }
@@ -45,6 +49,13 @@ export async function requestLead<T>(
             : "The request could not be completed.",
       typeof error?.requestId === "string" ? error.requestId : undefined,
       Number(response.headers.get("Retry-After")) || undefined,
+      response.status === 409 &&
+        error?.code === "LEAD_DUPLICATE_REVIEW_REQUIRED"
+        ? duplicateReviewSchema.safeParse(body?.duplicateReview).data
+        : undefined,
+      z
+        .record(z.string(), z.array(z.string()).max(10))
+        .safeParse(body?.fieldErrors ?? error?.fieldErrors).data,
     );
   }
   if (!body || typeof body !== "object")

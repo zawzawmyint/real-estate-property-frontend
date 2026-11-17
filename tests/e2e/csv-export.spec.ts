@@ -1,3 +1,5 @@
+import { signInDataToolsStaff } from "../fixtures/data-tools-staff";
+import { createReviewedLead } from "../fixtures/create-lead";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Page } from "@playwright/test";
@@ -5,20 +7,7 @@ import { expect, test, type Download, type Page } from "@playwright/test";
 test.setTimeout(180_000);
 
 async function signIn(page: Page, role: "admin" | "manager" | "agent") {
-  const origin = test.info().project.use.baseURL ?? "http://localhost:3100";
-  const response = await page.request.post("/api/v1/auth/sign-in/email", {
-    headers: { Origin: origin },
-    data: {
-      email: `e2e-property-${test.info().project.name}-${role}@example.com`,
-      password: process.env.STAFF_E2E_PASSWORD,
-      rememberMe: true,
-    },
-  });
-  expect(response.status(), await response.text()).toBe(200);
-  const session = await page.request.get("/api/v1/auth/get-session");
-  const identity = (await session.json()).user as { id: string; role: string };
-  expect(identity.role).toBe(role);
-  return identity;
+  return signInDataToolsStaff(page, "csv-export", role);
 }
 
 // Read the downloaded format independently of the production CSV writer.
@@ -103,7 +92,7 @@ test("all staff download all matching pages with role-scoped lead and owner acce
     const leadIds: string[] = [],
       propertyIds: string[] = [];
     for (let index = 0; index < 25; index++) {
-      const lead = await admin.request.post("/api/v1/staff/leads", {
+      const lead = await createReviewedLead(admin.request, {
         headers,
         data: {
           submissionId: randomUUID(),
@@ -134,7 +123,7 @@ test("all staff download all matching pages with role-scoped lead and owner acce
       expect(property.status(), await property.text()).toBe(201);
       propertyIds.push((await property.json()).id as string);
     }
-    const unassigned = await admin.request.post("/api/v1/staff/leads", {
+    const unassigned = await createReviewedLead(admin.request, {
       headers,
       data: {
         submissionId: randomUUID(),

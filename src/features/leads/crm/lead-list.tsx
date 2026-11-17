@@ -30,7 +30,11 @@ export function LeadList({
   const [announcement, setAnnouncement] = useState("");
   const query = leadQuery(filters);
   const filtered = Boolean(
-    filters.q || filters.stage || filters.source || filters.agentId,
+    filters.q ||
+    filters.stage ||
+    filters.source ||
+    filters.agentId ||
+    filters.duplicates,
   );
   const detail = (id: string) =>
     `/crm/leads/${id}?from=${encodeURIComponent(query)}`;
@@ -58,6 +62,12 @@ export function LeadList({
               <p className="mt-1 break-all text-xs text-muted-foreground">
                 {lead.phone}
               </p>
+            )}
+            {lead.duplicateCount > 0 && (
+              <Badge variant="outline" className="mt-2 whitespace-normal">
+                {lead.duplicateCount} possible{" "}
+                {lead.duplicateCount === 1 ? "duplicate" : "duplicates"}
+              </Badge>
             )}
           </div>
         </div>
@@ -197,6 +207,12 @@ export function LeadList({
               </p>
             )}
             <p className="mt-5 break-words text-sm">
+              {lead.duplicateCount > 0 && (
+                <Badge variant="outline" className="mb-2 whitespace-normal">
+                  {lead.duplicateCount} possible{" "}
+                  {lead.duplicateCount === 1 ? "duplicate" : "duplicates"}
+                </Badge>
+              )}
               {lead.property?.title || "No property selected"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">

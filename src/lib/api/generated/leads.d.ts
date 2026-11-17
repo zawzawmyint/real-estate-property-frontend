@@ -31,7 +31,7 @@ export interface paths {
     put?: never;
     /**
      * Validate new leads without writing
-     * @description No-store. Current Admin/Manager authorization runs before POST body consumption, then trusted Origin, JSON type, UTF-8 charset and 6 MiB parser. CSV maximum 1048576 UTF-8 bytes, 500 data records, 65536 raw record bytes including quoting/newline. Reject malformed UTF-8, NUL and unpaired surrogates. Ignore empty lines; quoted multiline values stay one logical record. Trim headers, allow reorder, reject unknown/duplicate/empty or inconsistent columns and empty batches. Require name,purpose,source and at least one phone/email header. Columns name,phone,email,purpose,budget_aed,source. Existing trimmed name (1-120), valid phone (3-40, digits/plus/parentheses/spaces/hyphens, at least one digit), valid lowercase email (max 254); every row needs a contact and any supplied invalid contact rejects. Preserve phone leading zeroes. Lowercase purpose sale/rent and manual source call/walk_in only. Optional positive plain decimal AED budget with <=2 fractional digits maps exactly to 1..1000000000000 fils. Null fields are blank. Validates every row; accurate total counts with at most 20 preview rows and 100 issues. Domain-invalid rows return valid=false. No leads, activities, receipts or notifications are written. Digest is lowercase SHA256 of UTF-8 lead-import:v1 followed by a NUL byte and the exact CSV UTF-8 bytes including BOM.
+     * @description No-store. Current Admin/Manager authorization runs before POST body consumption, then trusted Origin, JSON type, UTF-8 charset and 6 MiB parser. CSV maximum 1048576 UTF-8 bytes, 500 data records, 65536 raw record bytes including quoting/newline. Reject malformed UTF-8, NUL and unpaired surrogates. Ignore empty lines; quoted multiline values stay one logical record. Trim headers, allow reorder, reject unknown/duplicate/empty or inconsistent columns and empty batches. Require name,purpose,source and at least one phone/email header. Columns name,phone,email,purpose,budget_aed,source. Existing trimmed name (1-120), valid phone (3-40, digits/plus/parentheses/spaces/hyphens, at least one digit), valid lowercase email (max 254); every row needs a contact and any supplied invalid contact rejects. Preserve phone leading zeroes. Lowercase purpose sale/rent and manual source call/walk_in only. Optional positive plain decimal AED budget with <=2 fractional digits maps exactly to 1..1000000000000 fils. Null fields are blank. Validates every row; accurate total counts with at most 20 preview rows and 100 issues. Domain-invalid rows return valid=false. No leads, activities, receipts or notifications are written. Digest is lowercase SHA256 of UTF-8 lead-import:v2 followed by a NUL byte and the exact CSV UTF-8 bytes including BOM. Schema v2 adds scoped existing and same-file duplicateReview across all valid rows. Commit requires current explicit duplicateAcknowledgement when affectedRows>0, recomputes under write reservation, and writes nothing on IMPORT_DUPLICATE_REVIEW_REQUIRED. Compatible committed v1/v2 receipts replay before new semantic phone validation; uncommitted v1 is IMPORT_PREVIEW_STALE.
      */
     post: operations["previewLeadImport"];
     delete?: never;
@@ -51,7 +51,7 @@ export interface paths {
     put?: never;
     /**
      * Atomically create reviewed new unassigned leads
-     * @description No-store. Current Admin/Manager authorization runs before POST body consumption, then trusted Origin, JSON type, UTF-8 charset and 6 MiB parser. CSV maximum 1048576 UTF-8 bytes, 500 data records, 65536 raw record bytes including quoting/newline. Reject malformed UTF-8, NUL and unpaired surrogates. Ignore empty lines; quoted multiline values stay one logical record. Trim headers, allow reorder, reject unknown/duplicate/empty or inconsistent columns and empty batches. Require name,purpose,source and at least one phone/email header. Columns name,phone,email,purpose,budget_aed,source. Existing trimmed name (1-120), valid phone (3-40, digits/plus/parentheses/spaces/hyphens, at least one digit), valid lowercase email (max 254); every row needs a contact and any supplied invalid contact rejects. Preserve phone leading zeroes. Lowercase purpose sale/rent and manual source call/walk_in only. Optional positive plain decimal AED budget with <=2 fractional digits maps exactly to 1..1000000000000 fils. Null fields are blank. Revalidates live staff, CSV, digest and version. Acquire SQLite write reservation before live actor/receipt reads; all leads, normalized search fields, one actor-attributed created activity per row and aggregate LeadImportReceipt commit atomically. New stage, version 1, unassigned/unlinked, actor creator; no original messages, notifications or single-lead submission receipts. Never deduplicate/upsert. Same actor/UUID/content/version returns original IDs/count and preserves later edits/assignments. Another actor/content/version gives generic IMPORT_CONFLICT before stale-preview details. Unsupported positive schemaVersion or mismatched digest gives IMPORT_PREVIEW_STALE. Digest namespace lead-import:v1 then NUL and exact CSV bytes including BOM. Receipt retains no raw CSV/contact snapshots.
+     * @description No-store. Current Admin/Manager authorization runs before POST body consumption, then trusted Origin, JSON type, UTF-8 charset and 6 MiB parser. CSV maximum 1048576 UTF-8 bytes, 500 data records, 65536 raw record bytes including quoting/newline. Reject malformed UTF-8, NUL and unpaired surrogates. Ignore empty lines; quoted multiline values stay one logical record. Trim headers, allow reorder, reject unknown/duplicate/empty or inconsistent columns and empty batches. Require name,purpose,source and at least one phone/email header. Columns name,phone,email,purpose,budget_aed,source. Existing trimmed name (1-120), valid phone (3-40, digits/plus/parentheses/spaces/hyphens, at least one digit), valid lowercase email (max 254); every row needs a contact and any supplied invalid contact rejects. Preserve phone leading zeroes. Lowercase purpose sale/rent and manual source call/walk_in only. Optional positive plain decimal AED budget with <=2 fractional digits maps exactly to 1..1000000000000 fils. Null fields are blank. Revalidates live staff, CSV, digest and version. Acquire SQLite write reservation before live actor/receipt reads; all leads, normalized search fields, one actor-attributed created activity per row and aggregate LeadImportReceipt commit atomically. New stage, version 1, unassigned/unlinked, actor creator; no original messages, notifications or single-lead submission receipts. Never deduplicate/upsert. Same actor/UUID/content/version returns original IDs/count and preserves later edits/assignments. Another actor/content/version gives generic IMPORT_CONFLICT before stale-preview details. Unsupported positive schemaVersion or mismatched digest gives IMPORT_PREVIEW_STALE. Digest namespace lead-import:v2 then NUL and exact CSV bytes including BOM. Receipt retains no raw CSV/contact snapshots. Schema v2 adds scoped existing and same-file duplicateReview across all valid rows. Commit requires current explicit duplicateAcknowledgement when affectedRows>0, recomputes under write reservation, and writes nothing on IMPORT_DUPLICATE_REVIEW_REQUIRED. Compatible committed v1/v2 receipts replay before new semantic phone validation; uncommitted v1 is IMPORT_PREVIEW_STALE.
      */
     post: operations["commitLeadImport"];
     delete?: never;
@@ -271,6 +271,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/staff/leads/duplicate-check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Review accessible phone matches
+     * @description Live staff, trusted Origin, bounded JSON. Authorize excludeLeadId before disclosure. Max 20 summaries; token covers all accessible matching IDs. No receipt or writes.
+     */
+    post: operations["checkLeadDuplicates"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -280,7 +300,7 @@ export interface components {
           /** Format: uuid */
           submissionId: string;
           name: string;
-          /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
+          /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed; repeated internal spaces preserved. Phone contains a digit and only plus, digits, ASCII spaces, parentheses or hyphens, max 40 characters. Trim and preserve display phone, maximum 40 characters. New/changed supplied phone must be a valid UAE mobile/fixed-line number starting with 0, or explicit +/00 international number; strict libphonenumber-js/max isValid(). Compatible successful receipt replays precede semantic phone validation. */
           phone?: string | null;
           /** Format: email */
           email?: string | null;
@@ -332,6 +352,7 @@ export interface components {
       /** Format: date-time */
       updatedAt: string;
       version: number;
+      duplicateCount: number;
     };
     LeadActor: {
       id: string | null;
@@ -341,7 +362,7 @@ export interface components {
       /** Format: uuid */
       submissionId: string;
       name: string;
-      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
+      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed; repeated internal spaces preserved. Phone contains a digit and only plus, digits, ASCII spaces, parentheses or hyphens, max 40 characters. Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
       phone?: string | null;
       /** Format: email */
       email?: string | null;
@@ -351,7 +372,7 @@ export interface components {
       /** Format: uuid */
       submissionId: string;
       name: string;
-      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
+      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed; repeated internal spaces preserved. Phone contains a digit and only plus, digits, ASCII spaces, parentheses or hyphens, max 40 characters. Trim and preserve display phone, maximum 40 characters. New/changed supplied phone must be a valid UAE mobile/fixed-line number starting with 0, or explicit +/00 international number; strict libphonenumber-js/max isValid(). Compatible successful receipt replays precede semantic phone validation. */
       phone?: string | null;
       /** Format: email */
       email?: string | null;
@@ -362,10 +383,12 @@ export interface components {
       /** @enum {string} */
       source: "call" | "walk_in";
       assignedAgentId?: string | null;
+      duplicateAcknowledgement?: components["schemas"]["DuplicateAcknowledgement"];
     };
+    /** @description At least one business field besides expectedVersion and duplicateAcknowledgement is required. Unchanged legacy phone text remains editable; changed supplied phone must normalize. */
     LeadPatchInput: {
       name?: string;
-      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed before validation. The canonical phone must be 3-40 characters, contain a digit, and use only plus, digits, ASCII spaces, parentheses or hyphens. Repeated internal spaces are preserved. At least one phone or email is required. */
+      /** @description Every JavaScript whitespace character is replaced with ASCII space, then trimmed; repeated internal spaces preserved. Phone contains a digit and only plus, digits, ASCII spaces, parentheses or hyphens, max 40 characters. Trim and preserve display phone, maximum 40 characters. New/changed supplied phone must be a valid UAE mobile/fixed-line number starting with 0, or explicit +/00 international number; strict libphonenumber-js/max isValid(). Compatible successful receipt replays precede semantic phone validation. */
       phone?: string | null;
       /** Format: email */
       email?: string | null;
@@ -374,6 +397,7 @@ export interface components {
       budgetFils?: number | null;
       propertyId?: string | null;
       expectedVersion: number;
+      duplicateAcknowledgement?: components["schemas"]["DuplicateAcknowledgement"];
     };
     LeadAssignmentInput: {
       expectedVersion: number;
@@ -405,7 +429,7 @@ export interface components {
     };
     LeadImportPreview: {
       /** @constant */
-      schemaVersion: 1;
+      schemaVersion: 2;
       digest: string;
       valid: boolean;
       totalRows: number;
@@ -418,6 +442,7 @@ export interface components {
         rowNumber: number;
         values: string[];
       }[];
+      duplicateReview: components["schemas"]["ImportDuplicateReview"];
     };
     LeadImportResult: {
       /** Format: uuid */
@@ -445,6 +470,9 @@ export interface components {
         /** Format: uuid */
         requestId: string;
       };
+      fieldErrors?: {
+        [key: string]: string[];
+      };
     };
     LeadDetail: {
       /** Format: uuid */
@@ -471,6 +499,7 @@ export interface components {
       updatedAt: string;
       version: number;
       originalMessage: string | null;
+      duplicateCount: number;
     };
     LeadActivity: {
       /** Format: uuid */
@@ -535,6 +564,61 @@ export interface components {
     LeadNoteResult: {
       note: components["schemas"]["LeadActivity"];
       leadVersion: number;
+    };
+    DuplicateAcknowledgement: {
+      reviewToken: string;
+    };
+    DuplicateLeadSummary: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      phone: string;
+      /** @enum {string} */
+      stage:
+        "new" | "contacted" | "viewing_scheduled" | "offer" | "won" | "lost";
+      assignedAgent: components["schemas"]["LeadStaffSummary"] | null;
+    };
+    DuplicateReview: {
+      canonicalPhone: string;
+      totalMatches: number;
+      matches: components["schemas"]["DuplicateLeadSummary"][];
+      truncated: boolean;
+      reviewToken: string;
+    };
+    ImportDuplicateWarning: {
+      rowNumber: number;
+      canonicalPhone: string;
+      existingMatchCount: number;
+      matches: components["schemas"]["DuplicateLeadSummary"][];
+      sameFileRowNumbers: number[];
+      sameFileRowCount: number;
+    };
+    ImportDuplicateReview: {
+      affectedRows: number;
+      existingMatchRows: number;
+      withinFileRows: number;
+      warningCount: number;
+      warnings: components["schemas"]["ImportDuplicateWarning"][];
+      truncated: boolean;
+      reviewToken: string;
+    };
+    LeadDuplicateError: {
+      error: {
+        code: string;
+        message: string;
+        /** Format: uuid */
+        requestId: string;
+      };
+      duplicateReview: components["schemas"]["DuplicateReview"];
+    };
+    ImportDuplicateError: {
+      error: {
+        code: string;
+        message: string;
+        /** Format: uuid */
+        requestId: string;
+      };
+      duplicateReview: components["schemas"]["ImportDuplicateReview"];
     };
     Photo: {
       /** Format: uuid */
@@ -734,6 +818,7 @@ export interface operations {
           schemaVersion: number;
           digest: string;
           csv: string;
+          duplicateAcknowledgement?: components["schemas"]["DuplicateAcknowledgement"];
         };
       };
     };
@@ -801,7 +886,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["LeadApiError"];
+          "application/json":
+            | components["schemas"]["LeadApiError"]
+            | components["schemas"]["ImportDuplicateError"];
         };
       };
       /** @description IMPORT_LIMIT_EXCEEDED or transport body too large. */
@@ -860,6 +947,8 @@ export interface operations {
         source?: "website" | "call" | "walk_in";
         agentId?: string;
         sort?: "newest" | "oldest" | "updated";
+        /** @description Only leads with other accessible canonical phone matches; combines with filters before pagination. */
+        duplicates?: "only";
       };
       header?: never;
       path?: never;
@@ -1251,6 +1340,8 @@ export interface operations {
         agentId?: string;
         sort?: "newest" | "oldest" | "updated";
         page?: number;
+        /** @description Only leads with other accessible canonical phone matches; combines with filters before pagination. */
+        duplicates?: "only";
       };
       header?: never;
       path?: never;
@@ -1408,7 +1499,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["LeadApiError"];
+          "application/json":
+            | components["schemas"]["LeadApiError"]
+            | components["schemas"]["LeadDuplicateError"];
         };
       };
       /** @description Safe error envelope; no submitted contact or internal exception details. */
@@ -1698,7 +1791,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["LeadApiError"];
+          "application/json":
+            | components["schemas"]["LeadApiError"]
+            | components["schemas"]["LeadDuplicateError"];
         };
       };
       /** @description Safe error envelope; no submitted contact or internal exception details. */
@@ -2124,6 +2219,79 @@ export interface operations {
         };
       };
       /** @description Safe error envelope; no submitted contact or internal exception details. */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
+  checkLeadDuplicates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          phone: string;
+          /** Format: uuid */
+          excludeLeadId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Scoped current review; no writes. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DuplicateReview"];
+        };
+      };
+      /** @description Scoped current review; no writes. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Scoped current review; no writes. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Scoped current review; no writes. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Scoped current review; no writes. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Scoped current review; no writes. */
       500: {
         headers: {
           [name: string]: unknown;

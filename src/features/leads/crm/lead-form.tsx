@@ -1,7 +1,7 @@
 "use client";
 import { buttonVariants } from "@/components/ui/button-variants";
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,9 @@ import type { ActionError, LeadDetail } from "../data/types";
 import { receiptAfterFailure } from "../data/submissions";
 import { LeadFormFields } from "./lead-form-fields";
 import { useDirtyForm } from "./use-dirty-form";
+import { checkLeadDuplicates } from "../data/duplicate-actions";
+import type { DuplicateReview } from "../data/duplicate-types";
+import { LeadDuplicateWarning } from "./lead-duplicate-warning";
 function defaults(lead?: LeadDetail): LeadFormValues {
   return {
     name: lead?.name || "",
@@ -49,7 +52,17 @@ export function LeadForm({
   const [reviewLoaded, setReviewLoaded] = useState(false);
   const [navigating, setNavigating] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [, startPhoneTransition] = useTransition();
   const guard = useRef(false);
+  const duplicateGeneration = useRef(0);
+  const [duplicate, setDuplicate] = useState<{
+    phone: string;
+    review: DuplicateReview;
+    acknowledged: boolean;
+  }>();
+  const [checkingPhone, setCheckingPhone] = useState(false);
+  const [duplicateError, setDuplicateError] = useState("");
+  const baselineCanonical = useRef<string | undefined>(undefined);
   const receipt = useRef<{ id: string; payload: unknown } | undefined>(
     undefined,
   );
@@ -59,7 +72,71 @@ export function LeadForm({
     defaultValues: defaults(initialLead),
   });
   const busy = pending || form.formState.isSubmitting;
+  useEffect(() => {
+    if (message && !busy) summary.current?.focus();
+  }, [message, busy]);
   useDirtyForm(form.formState.isDirty && !navigating);
+  function resetDuplicate() {
+    duplicateGeneration.current++;
+    setDuplicate(undefined);
+    setDuplicateError("");
+    setCheckingPhone(false);
+  }
+  async function checkPhone(
+    phone: string,
+  ): Promise<DuplicateReview | undefined> {
+    if (!phone || (lead && phone === lead.phone)) return undefined;
+    const generation = ++duplicateGeneration.current;
+    setCheckingPhone(true);
+    setDuplicateError("");
+    try {
+      const result = await checkLeadDuplicates({
+        phone,
+        ...(lead ? { excludeLeadId: lead.id } : {}),
+      });
+      if (
+        generation !== duplicateGeneration.current ||
+        form.getValues("phone").trim() !== phone
+      )
+        return undefined;
+      if (!result.ok) {
+        setDuplicate(undefined);
+        setDuplicateError(result.error.message);
+        return undefined;
+      }
+      if (lead?.phone && !baselineCanonical.current) {
+        const baseline = await checkLeadDuplicates({
+          phone: lead.phone,
+          excludeLeadId: lead.id,
+        });
+        if (baseline.ok)
+          baselineCanonical.current = baseline.data.canonicalPhone;
+      }
+      if (
+        generation !== duplicateGeneration.current ||
+        form.getValues("phone").trim() !== phone
+      )
+        return undefined;
+      const review = result.data;
+      if (lead && baselineCanonical.current === review.canonicalPhone) {
+        setDuplicate(undefined);
+        return undefined;
+      }
+      setDuplicate({ phone, review, acknowledged: false });
+      return review;
+    } catch {
+      if (
+        generation === duplicateGeneration.current &&
+        form.getValues("phone").trim() === phone
+      )
+        setDuplicateError(
+          "Matching leads could not be checked. Retry the check.",
+        );
+      return undefined;
+    } finally {
+      if (generation === duplicateGeneration.current) setCheckingPhone(false);
+    }
+  }
   function fail(error: ActionError) {
     setMessage(error.message);
     for (const [key, messages] of Object.entries(error.fieldErrors || {})) {
@@ -69,7 +146,6 @@ export function LeadForm({
           message: messages.join(" "),
         });
     }
-    summary.current?.focus();
   }
   async function reconcile() {
     if (!lead) return;
@@ -100,6 +176,40 @@ export function LeadForm({
   async function save(values: LeadFormValues) {
     startTransition(async () => {
       try {
+        const phone = values.phone.trim();
+        let currentDuplicate =
+          duplicate?.phone === phone ? duplicate : undefined;
+        if (
+          !uncertain &&
+          phone &&
+          (!lead || phone !== lead.phone) &&
+          !currentDuplicate
+        ) {
+          const review = await checkPhone(phone);
+          if (review?.totalMatches) {
+            fail({
+              code: "LEAD_DUPLICATE_REVIEW_REQUIRED",
+              message:
+                "Review matching leads and acknowledge before saving a separate lead.",
+            });
+            return;
+          }
+          currentDuplicate = undefined;
+        }
+        if (
+          !uncertain &&
+          currentDuplicate?.review.totalMatches &&
+          !currentDuplicate.acknowledged
+        ) {
+          fail({
+            code: "LEAD_DUPLICATE_REVIEW_REQUIRED",
+            message: "Acknowledge the matching phone number before saving.",
+          });
+          return;
+        }
+        const duplicateAcknowledgement = currentDuplicate?.acknowledged
+          ? { reviewToken: currentDuplicate.review.reviewToken }
+          : undefined;
         const input = {
           name: values.name,
           phone: values.phone || null,
@@ -119,11 +229,12 @@ export function LeadForm({
             ...rest,
             ...(!unchangedUnavailable ? { propertyId } : {}),
             expectedVersion: lead.version,
+            ...(duplicateAcknowledgement ? { duplicateAcknowledgement } : {}),
           });
         } else {
-          if (!receipt.current)
+          if (!receipt.current || !uncertain)
             receipt.current = {
-              id: crypto.randomUUID(),
+              id: receipt.current?.id ?? crypto.randomUUID(),
               payload: {
                 ...input,
                 source: values.source,
@@ -135,9 +246,23 @@ export function LeadForm({
           result = await createLead({
             ...(receipt.current.payload as Parameters<typeof createLead>[0]),
             submissionId: receipt.current.id,
+            ...(duplicateAcknowledgement ? { duplicateAcknowledgement } : {}),
           });
         }
         if (!result.ok) {
+          if (result.error.code === "LEAD_DUPLICATE_REVIEW_REQUIRED") {
+            setDuplicate(
+              result.error.duplicateReview
+                ? {
+                    phone,
+                    review: result.error.duplicateReview,
+                    acknowledged: false,
+                  }
+                : undefined,
+            );
+            fail(result.error);
+            return;
+          }
           if ([403, 404].includes(result.error.status || 0) && lead) {
             setDenied(true);
             return;
@@ -285,7 +410,40 @@ export function LeadForm({
         disabled={!ready || busy || uncertain || needsReview}
         lead={lead}
         manager={manager}
+        onPhoneChange={resetDuplicate}
+        onPhoneBlur={() =>
+          startPhoneTransition(async () => {
+            await checkPhone(form.getValues("phone").trim());
+          })
+        }
       />
+      <div role="status" aria-live="polite" className="text-sm">
+        {checkingPhone ? "Checking matching leads…" : duplicateError}
+      </div>
+      {duplicateError && (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy || !ready}
+          onClick={() =>
+            startPhoneTransition(async () => {
+              await checkPhone(form.getValues("phone").trim());
+            })
+          }
+        >
+          Retry phone check
+        </Button>
+      )}
+      {duplicate && (
+        <LeadDuplicateWarning
+          review={duplicate.review}
+          acknowledged={duplicate.acknowledged}
+          disabled={busy || !ready}
+          onAcknowledge={(acknowledged) =>
+            setDuplicate({ ...duplicate, acknowledged })
+          }
+        />
+      )}
       <div className="flex flex-wrap items-center gap-3 border-t border-border pt-6">
         <SubmitButton
           pending={busy}

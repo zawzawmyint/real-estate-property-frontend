@@ -1,3 +1,4 @@
+import { createReviewedLead } from "../fixtures/create-lead";
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page, type Cookie } from "@playwright/test";
 
@@ -35,7 +36,7 @@ async function login(page: Page, role = "manager") {
   return user;
 }
 async function create(page: Page, name: string, extra = {}) {
-  const response = await page.request.post("/api/v1/staff/leads", {
+  const response = await createReviewedLead(page.request, {
     headers,
     data: {
       submissionId: randomUUID(),
@@ -284,10 +285,24 @@ test("pointer drag persists a cross-stage move and Escape cancels a drag", async
     exact: true,
   });
   await expect(handle).toBeEnabled();
+  // Raw mouse coordinates do not scroll a drop target into the viewport.
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
+  await handle.hover();
+  async function visibleStageCenter(stage: string) {
+    const box = (await page.locator(`[data-stage="${stage}"]`).boundingBox())!;
+    const viewport = page.viewportSize()!;
+    const left = Math.max(0, box.x);
+    const right = Math.min(viewport.width, box.x + box.width);
+    const top = Math.max(0, box.y);
+    const bottom = Math.min(viewport.height, box.y + box.height);
+    expect(right).toBeGreaterThan(left);
+    expect(bottom).toBeGreaterThan(top);
+    return { x: (left + right) / 2, y: (top + bottom) / 2 };
+  }
   const source = (await handle.boundingBox())!;
-  const target = (await page
-    .locator('[data-stage="contacted"]')
-    .boundingBox())!;
+  const target = await visibleStageCenter("contacted");
   await page.mouse.move(
     source.x + source.width / 2,
     source.y + source.height / 2,
@@ -298,30 +313,28 @@ test("pointer drag persists a cross-stage move and Escape cancels a drag", async
     source.y + source.height / 2,
     { steps: 4 },
   );
-  await page.mouse.move(target.x + target.width / 2, target.y + 180, {
-    steps: 16,
-  });
+  await page.mouse.move(target.x, target.y, { steps: 16 });
+  await expect(
+    page.getByText(`${name} over Contacted.`, { exact: true }),
+  ).toHaveCount(1);
   await page.mouse.up();
   await expect(
     page.getByRole("combobox", { name: `Move ${name} to stage`, exact: true }),
   ).toHaveValue("contacted");
   await expect(handle).toBeEnabled();
-  // Let Playwright wait for the drop animation to settle before reading geometry.
+  // Re-establish visible geometry after the saved move before testing cancellation.
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
   await handle.hover();
   const current = (await handle.boundingBox())!;
-  const cancelTarget = (await page
-    .locator('[data-stage="new"]')
-    .boundingBox())!;
+  const cancelTarget = await visibleStageCenter("new");
   await page.mouse.move(
     current.x + current.width / 2,
     current.y + current.height / 2,
   );
   await page.mouse.down();
-  await page.mouse.move(
-    cancelTarget.x + cancelTarget.width / 2,
-    cancelTarget.y + 180,
-    { steps: 16 },
-  );
+  await page.mouse.move(cancelTarget.x, cancelTarget.y, { steps: 16 });
   await expect(
     // Cancellation only requires an active drag; collision targets can differ
     // while the pointer crosses the boundary between these adjacent columns.

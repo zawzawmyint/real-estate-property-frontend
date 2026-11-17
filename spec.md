@@ -2,6 +2,10 @@
 
 Status: Project overview. Foundation, staff authentication/roles, property management, public discovery and demo data are verified.
 
+## Verified P2-05
+
+The [lead duplicate detection specification](specs/lead-duplicate-detection/spec.md) verifies backend-owned canonical phone matching, scoped CRM warnings/acknowledgement, counts/filtering and lead-import v2 review, with no public duplicate disclosure. The [backend contract snapshot](docs/contracts/lead-duplicate-detection.md) mirrors the backend narrative contract. Patched frontend/backend checks, disposable migration verification, runtime inspection, responsive/native-zoom review and the final clean serial browser run passed. No deployment or normal-database migration is claimed.
+
 ## Purpose and scope
 
 Provide the Avenor Properties public website and internal staff CRM interface in one independently versioned frontend repository. Deliver one verified feature slice at a time. The client portal is later, optional work.

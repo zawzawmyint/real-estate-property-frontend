@@ -62,7 +62,7 @@ test("public inquiry keeps contact hints and error anchors without invalid write
   const described = await descriptions(phone);
   expect(
     described.some((text) =>
-      text.includes("Provide a phone number or email address."),
+      text.includes("Enter a phone number or email address."),
     ),
   ).toBe(true);
   expect(described.some((text) => text.startsWith("MISSING:"))).toBe(false);

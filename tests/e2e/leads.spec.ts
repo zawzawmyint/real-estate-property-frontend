@@ -1,3 +1,4 @@
+import { createReviewedLead } from "../fixtures/create-lead";
 import { randomUUID } from "node:crypto";
 import {
   expect,
@@ -47,7 +48,7 @@ async function signIn(page: Page, identity = "manager") {
 }
 
 async function createLead(page: Page, extra: Record<string, unknown> = {}) {
-  const response = await page.request.post("/api/v1/staff/leads", {
+  const response = await createReviewedLead(page.request, {
     headers,
     data: {
       submissionId: randomUUID(),
@@ -248,7 +249,13 @@ test("manual lead form saves contact details and exact AED budget", async ({
   await page.getByRole("radio", { name: propertyTitle, exact: true }).check();
   await expect(page.getByLabel("Purpose", { exact: true })).toHaveValue("rent");
   await page.getByLabel("Name", { exact: true }).fill(name);
-  await page.getByLabel("Phone", { exact: true }).fill("+971 50 765 4321");
+  await page
+    .getByLabel("Phone", { exact: true })
+    .fill(
+      test.info().project.name === "mobile"
+        ? "+971 50 765 4322"
+        : "+971 50 765 4321",
+    );
   await page.getByLabel(/Budget.*AED/).fill("1250000.50");
   await page
     .getByRole("button", { name: /Create lead|Save lead/, exact: true })

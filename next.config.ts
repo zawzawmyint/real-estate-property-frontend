@@ -8,7 +8,14 @@ const nextConfig: NextConfig = {
   turbopack: { root: dirname(fileURLToPath(import.meta.url)) },
   poweredByHeader: false,
   ...(process.env.E2E_TEST_RUN === "1"
-    ? { devIndicators: false as const }
+    ? {
+        devIndicators: false as const,
+        // Keep warmed routes compiled throughout long serial browser runs.
+        onDemandEntries: {
+          maxInactiveAge: 60 * 60 * 1000,
+          pagesBufferLength: 64,
+        },
+      }
     : {}),
   experimental: { serverActions: { bodySizeLimit: "6mb" } },
   async rewrites() {

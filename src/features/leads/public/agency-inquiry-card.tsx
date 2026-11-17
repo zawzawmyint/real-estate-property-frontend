@@ -373,6 +373,7 @@ export function AgencyInquiryCard({
               <TextField
                 id="agency-phone"
                 label="Phone"
+                help="Use a UAE local number, or include + or 00 and the country code for other countries."
                 type="tel"
                 {...register("phone")}
                 autoComplete="tel"

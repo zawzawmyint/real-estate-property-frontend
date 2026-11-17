@@ -74,9 +74,12 @@ export function LeadFilters({
     }, 300);
     return () => clearTimeout(timer);
   }, [q, filters, router, checkingSession, href, pipeline]);
-  const count = [filters.stage, filters.source, filters.agentId].filter(
-    Boolean,
-  ).length;
+  const count = [
+    filters.stage,
+    filters.source,
+    filters.agentId,
+    filters.duplicates,
+  ].filter(Boolean).length;
   function controls(
     value: LeadFilters,
     change: (next: LeadFilters) => void,
@@ -85,6 +88,20 @@ export function LeadFilters({
   ) {
     return (
       <>
+        <SelectField
+          label="Possible duplicates"
+          id={`lead-duplicates-${suffix}`}
+          value={value.duplicates || ""}
+          onChange={(event) =>
+            change({
+              ...value,
+              duplicates: event.target.value === "only" ? "only" : undefined,
+            })
+          }
+        >
+          <option value="">All leads</option>
+          <option value="only">Matching phone numbers only</option>
+        </SelectField>
         {!pipeline && (
           <SelectField
             label="Stage"
@@ -136,7 +153,9 @@ export function LeadFilters({
     );
   }
   const disabled = !ready || checkingSession;
-  function removeFilter(key: "q" | "stage" | "source" | "agentId") {
+  function removeFilter(
+    key: "q" | "stage" | "source" | "agentId" | "duplicates",
+  ) {
     if (key === "q") {
       setSearch({ source: filters.q || "", value: "", requested: "" });
     } else navigate({ ...filters, [key]: undefined });
@@ -274,6 +293,15 @@ export function LeadFilters({
                   onRemove={() => removeFilter("agentId")}
                 >
                   Assigned agent
+                </FilterChip>
+              )}
+              {filters.duplicates && (
+                <FilterChip
+                  disabled={disabled}
+                  removeLabel="Remove possible duplicates filter"
+                  onRemove={() => removeFilter("duplicates")}
+                >
+                  Possible duplicates
                 </FilterChip>
               )}
               <Link

@@ -11,6 +11,7 @@ export function useDirtyForm(dirty: boolean) {
       const link = (event.target as Element)?.closest("a[href]");
       if (
         !link ||
+        link.getAttribute("target") === "_blank" ||
         event.defaultPrevented ||
         event.ctrlKey ||
         event.metaKey ||

@@ -24,6 +24,7 @@ import {
 } from "../data/submissions";
 import { AssignmentDialog } from "./assignment-dialog";
 import { LeadPropertyMatching } from "./lead-property-matching";
+import { LeadDuplicatePanel } from "./lead-duplicate-panel";
 import {
   LeadDate,
   StageBadge,
@@ -378,6 +379,13 @@ export function LeadDetail({
             />
           </LeadSection>
           <LeadSection title="Lead stage">
+            <LeadDuplicatePanel
+              key={`${lead.id}:${lead.phone}:${lead.version}`}
+              id={lead.id}
+              phone={lead.phone}
+              count={lead.duplicateCount}
+              disabled={!ready || pending}
+            />
             <form
               className="space-y-4"
               onSubmit={(event) => {

@@ -982,9 +982,19 @@ test("CRM missing photos use shared fallback without expanding inventory thumbna
 }, testInfo) => {
   await signIn(page);
   const property = await createProperty(page);
-  await page.route("**/media/**", (route) => route.abort());
+  await page.route(
+    (url) => url.pathname.startsWith("/media/"),
+    (route) =>
+      route.request().resourceType() === "image"
+        ? route.abort()
+        : route.continue(),
+  );
 
   await page.goto(`/crm/properties/${property.id}`);
+  await page
+    .locator('[data-slot="property-image"]')
+    .first()
+    .scrollIntoViewIfNeeded();
   await expect(
     page.getByRole("img", {
       name: `${property.title}, photo 1. Photo unavailable`,
@@ -992,6 +1002,10 @@ test("CRM missing photos use shared fallback without expanding inventory thumbna
     }),
   ).toBeVisible();
   await page.goto(`/crm/properties/${property.id}/edit`);
+  await page
+    .locator('[data-slot="property-image"]')
+    .first()
+    .scrollIntoViewIfNeeded();
   await expect(
     page.getByRole("img", {
       name: `${property.title}, photo 1. Photo unavailable`,
@@ -1003,6 +1017,7 @@ test("CRM missing photos use shared fallback without expanding inventory thumbna
     .locator('[data-slot="property-image"]')
     .filter({ visible: true })
     .first();
+  await thumbnail.scrollIntoViewIfNeeded();
   await expect(thumbnail.locator('[data-state="unavailable"]')).toBeVisible();
   const bounds = await thumbnail.boundingBox();
   expect(bounds?.height).toBe(72);
