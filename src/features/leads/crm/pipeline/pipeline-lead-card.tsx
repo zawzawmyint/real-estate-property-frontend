@@ -13,6 +13,7 @@ import type { LeadSummary } from "../../data/types";
 import {
   LeadDate,
   SourceBadge,
+  TemperatureBadge,
   budgetLabel,
   assigneeLabel,
 } from "../lead-presentation";
@@ -56,7 +57,10 @@ export function PipelineLeadCard({
       )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <SourceBadge source={lead.source} />
+        <div className="flex flex-wrap gap-2">
+          <SourceBadge source={lead.source} />
+          <TemperatureBadge temperature={lead.temperature} />
+        </div>
         <Button
           ref={handleRef}
           variant="ghost"

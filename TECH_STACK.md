@@ -94,20 +94,23 @@ The following lists every direct backend package declared in package.json (compa
 
 ### Backend development dependencies
 
-| Package             | Pinned version | Purpose                                                       |
-| ------------------- | -------------- | ------------------------------------------------------------- |
-| `prisma`            | 7.10.1         | Client generation and committed SQLite auth migration tooling |
-| `typescript`        | 5.9.3          | Strict static type checking and server compilation            |
-| `tsx`               | 4.23.15        | Run TypeScript during Node development and database checks    |
-| `vitest`            | 5.0.5          | Backend boundary and filesystem tests                         |
-| `supertest`         | 7.3.1          | Exercise the real Express application in HTTP tests           |
-| `eslint`            | 9.39.5         | Linting                                                       |
-| `@eslint/js`        | 9.39.5         | ESLint base rules                                             |
-| `typescript-eslint` | 8.72.0         | TypeScript-aware lint configuration                           |
-| `prettier`          | 3.9.10         | Source and documentation formatting                           |
-| `@types/express`    | 5.0.6          | Express TypeScript definitions                                |
-| `@types/node`       | 24.19.2        | Node.js TypeScript definitions                                |
-| `@types/supertest`  | 7.2.1          | Supertest TypeScript definitions                              |
+`@redocly/openapi-core` is a direct backend development dependency for semantic validation of resolved OpenAPI authentication requirements. It is not a backend runtime dependency or a direct frontend dependency; the frontend already uses it transitively through `openapi-typescript`.
+
+| Package                 | Pinned version | Purpose                                                       |
+| ----------------------- | -------------- | ------------------------------------------------------------- |
+| `prisma`                | 7.10.1         | Client generation and committed SQLite auth migration tooling |
+| `typescript`            | 5.9.3          | Strict static type checking and server compilation            |
+| `tsx`                   | 4.23.15        | Run TypeScript during Node development and database checks    |
+| `vitest`                | 5.0.5          | Backend boundary and filesystem tests                         |
+| `@redocly/openapi-core` | 1.34.21        | Dev-only resolved OpenAPI authentication contract validation  |
+| `supertest`             | 7.3.1          | Exercise the real Express application in HTTP tests           |
+| `eslint`                | 9.39.5         | Linting                                                       |
+| `@eslint/js`            | 9.39.5         | ESLint base rules                                             |
+| `typescript-eslint`     | 8.72.0         | TypeScript-aware lint configuration                           |
+| `prettier`              | 3.9.10         | Source and documentation formatting                           |
+| `@types/express`        | 5.0.6          | Express TypeScript definitions                                |
+| `@types/node`           | 24.19.2        | Node.js TypeScript definitions                                |
+| `@types/supertest`      | 7.2.1          | Supertest TypeScript definitions                              |
 
 ## Public chatbot runtime
 

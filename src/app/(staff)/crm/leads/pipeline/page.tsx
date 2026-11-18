@@ -25,8 +25,10 @@ export default async function PipelinePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(await searchParams))
-    if (typeof value === "string") query.set(key, value);
+  for (const [key, value] of Object.entries(await searchParams)) {
+    if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
+    else if (typeof value === "string") query.set(key, value);
+  }
   const queryString = query.toString();
   let filters;
   try {

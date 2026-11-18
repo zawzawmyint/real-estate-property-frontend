@@ -18,7 +18,12 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { useClientReady } from "@/lib/use-client-ready";
-import { stages, stageLabels, sourceLabels } from "../data/input";
+import {
+  stages,
+  stageLabels,
+  sourceLabels,
+  temperatureLabels,
+} from "../data/input";
 import { leadsHref, type LeadFilters } from "../data/filters";
 import { pipelineHref } from "../data/pipeline";
 import { SearchPicker } from "./search-picker";
@@ -79,6 +84,7 @@ export function LeadFilters({
     filters.source,
     filters.agentId,
     filters.duplicates,
+    filters.temperature,
   ].filter(Boolean).length;
   function controls(
     value: LeadFilters,
@@ -88,6 +94,25 @@ export function LeadFilters({
   ) {
     return (
       <>
+        <SelectField
+          label="Temperature"
+          id={`lead-temperature-${suffix}`}
+          value={value.temperature || ""}
+          onChange={(event) =>
+            change({
+              ...value,
+              temperature: (event.target.value ||
+                undefined) as LeadFilters["temperature"],
+            })
+          }
+        >
+          <option value="">All temperatures</option>
+          {Object.entries(temperatureLabels).map(([key, label]) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
+        </SelectField>
         <SelectField
           label="Possible duplicates"
           id={`lead-duplicates-${suffix}`}
@@ -154,7 +179,7 @@ export function LeadFilters({
   }
   const disabled = !ready || checkingSession;
   function removeFilter(
-    key: "q" | "stage" | "source" | "agentId" | "duplicates",
+    key: "q" | "stage" | "source" | "agentId" | "duplicates" | "temperature",
   ) {
     if (key === "q") {
       setSearch({ source: filters.q || "", value: "", requested: "" });
@@ -264,6 +289,15 @@ export function LeadFilters({
                   onRemove={() => removeFilter("q")}
                 >
                   Search: {filters.q}
+                </FilterChip>
+              )}
+              {filters.temperature && (
+                <FilterChip
+                  disabled={disabled}
+                  removeLabel="Remove temperature filter"
+                  onRemove={() => removeFilter("temperature")}
+                >
+                  Temperature: {temperatureLabels[filters.temperature]}
                 </FilterChip>
               )}
               {filters.stage && (

@@ -214,6 +214,28 @@ export interface paths {
     patch: operations["assignLead"];
     trace?: never;
   };
+  "/api/v1/staff/leads/{id}/temperature": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Manually assess lead temperature independently of stage
+     * @description Live native staff session required. Admin/Manager access all; Agent only current assigned leads. Inaccessible resource IDs return 404. All mutation access/session/eligibility/version checks occur inside SQLite transactions. Writes require exact APP_ORIGIN, application/json and <=16KiB body.
+     */
+    patch: operations["changeLeadTemperature"];
+    trace?: never;
+  };
   "/api/v1/staff/leads/{id}/stage": {
     parameters: {
       query?: never;
@@ -328,6 +350,12 @@ export interface components {
       location: string | null;
       available: boolean;
     };
+    /** @enum {string} */
+    LeadTemperature: "hot" | "warm" | "cold" | "unassessed";
+    LeadTemperatureInput: {
+      expectedVersion: number;
+      temperature: components["schemas"]["LeadTemperature"];
+    };
     LeadSummary: {
       /** Format: uuid */
       id: string;
@@ -353,6 +381,7 @@ export interface components {
       updatedAt: string;
       version: number;
       duplicateCount: number;
+      temperature: components["schemas"]["LeadTemperature"];
     };
     LeadActor: {
       id: string | null;
@@ -500,6 +529,7 @@ export interface components {
       version: number;
       originalMessage: string | null;
       duplicateCount: number;
+      temperature: components["schemas"]["LeadTemperature"];
     };
     LeadActivity: {
       /** Format: uuid */
@@ -512,7 +542,8 @@ export interface components {
         | "stage_changed"
         | "details_updated"
         | "note_added"
-        | "call_logged";
+        | "call_logged"
+        | "temperature_changed";
       actor: components["schemas"]["LeadActor"] | null;
       /** Format: date-time */
       createdAt: string;
@@ -538,6 +569,10 @@ export interface components {
       changedFields: (
         "name" | "phone" | "email" | "purpose" | "budgetFils" | "propertyId"
       )[];
+      temperatureChange: {
+        from: components["schemas"]["LeadTemperature"];
+        to: components["schemas"]["LeadTemperature"];
+      } | null;
     };
     LeadPage: {
       items: components["schemas"]["LeadSummary"][];
@@ -949,6 +984,8 @@ export interface operations {
         sort?: "newest" | "oldest" | "updated";
         /** @description Only leads with other accessible canonical phone matches; combines with filters before pagination. */
         duplicates?: "only";
+        /** @description Single temperature filter before pagination/count/export bounds. Repeated or invalid values are rejected. */
+        temperature?: components["schemas"]["LeadTemperature"];
       };
       header?: never;
       path?: never;
@@ -1342,6 +1379,8 @@ export interface operations {
         page?: number;
         /** @description Only leads with other accessible canonical phone matches; combines with filters before pagination. */
         duplicates?: "only";
+        /** @description Single temperature filter before pagination/count/export bounds. Repeated or invalid values are rejected. */
+        temperature?: components["schemas"]["LeadTemperature"];
       };
       header?: never;
       path?: never;
@@ -1841,6 +1880,105 @@ export interface operations {
     };
     responses: {
       /** @description Success; matching submissionId replay also returns 200. */
+      200: {
+        headers: {
+          "Cache-Control"?: "no-store";
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadDetail"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      415: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+      /** @description Safe error envelope; no submitted contact or internal exception details. */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeadApiError"];
+        };
+      };
+    };
+  };
+  changeLeadTemperature: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LeadTemperatureInput"];
+      };
+    };
+    responses: {
+      /** @description Current lead detail; same-value current-version requests are no-ops. No submissionId or receipt replay. */
       200: {
         headers: {
           "Cache-Control"?: "no-store";

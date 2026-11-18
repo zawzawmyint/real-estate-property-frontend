@@ -118,7 +118,7 @@ const server = createServer(async (incoming, response) => {
             rule.path === "/api/v1/auth/get-session" &&
             typeof rule.sessionDigest === "string" &&
             /^[a-f0-9]{64}$/.test(rule.sessionDigest)) ||
-          /^\/api\/v1\/staff\/leads(?:\/[\w-]+(?:\/(?:notes|stage|assignment|activity))?)?$/.test(
+          /^\/api\/v1\/staff\/leads(?:\/[\w-]+(?:\/(?:notes|stage|assignment|activity|temperature))?)?$/.test(
             rule.path,
           ) ||
           /^\/api\/v1\/staff\/viewings(?:\/[\w-]+(?:\/status)?)?$/.test(

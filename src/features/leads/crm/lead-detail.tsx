@@ -13,11 +13,17 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { useClientReady } from "@/lib/use-client-ready";
-import { changeStage, addLeadNote } from "../data/actions";
+import { changeStage, changeTemperature, addLeadNote } from "../data/actions";
+import { SelectField } from "@/components/forms/fields";
 import { getLead, getActivity } from "../data/queries";
 import { LeadApiError } from "../data/request";
 import type { Activity, LeadDetail as Detail, Page } from "../data/types";
-import { stageLabels, stages } from "../data/input";
+import {
+  stageLabels,
+  stages,
+  temperatureLabels,
+  temperatures,
+} from "../data/input";
 import {
   receiptAfterFailure,
   receiptAfterNoteConflict,
@@ -29,6 +35,7 @@ import {
   LeadDate,
   StageBadge,
   SourceBadge,
+  TemperatureBadge,
   AssigneeContext,
   budgetLabel,
 } from "./lead-presentation";
@@ -41,6 +48,8 @@ const entrySchema = z.object({
 });
 type Entry = z.infer<typeof entrySchema>;
 function activityTitle(event: Activity) {
+  if (event.temperatureChange)
+    return `Temperature changed · ${temperatureLabels[event.temperatureChange.from]} → ${temperatureLabels[event.temperatureChange.to]}`;
   if (event.note)
     return event.note.kind === "call" ? "Call logged" : "Note added";
   if (event.assignment)
@@ -77,7 +86,9 @@ export function LeadDetail({
   const [announcement, setAnnouncement] = useState(saved ? "Lead saved." : "");
   const [selected, setSelected] = useState(initialLead.stage);
   const [confirmStage, setConfirmStage] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [transitionPending, startTransition] = useTransition();
+  const [assignmentPending, setAssignmentPending] = useState(false);
+  const pending = transitionPending || assignmentPending;
   const [operation, setOperation] = useState("");
   const [review, setReview] = useState(false);
   const [noteUncertain, setNoteUncertain] = useState(false);
@@ -93,7 +104,15 @@ export function LeadDetail({
     defaultValues: { kind: "note", body: "" },
   });
   const kind = useWatch({ control: form.control, name: "kind" });
-  useDirtyForm(form.formState.isDirty);
+  const temperatureForm = useForm<{ temperature: Detail["temperature"] }>({
+    resolver: zodResolver(z.object({ temperature: z.enum(temperatures) })),
+    defaultValues: { temperature: initialLead.temperature },
+  });
+  const temperature = useWatch({
+    control: temperatureForm.control,
+    name: "temperature",
+  });
+  useDirtyForm(form.formState.isDirty || temperature !== lead.temperature);
   function handleDenied(error: unknown) {
     if (error instanceof LeadApiError && [403, 404].includes(error.status)) {
       setDenied(true);
@@ -110,6 +129,8 @@ export function LeadDetail({
     try {
       const fresh = await getLead(lead.id);
       const events = await getActivity(lead.id);
+      if (temperatureForm.getValues("temperature") === lead.temperature)
+        temperatureForm.reset({ temperature: fresh.temperature });
       setLead(fresh);
       setActivity(events);
       setReview(false);
@@ -125,7 +146,7 @@ export function LeadDetail({
     }
   }
   async function saveStage() {
-    if (guard.current || pending || review) return;
+    if (guard.current || pending || review || noteUncertain) return;
     if ((selected === "won" || selected === "lost") && !confirmStage) {
       setConfirmStage(true);
       return;
@@ -140,6 +161,11 @@ export function LeadDetail({
           stage: selected,
         });
         if (!result.ok) {
+          if (result.error.status === 401) {
+            setDenied(true);
+            startTransition(() => router.replace("/login"));
+            return;
+          }
           if ([403, 404].includes(result.error.status || 0)) {
             setDenied(true);
             return;
@@ -172,6 +198,57 @@ export function LeadDetail({
       }
     });
   }
+  async function saveTemperature() {
+    if (guard.current || pending || review || noteUncertain || !ready) return;
+    guard.current = true;
+    setOperation("temperature");
+    setMessage("");
+    startTransition(async () => {
+      try {
+        const parsed = await temperatureForm.trigger();
+        if (!parsed) return;
+        const desired = temperatureForm.getValues("temperature");
+        const result = await changeTemperature(lead.id, {
+          expectedVersion: lead.version,
+          temperature: desired,
+        });
+        if (!result.ok) {
+          if (result.error.status === 401) {
+            setDenied(true);
+            startTransition(() => router.replace("/login"));
+            return;
+          }
+          if ([403, 404].includes(result.error.status || 0)) {
+            setDenied(true);
+            return;
+          }
+          if (result.error.status === 409 || result.error.uncertain) {
+            const fresh = await reload();
+            if (fresh)
+              setMessage(
+                fresh.temperature === desired
+                  ? "The current saved temperature matches your selection. Review the latest activity."
+                  : "Review the current saved temperature, then explicitly save your preserved selection again.",
+              );
+          } else setMessage(result.error.message);
+          return;
+        }
+        setLead(result.data);
+        temperatureForm.reset({ temperature: result.data.temperature });
+        setAnnouncement("Temperature saved.");
+        await reload();
+        startTransition(() => router.refresh());
+      } catch {
+        const fresh = await reload();
+        if (fresh)
+          setMessage(
+            "The temperature result could not be confirmed. Review the current saved temperature before saving again.",
+          );
+      } finally {
+        guard.current = false;
+      }
+    });
+  }
   async function saveEntry(entry: Entry) {
     if (!receipt.current)
       receipt.current = {
@@ -189,6 +266,11 @@ export function LeadDetail({
           ...current.entry,
         });
         if (!result.ok) {
+          if (result.error.status === 401) {
+            setDenied(true);
+            startTransition(() => router.replace("/login"));
+            return;
+          }
           if ([403, 404].includes(result.error.status || 0)) {
             setDenied(true);
             return;
@@ -263,6 +345,7 @@ export function LeadDetail({
           <div className="mb-3 flex flex-wrap gap-2">
             <SourceBadge source={lead.source} />
             <StageBadge stage={lead.stage} />
+            <TemperatureBadge temperature={lead.temperature} />
           </div>
           <h1 className="text-3xl font-semibold tracking-tight break-words">
             {lead.name}
@@ -378,6 +461,47 @@ export function LeadDetail({
               onAccessError={handleDenied}
             />
           </LeadSection>
+          <LeadSection
+            title="Lead temperature"
+            description="Assess interest and readiness independently of the sales stage."
+          >
+            <form
+              noValidate
+              className="space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void saveTemperature();
+              }}
+            >
+              <SelectField
+                id="detail-temperature"
+                label="Temperature"
+                help="Hot: ready soon. Warm: interested with decisions pending. Cold: low current engagement or a distant timeline."
+                {...temperatureForm.register("temperature")}
+                disabled={!ready || pending || review || noteUncertain}
+                error={temperatureForm.formState.errors.temperature?.message}
+              >
+                {Object.entries(temperatureLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </SelectField>
+              <SubmitButton
+                pending={pending && operation === "temperature"}
+                label="Save temperature"
+                pendingLabel="Saving temperature…"
+                disabled={
+                  !ready ||
+                  pending ||
+                  review ||
+                  noteUncertain ||
+                  temperature === lead.temperature
+                }
+                className="w-full"
+              />
+            </form>
+          </LeadSection>
           <LeadSection title="Lead stage">
             <LeadDuplicatePanel
               key={`${lead.id}:${lead.phone}:${lead.version}`}
@@ -397,7 +521,7 @@ export function LeadDetail({
                 <FieldLabel htmlFor="detail-stage">Stage</FieldLabel>
                 <NativeSelect
                   id="detail-stage"
-                  disabled={!ready || pending || review}
+                  disabled={!ready || pending || review || noteUncertain}
                   value={selected}
                   onChange={(event) => {
                     setSelected(event.target.value as Detail["stage"]);
@@ -438,7 +562,11 @@ export function LeadDetail({
                 }
                 pendingLabel="Saving stage…"
                 disabled={
-                  !ready || pending || review || selected === lead.stage
+                  !ready ||
+                  pending ||
+                  review ||
+                  noteUncertain ||
+                  selected === lead.stage
                 }
               />
             </form>
@@ -450,13 +578,27 @@ export function LeadDetail({
             {manager && (
               <AssignmentDialog
                 lead={lead}
-                onSaved={(updated, text) => {
+                coordination={{
+                  blocked: transitionPending || review || noteUncertain,
+                  acquire: () => {
+                    if (guard.current || pending || review || noteUncertain)
+                      return false;
+                    guard.current = true;
+                    setAssignmentPending(true);
+                    return true;
+                  },
+                  release: () => {
+                    guard.current = false;
+                    setAssignmentPending(false);
+                  },
+                  reconcile: reload,
+                  onAccessError: handleDenied,
+                }}
+                onSaved={async (updated, text) => {
                   setLead(updated);
                   setAnnouncement(text);
-                  startTransition(async () => {
-                    await reload();
-                    startTransition(() => router.refresh());
-                  });
+                  await reload();
+                  startTransition(() => router.refresh());
                 }}
               />
             )}
