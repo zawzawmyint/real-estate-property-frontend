@@ -1,9 +1,11 @@
 import type { StaffRole } from "@/lib/auth/roles";
-import { stages } from "./input";
+import { stages, temperatures } from "./input";
+import type { LeadSummary } from "./types";
 export type LeadFilters = {
   view: "unassigned" | "all" | "mine";
   q?: string;
   stage?: string;
+  temperature?: LeadSummary["temperature"];
   source?: string;
   agentId?: string;
   duplicates?: "only";
@@ -18,6 +20,7 @@ export function parseLeadFilters(
     "view",
     "q",
     "stage",
+    "temperature",
     "source",
     "agentId",
     "sort",
@@ -41,6 +44,7 @@ export function parseLeadFilters(
     !["unassigned", "all", "mine"].includes(view) ||
     !["newest", "oldest", "updated"].includes(sort) ||
     (value.stage && !stages.includes(value.stage as never)) ||
+    (value.temperature && !temperatures.includes(value.temperature as never)) ||
     (value.source && !["website", "call", "walk_in"].includes(value.source)) ||
     (value.duplicates !== undefined && value.duplicates !== "only") ||
     (value.q?.length ?? 0) > 120 ||
@@ -57,6 +61,9 @@ export function parseLeadFilters(
     view: view as LeadFilters["view"],
     ...(value.q ? { q: value.q } : {}),
     ...(value.stage ? { stage: value.stage } : {}),
+    ...(value.temperature
+      ? { temperature: value.temperature as LeadSummary["temperature"] }
+      : {}),
     ...(value.source ? { source: value.source } : {}),
     ...(value.agentId ? { agentId: value.agentId } : {}),
     ...(value.duplicates ? { duplicates: "only" as const } : {}),

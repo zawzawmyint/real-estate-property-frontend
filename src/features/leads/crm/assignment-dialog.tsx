@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useClientReady } from "@/lib/use-client-ready";
 import { assignLead } from "../data/actions";
 import { getLead } from "../data/queries";
+import { LeadApiError } from "../data/request";
 import type { LeadDetail, LeadSummary } from "../data/types";
 import { SearchPicker } from "./search-picker";
 import { assigneeLabel } from "./lead-presentation";
@@ -23,9 +24,17 @@ import { assigneeLabel } from "./lead-presentation";
 export function AssignmentDialog({
   lead,
   onSaved,
+  coordination,
 }: {
   lead: LeadSummary;
-  onSaved?: (lead: LeadDetail, message: string) => void;
+  onSaved?: (lead: LeadDetail, message: string) => void | Promise<void>;
+  coordination?: {
+    blocked: boolean;
+    acquire: () => boolean;
+    release: () => void;
+    reconcile: () => Promise<LeadDetail | null>;
+    onAccessError: (error: unknown) => boolean;
+  };
 }) {
   const ready = useClientReady();
   const router = useRouter();
@@ -40,7 +49,7 @@ export function AssignmentDialog({
   const [pending, startTransition] = useTransition();
   const guard = useRef(false);
   function changeOpen(next: boolean) {
-    if (pending) return;
+    if (pending || (next && coordination?.blocked)) return;
     setOpen(next);
     if (next) {
       setCurrent(lead);
@@ -52,7 +61,13 @@ export function AssignmentDialog({
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
       <DialogTrigger
-        render={<Button type="button" variant="outline" disabled={!ready} />}
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!ready || coordination?.blocked}
+          />
+        }
       >
         {lead.assignedAgent ? "Reassign agent" : "Assign agent"}
       </DialogTrigger>
@@ -83,9 +98,11 @@ export function AssignmentDialog({
               guard.current ||
               pending ||
               mustReload ||
+              coordination?.blocked ||
               selected === (current.assignedAgent?.id || "")
             )
               return;
+            if (coordination && !coordination.acquire()) return;
             guard.current = true;
             setError("");
             startTransition(async () => {
@@ -95,8 +112,24 @@ export function AssignmentDialog({
                   assignedAgentId: selected || null,
                 });
                 if (!result.ok) {
+                  if (
+                    coordination?.onAccessError(
+                      new LeadApiError(
+                        result.error.status || 0,
+                        result.error.code,
+                        result.error.message,
+                      ),
+                    )
+                  )
+                    return;
                   if (result.error.status === 409 || result.error.uncertain) {
-                    const fresh = await getLead(current.id);
+                    const fresh = coordination
+                      ? await coordination.reconcile()
+                      : await getLead(current.id);
+                    if (!fresh) {
+                      setMustReload(true);
+                      return;
+                    }
                     setCurrent(fresh);
                     setError(
                       "This lead changed. Review the current assignment and explicitly save again.",
@@ -107,16 +140,19 @@ export function AssignmentDialog({
                 const message = selected
                   ? `Lead assigned to ${selectionName}`
                   : "Lead moved to Unassigned";
-                onSaved?.(result.data, message);
+                await onSaved?.(result.data, message);
                 setOpen(false);
                 startTransition(() => router.refresh());
-              } catch {
+              } catch (error) {
+                if (coordination?.onAccessError(error)) return;
+                if (coordination) await coordination.reconcile();
                 setMustReload(true);
                 setError(
                   "The assignment could not be confirmed. Reload the latest assignment before trying again.",
                 );
               } finally {
                 guard.current = false;
+                coordination?.release();
               }
             });
           }}
@@ -125,7 +161,7 @@ export function AssignmentDialog({
             kind="agent"
             value={selected}
             currentLabel={selectionName}
-            disabled={pending}
+            disabled={pending || coordination?.blocked}
             onChange={(value, option) => {
               setSelected(value);
               setSelectionName(option?.name || "");
@@ -145,7 +181,11 @@ export function AssignmentDialog({
                 onClick={() =>
                   startTransition(async () => {
                     try {
-                      setCurrent(await getLead(current.id));
+                      const fresh = coordination
+                        ? await coordination.reconcile()
+                        : await getLead(current.id);
+                      if (!fresh) return;
+                      setCurrent(fresh);
                       setMustReload(false);
                       setError(
                         "Latest assignment loaded. Review and explicitly save your selection again.",
@@ -174,7 +214,9 @@ export function AssignmentDialog({
               label={current.assignedAgent ? "Save assignment" : "Assign agent"}
               pendingLabel="Saving assignment…"
               disabled={
-                mustReload || selected === (current.assignedAgent?.id || "")
+                coordination?.blocked ||
+                mustReload ||
+                selected === (current.assignedAgent?.id || "")
               }
             />
           </DialogFooter>

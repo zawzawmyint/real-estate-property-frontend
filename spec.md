@@ -6,6 +6,10 @@ Status: Project overview. Foundation, staff authentication/roles, property manag
 
 The [lead duplicate detection specification](specs/lead-duplicate-detection/spec.md) verifies backend-owned canonical phone matching, scoped CRM warnings/acknowledgement, counts/filtering and lead-import v2 review, with no public duplicate disclosure. The [backend contract snapshot](docs/contracts/lead-duplicate-detection.md) mirrors the backend narrative contract. Patched frontend/backend checks, disposable migration verification, runtime inspection, responsive/native-zoom review and the final clean serial browser run passed. No deployment or normal-database migration is claimed.
 
+## Verified P2-06
+
+The [lead temperature tags specification](specs/lead-temperature-tags/spec.md), [backend contract snapshot](docs/contracts/lead-temperature-tags.md) and [implementation plan](docs/superpowers/plans/2026-11-17-lead-temperature-tags.md) verify manual staff temperature, default Not assessed, detail/list/pipeline presentation, scoped list/pipeline/export filtering and activity history. Frontend final `bun run check` passed API drift, lint, formatting, typecheck, 416 tests in 61 files and production build with 20 static outputs. The browser matrix covers all 486 current tests exactly once: 419 passed and 67 expected skips, with no failures/missing/unexpected/duplicates. It combines the November 17 interrupted run (207 completed cases) and the November 18 resumed fresh-fixture run (222 passed, 57 expected skips), and is not represented as one uninterrupted clean run. Responsive review passed at 320/390/768/1440px, native 200% zoom passed at 1280 physical/640 CSS pixels, keyboard review passed, and the November 18 runtime inspection was clean. No deployment or normal-database migration is claimed.
+
 ## Purpose and scope
 
 Provide the Avenor Properties public website and internal staff CRM interface in one independently versioned frontend repository. Deliver one verified feature slice at a time. The client portal is later, optional work.

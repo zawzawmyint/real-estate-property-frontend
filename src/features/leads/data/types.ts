@@ -14,6 +14,7 @@ export type CreateLead = components["schemas"]["LeadCreateInput"];
 export type PatchLead = components["schemas"]["LeadPatchInput"];
 export type AssignmentInput = components["schemas"]["LeadAssignmentInput"];
 export type StageInput = components["schemas"]["LeadStageInput"];
+export type TemperatureInput = components["schemas"]["LeadTemperatureInput"];
 export type NoteInput = components["schemas"]["LeadNoteInput"];
 export type NoteResult = components["schemas"]["LeadNoteResult"];
 export type InquiryInput = components["schemas"]["InquiryInput"];

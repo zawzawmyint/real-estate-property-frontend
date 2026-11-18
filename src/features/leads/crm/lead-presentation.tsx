@@ -2,7 +2,7 @@ import Link from "next/link";
 import { leadsHref } from "../data/filters";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/crm/status-badge";
-import { stageLabels, sourceLabels } from "../data/input";
+import { stageLabels, sourceLabels, temperatureLabels } from "../data/input";
 import type { LeadSummary } from "../data/types";
 export function StageBadge({
   stage,
@@ -61,6 +61,34 @@ export function LeadDate({ value }: { value: string }) {
         year: "numeric",
       })}
     </time>
+  );
+}
+export function TemperatureBadge({
+  temperature,
+}: {
+  temperature: LeadSummary["temperature"];
+}) {
+  if (temperature === "hot")
+    return (
+      <Badge
+        variant="outline"
+        className="border-primary/20 bg-primary/10 text-primary"
+      >
+        Hot
+      </Badge>
+    );
+  return (
+    <StatusBadge
+      tone={
+        temperature === "warm"
+          ? "warning"
+          : temperature === "cold"
+            ? "info"
+            : "neutral"
+      }
+    >
+      {temperatureLabels[temperature]}
+    </StatusBadge>
   );
 }
 export function budgetLabel(

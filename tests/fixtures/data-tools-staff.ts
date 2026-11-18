@@ -1,7 +1,8 @@
 import { expect, test, type Cookie, type Page } from "@playwright/test";
 
 type StaffRole = "admin" | "manager" | "agent";
-type Namespace = "csv-export" | "lead-import" | "property-import";
+type Namespace =
+  "csv-export" | "lead-import" | "property-import" | "lead-temperature";
 type Identity = { id: string; name: string; role: StaffRole };
 const sessions = new Map<string, { cookies: Cookie[]; identity: Identity }>();
 

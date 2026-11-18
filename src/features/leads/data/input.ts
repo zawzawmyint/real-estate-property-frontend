@@ -26,6 +26,17 @@ export const sourceLabels = {
   call: "Call",
   walk_in: "Walk-in",
 };
+export const temperatures = ["hot", "warm", "cold", "unassessed"] as const;
+export const temperatureLabels = {
+  hot: "Hot",
+  warm: "Warm",
+  cold: "Cold",
+  unassessed: "Not assessed",
+};
+export const temperatureSchema = z.strictObject({
+  expectedVersion: z.number().int().positive(),
+  temperature: z.enum(temperatures),
+});
 const phone = z
   .string()
   .transform((value) => value.replace(/\s/g, " ").trim())

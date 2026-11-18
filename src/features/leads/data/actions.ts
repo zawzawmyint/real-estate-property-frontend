@@ -11,6 +11,7 @@ import {
   noteSchema,
   patchLeadSchema,
   stageSchema,
+  temperatureSchema,
 } from "./input";
 import type {
   ActionResult,
@@ -19,6 +20,7 @@ import type {
   PatchLead,
   AssignmentInput,
   StageInput,
+  TemperatureInput,
   NoteInput,
   NoteResult,
   InquiryInput,
@@ -60,6 +62,16 @@ export async function changeStage(id: string, input: StageInput) {
     () => {
       path(id);
       return stageSchema.parse(input);
+    },
+  );
+}
+export async function changeTemperature(id: string, input: TemperatureInput) {
+  return runLeadMutation<LeadDetail>(
+    `staff/leads/${encodeURIComponent(id)}/temperature`,
+    "PATCH",
+    () => {
+      path(id);
+      return temperatureSchema.parse(input);
     },
   );
 }

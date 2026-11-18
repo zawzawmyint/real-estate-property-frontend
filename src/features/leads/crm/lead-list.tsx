@@ -11,6 +11,7 @@ import { leadQuery, leadsHref, type LeadFilters } from "../data/filters";
 import { AssignmentDialog } from "./assignment-dialog";
 import {
   StageBadge,
+  TemperatureBadge,
   SourceBadge,
   LeadDate,
   AssigneeContext,
@@ -34,7 +35,8 @@ export function LeadList({
     filters.stage ||
     filters.source ||
     filters.agentId ||
-    filters.duplicates,
+    filters.duplicates ||
+    filters.temperature,
   );
   const detail = (id: string) =>
     `/crm/leads/${id}?from=${encodeURIComponent(query)}`;
@@ -97,7 +99,12 @@ export function LeadList({
     {
       id: "stage",
       header: "Stage",
-      cell: (lead) => <StageBadge stage={lead.stage} workspace />,
+      cell: (lead) => (
+        <div className="flex flex-wrap gap-2">
+          <StageBadge stage={lead.stage} workspace />
+          <TemperatureBadge temperature={lead.temperature} />
+        </div>
+      ),
     },
     ...(manager
       ? [
@@ -220,7 +227,10 @@ export function LeadList({
               {budgetLabel(lead.budgetFils, lead.purpose)}
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
-              <SourceBadge source={lead.source} workspace />
+              <div className="flex flex-wrap gap-2">
+                <SourceBadge source={lead.source} workspace />
+                <TemperatureBadge temperature={lead.temperature} />
+              </div>
               <LeadDate value={lead.createdAt} />
             </div>
             {manager && (
