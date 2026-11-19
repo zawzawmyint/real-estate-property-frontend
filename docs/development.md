@@ -30,6 +30,8 @@ The disposable backend seeds fictional featured listings by default so public im
 
 Dashboard acceptance is deliberately isolated from the legacy browser fixture because it requires an exact ten-lead agency population. In the backend terminal, set the same temporary `STAFF_E2E_PASSWORD`, then set `STAFF_E2E_DASHBOARD_ONLY=1` before starting `bun run test:auth:e2e-server`. In the frontend terminal, set both variables and run `bun run test:e2e -- tests/e2e/dashboard.spec.ts --workers=1`. The dashboard suite is skipped unless this flag is set; do not set it for the normal legacy suite.
 
+Agent-performance browser coverage uses the normal disposable fixture with `STAFF_E2E_AGENT_PERFORMANCE=1` and the existing `STAFF_E2E_STATE_FILE` state path. It seeds only synthetic report identities and historical activity; use a separate backend/proxy/SQLite state for each full desktop or mobile project. The dashboard-only fixture excludes the report seed, so retain `STAFF_E2E_DASHBOARD_ONLY=1` for its dedicated exact-data run. These flags are test-fixture controls, never application configuration.
+
 The test-only `E2E_BACKEND_PORT` selects the proxy's strict `127.0.0.1` upstream; it defaults to `4311`. To use an alternate port such as `14311`, set `E2E_BACKEND_PORT=14311` and `PORT=14311` in the backend fixture terminal, then set `E2E_BACKEND_PORT=14311` in the frontend test terminal. The fixture also uses that port for its test `PUBLIC_ORIGIN`, including media URLs. This is fixture/proxy configuration only and does not change production environment configuration.
 
 ## Public agency catalog and portraits

@@ -6,6 +6,7 @@ docs/contracts/properties.openapi.yaml
 docs/contracts/viewings.openapi.yaml
 docs/contracts/tasks.openapi.yaml
 docs/contracts/dashboard.openapi.yaml
+docs/contracts/agent-performance.openapi.yaml
 out
 coverage
 playwright-report

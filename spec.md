@@ -2,6 +2,10 @@
 
 Status: Project overview. Foundation, staff authentication/roles, property management, public discovery and demo data are verified.
 
+## Verified P2-07
+
+The [agent performance reporting specification](specs/agent-performance-reporting/spec.md), [backend contract snapshot](docs/contracts/agent-performance-reporting.md) and [implementation plan](docs/superpowers/plans/2026-11-18-agent-performance-reporting.md) verify the read-only `/crm/reports/agents` workflow and its authoritative backend report. It uses Dubai date windows, role-scoped historical aggregates, provable assignment attribution, first-ever Won credit, recorded follow-up cohorts and explicit coverage limits. Backend quality gates passed with 310 tests in 65 files; frontend quality gates passed API parity, lint, format, typecheck, 440 tests in 62 files and build. Separate clean serial desktop/mobile projects accounted for all 508 discovered browser cases with zero failures; a separate dashboard fixture passed 16/16. No deployment, normal-database migration or native Safari verification is claimed.
+
 ## Verified P2-05
 
 The [lead duplicate detection specification](specs/lead-duplicate-detection/spec.md) verifies backend-owned canonical phone matching, scoped CRM warnings/acknowledgement, counts/filtering and lead-import v2 review, with no public duplicate disclosure. The [backend contract snapshot](docs/contracts/lead-duplicate-detection.md) mirrors the backend narrative contract. Patched frontend/backend checks, disposable migration verification, runtime inspection, responsive/native-zoom review and the final clean serial browser run passed. No deployment or normal-database migration is claimed.

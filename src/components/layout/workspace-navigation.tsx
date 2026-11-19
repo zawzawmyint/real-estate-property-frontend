@@ -11,6 +11,7 @@ const destinations = [
   ["/crm/leads", "Leads", "leads"],
   ["/crm/viewings", "Viewings", "calendar"],
   ["/crm/tasks", "Tasks", "tasks"],
+  ["/crm/reports/agents", "Reports", "overview"],
 ] as const;
 
 export function WorkspaceNavigation({

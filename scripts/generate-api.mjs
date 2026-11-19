@@ -10,6 +10,7 @@ for (const domain of [
   "viewings",
   "tasks",
   "dashboard",
+  "agent-performance",
   "notifications",
 ]) {
   const schema = new URL(
