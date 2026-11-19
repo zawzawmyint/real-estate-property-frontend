@@ -2,7 +2,11 @@ import { expect, test, type Cookie, type Page } from "@playwright/test";
 
 type StaffRole = "admin" | "manager" | "agent";
 type Namespace =
-  "csv-export" | "lead-import" | "property-import" | "lead-temperature";
+  | "csv-export"
+  | "lead-import"
+  | "property-import"
+  | "lead-temperature"
+  | "agent-performance";
 type Identity = { id: string; name: string; role: StaffRole };
 const sessions = new Map<string, { cookies: Cookie[]; identity: Identity }>();
 
@@ -11,9 +15,10 @@ export async function signInDataToolsStaff(
   page: Page,
   namespace: Namespace,
   role: StaffRole,
+  accountLabel: string = role,
 ) {
   const project = test.info().project.name;
-  const key = `${namespace}-${project}-${role}`;
+  const key = `${namespace}-${project}-${accountLabel}`;
   const origin = test.info().project.use.baseURL ?? "http://localhost:3100";
   await page.context().clearCookies();
   const saved = sessions.get(key);

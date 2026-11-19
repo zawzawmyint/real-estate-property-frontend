@@ -14,6 +14,7 @@ const publicAgencyPaths = new Set([
   "/api/v1/public/agents/daniel-brooks",
   "/api/v1/public/agents/leila-mansour",
 ]);
+const reportPath = "/api/v1/staff/reports/agent-performance";
 
 function json(response, status, body) {
   response.writeHead(status, { "Content-Type": "application/json" });
@@ -101,6 +102,11 @@ const server = createServer(async (incoming, response) => {
       const rule = JSON.parse(body.toString());
       const publicAgencyRead =
         rule.method === "GET" && publicAgencyPaths.has(rule.path);
+      const reportRead =
+        rule.method === "GET" &&
+        rule.path === reportPath &&
+        typeof rule.sessionDigest === "string" &&
+        /^[a-f0-9]{64}$/.test(rule.sessionDigest);
 
       if (
         !["GET", "POST", "PATCH", "DELETE"].includes(rule.method) ||
@@ -110,6 +116,7 @@ const server = createServer(async (incoming, response) => {
           ) ||
           (rule.method === "GET" && rule.path === "/api/v1/properties") ||
           publicAgencyRead ||
+          reportRead ||
           (rule.method === "GET" &&
             rule.path === "/api/v1/staff/dashboard" &&
             typeof rule.sessionDigest === "string" &&
@@ -147,6 +154,7 @@ const server = createServer(async (incoming, response) => {
           )) ||
         (rule.status !== undefined &&
           rule.status !== 503 &&
+          !(reportRead && rule.status === 422) &&
           !(
             [404, 429].includes(rule.status) &&
             rule.method === "POST" &&
@@ -264,7 +272,7 @@ const server = createServer(async (incoming, response) => {
       if (rule.status) {
         json(response, rule.status, {
           error: {
-            code: "UNAVAILABLE",
+            code: rule.status === 422 ? "REPORT_TOO_LARGE" : "UNAVAILABLE",
             message: "Fixture service unavailable",
             requestId: "e2e-proxy",
           },

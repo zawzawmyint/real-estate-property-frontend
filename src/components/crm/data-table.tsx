@@ -21,6 +21,7 @@ export function DataTable<T>({
   columns,
   getRowKey,
   label,
+  scrollLabel,
   empty,
   renderMobile,
   variant = "default",
@@ -29,6 +30,7 @@ export function DataTable<T>({
   columns: readonly DataColumn<T>[];
   getRowKey: (row: T) => Key;
   label: string;
+  scrollLabel?: string;
   empty: ReactNode;
   renderMobile?: (row: T) => ReactNode;
   variant?: "default" | "workspace";
@@ -44,6 +46,7 @@ export function DataTable<T>({
       >
         <Table
           aria-label={label}
+          scrollLabel={scrollLabel}
           className={
             variant === "workspace" ? "text-sm lg:text-base" : undefined
           }
@@ -55,6 +58,7 @@ export function DataTable<T>({
               {columns.map((column) => (
                 <TableHead
                   key={column.id}
+                  scope="col"
                   className={cn(
                     variant === "workspace" && "h-11 px-4 font-semibold",
                     column.headerClassName,
