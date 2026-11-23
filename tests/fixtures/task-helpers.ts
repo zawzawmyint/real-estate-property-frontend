@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { expect, test, type Cookie, type Page } from "@playwright/test";
 import { createReviewedLead } from "./create-lead";
 
-export const taskHeaders = { Origin: "http://localhost:3100" };
+export const taskHeaders = {
+  Origin: process.env.E2E_APP_ORIGIN ?? "http://localhost:3100",
+};
 const sessions = new Map<
   string,
   { cookies: Cookie[]; user: { id: string; name: string } }

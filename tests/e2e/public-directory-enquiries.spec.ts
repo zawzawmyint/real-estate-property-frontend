@@ -5,7 +5,7 @@ import { signInTask } from "../fixtures/task-helpers";
 test.setTimeout(90_000);
 
 const control = "http://127.0.0.1:4312/_e2e/rules";
-const origin = "http://localhost:3100";
+const origin = process.env.E2E_APP_ORIGIN ?? "http://localhost:3100";
 const enquiryMessage = "A fictional directory enquiry about a home in Dubai.";
 const receipt = (page: Page) =>
   page.getByText("Your enquiry has been received.", { exact: true });

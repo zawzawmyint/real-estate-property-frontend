@@ -10,7 +10,7 @@ Give CRM staff a bell that updates live and keeps unread alerts available across
 
 - P2-02: inbox, unread count, mark as read and live lead assignment/reassignment alerts.
 - Supplemental delivered slices on the same inbox: viewing reschedule/cancellation, upcoming follow-up task and website inquiry alerts.
-- Staff email, client email, browser push and notification preferences are follow-up work.
+- Staff/customer email delivery is verified separately in [shared transactional email compatibility](../transactional-emails/spec.md), without changing this inbox/SSE contract. Browser push and notification preferences remain follow-up work.
 
 ## User flow
 
