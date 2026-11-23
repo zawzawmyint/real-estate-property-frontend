@@ -2,6 +2,8 @@
 
 Status: Verified 2026-10-29 on `feat/follow-up-tasks`.
 
+Email extension: [shared transactional email compatibility](../transactional-emails/spec.md) verifies unchanged task UI/API behavior while the backend adds due-task email delivery independently of the inbox. The original slice's exclusions below remain historical scope boundaries.
+
 ## Goal
 
 Let staff record the next action for a lead with a due date/time and quickly find overdue follow-ups.

@@ -2,6 +2,8 @@
 
 Status: Verified — 2026-10-29. Backend, frontend, browser and live-runtime evidence is recorded below.
 
+Email extension: [shared transactional email compatibility](../transactional-emails/spec.md) verifies unchanged viewing UI/API behavior while the backend adds customer viewing emails and staff viewing-change alerts. The original slice's exclusions below remain historical scope boundaries.
+
 ## Goal
 
 Deliver P1-23–P1-25: staff can arrange a property visit for a lead, see the schedule in a calendar and record feedback after the visit.
