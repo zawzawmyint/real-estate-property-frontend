@@ -1,5 +1,9 @@
 # Feature specifications
 
+## Redis notification transport — implemented locally
+
+- [Redis notification transport compatibility](notification-redis-pubsub/spec.md): locally verified backend cross-process refresh signals with unchanged CRM inbox/SSE behavior. P2-02 remains verified at its existing scope; production activation is not claimed. Backend owns the feature specification and implementation plan in its independent repository.
+
 ## Shared transactional emails — implemented locally
 
 - [Shared transactional email notifications](transactional-emails/spec.md): locally verified backend delivery for staff assignment, viewing changes, task reminders and website enquiries, plus customer viewing confirmation, reminder, reschedule and cancellation. It preserves the frontend/API contract; no frontend delivery settings UI or API change is introduced.
@@ -45,7 +49,7 @@ The companion backend repository's `specs/README.md` indexes the diagrams for st
 
 ## Verified Phase 2 CRM enhancements
 
-- [CRM notifications](crm-notifications/spec.md): verified P2-02 assignment/reassignment notifications with a persistent inbox, unread/read state and SSE. Verified supplemental viewing, task-reminder and staff-inquiry alerts share the inbox. The [transactional email feature](transactional-emails/spec.md) now delivers the corresponding backend email extension locally; WhatsApp, Redis fanout and deployed-ingress verification remain follow-up work.
+- [CRM notifications](crm-notifications/spec.md): verified P2-02 assignment/reassignment notifications with a persistent inbox, unread/read state and SSE. Verified supplemental viewing, task-reminder and staff-inquiry alerts share the inbox. The [transactional email feature](transactional-emails/spec.md) now delivers the corresponding backend email extension locally; WhatsApp, deployed-ingress verification and production Redis activation remain follow-up work.
 - [CRM property matching](property-matching/spec.md): verified P2-03 lead-detail matching panel for explicit Buy/Rent, maximum AED, area, type and exact-bedroom criteria. It uses the backend-owned read-only route through a same-origin handler and the generated leads snapshot, returns only shareable public listing summaries, and preserves local filters for retry and pagination. No extraction, provider, migration or deployment is included.
 
 ## Verified public property chatbot

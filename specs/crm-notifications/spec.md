@@ -41,8 +41,10 @@ Frontend unit tests (306 tests in 49 files), API-contract drift, lint, typecheck
 
 ## Rollout and risks
 
-Deploy the backend migration and routes before the client. The stream returns `Cache-Control: no-store, no-transform` and `X-Accel-Buffering: no` so the current Next rewrite does not buffer it; deployment ingress remains to be verified. A browser reconnect reloads the canonical inbox. To roll back the UI, remove the bell and stream subscription together.
+The [Redis transport compatibility feature](../notification-redis-pubsub/spec.md) records the locally verified backend cross-process signal delivery follow-up. It keeps this feature's inbox/SSE presentation and API snapshot unchanged; memory remains the backend default and Redis activation is an operations choice.
+
+Deploy the backend migration and routes before the client. The stream returns `Cache-Control: no-store, no-transform` and `X-Accel-Buffering: no` so the current Next rewrite does not buffer it; deployment ingress remains to be verified. A browser reconnect reloads the canonical inbox. Redis Pub/Sub is at-most-once and has no browser-facing credentials or replay; backend recovery refreshes existing SSE listeners after confirmed resubscription. To roll back Redis activation, operators return the backend transport to memory and restart affected APIs; no UI rollback is required.
 
 ## Implementation evidence
 
-The implementation and frontend contract snapshot are verified. P2-02 is checked in the roadmap. Viewing, task-reminder and staff-inquiry alerts are verified supplemental slices; they do not implement an email/WhatsApp auto-reply, notification preferences, Redis transport, or deployed production ingress.
+The implementation and frontend contract snapshot are verified. P2-02 is checked in the roadmap. Viewing, task-reminder and staff-inquiry alerts are verified supplemental slices; they do not implement an email/WhatsApp auto-reply, notification preferences, or deployed production ingress. The backend Redis transport follow-up is locally verified without frontend production changes.
