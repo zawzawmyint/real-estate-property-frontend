@@ -1,5 +1,9 @@
 # Feature specifications
 
+## Record activity log — verified locally
+
+- [P3-04 record activity log](record-audit-log/spec.md), [local contract snapshot](../docs/contracts/record-audit-log.md) and [implementation plan](../docs/superpowers/plans/2026-11-26-record-audit-log.md): locally verified Admin/Manager investigation screen with full agency visibility, including Admin actions. Backend owns event persistence and the API contract. Deployment and normal-database migration are not claimed.
+
 ## Redis notification transport — implemented locally
 
 - [Redis notification transport compatibility](notification-redis-pubsub/spec.md): locally verified backend cross-process refresh signals with unchanged CRM inbox/SSE behavior. P2-02 remains verified at its existing scope; production activation is not claimed. Backend owns the feature specification and implementation plan in its independent repository.

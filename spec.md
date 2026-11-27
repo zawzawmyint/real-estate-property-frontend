@@ -2,6 +2,10 @@
 
 Status: Project overview. Foundation, staff authentication/roles, property management, public discovery and demo data are verified.
 
+## Verified locally P3-04 — record activity log
+
+[Feature specification](specs/record-audit-log/spec.md), local [contract snapshot](docs/contracts/record-audit-log.md) and [implementation plan](docs/superpowers/plans/2026-11-26-record-audit-log.md) verify the Admin/Manager agency-wide investigation screen, including Admin actions; Agents retain existing lead timelines. Frontend `bun run check` passed API parity, lint, format, typecheck, 457 tests in 63 files and production build. Dedicated browser verification registered 10 tests: 9 passed and one intentional duplicate-mobile native-zoom skip. Backend ownership, deployment, normal-database migration, production retention/backup decisions and earlier roadmap release gates remain separate.
+
 ## Verified P2-07
 
 The [agent performance reporting specification](specs/agent-performance-reporting/spec.md), [backend contract snapshot](docs/contracts/agent-performance-reporting.md) and [implementation plan](docs/superpowers/plans/2026-11-18-agent-performance-reporting.md) verify the read-only `/crm/reports/agents` workflow and its authoritative backend report. It uses Dubai date windows, role-scoped historical aggregates, provable assignment attribution, first-ever Won credit, recorded follow-up cohorts and explicit coverage limits. Backend quality gates passed with 310 tests in 65 files; frontend quality gates passed API parity, lint, format, typecheck, 440 tests in 62 files and build. Separate clean serial desktop/mobile projects accounted for all 508 discovered browser cases with zero failures; a separate dashboard fixture passed 16/16. No deployment, normal-database migration or native Safari verification is claimed.

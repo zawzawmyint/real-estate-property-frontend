@@ -102,6 +102,11 @@ const server = createServer(async (incoming, response) => {
       const rule = JSON.parse(body.toString());
       const publicAgencyRead =
         rule.method === "GET" && publicAgencyPaths.has(rule.path);
+      const auditRead =
+        rule.method === "GET" &&
+        rule.path === "/api/v1/staff/audit-log" &&
+        typeof rule.sessionDigest === "string" &&
+        /^[a-f0-9]{64}$/.test(rule.sessionDigest);
       const reportRead =
         rule.method === "GET" &&
         rule.path === reportPath &&
@@ -117,6 +122,7 @@ const server = createServer(async (incoming, response) => {
           (rule.method === "GET" && rule.path === "/api/v1/properties") ||
           publicAgencyRead ||
           reportRead ||
+          auditRead ||
           (rule.method === "GET" &&
             rule.path === "/api/v1/staff/dashboard" &&
             typeof rule.sessionDigest === "string" &&
