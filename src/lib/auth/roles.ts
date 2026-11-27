@@ -5,3 +5,7 @@ export type StaffRole = (typeof staffRoles)[number];
 export function isStaffRole(value: unknown): value is StaffRole {
   return staffRoles.some((role) => role === value);
 }
+
+export function canReadAudit(role: StaffRole | undefined) {
+  return role === "admin" || role === "manager";
+}

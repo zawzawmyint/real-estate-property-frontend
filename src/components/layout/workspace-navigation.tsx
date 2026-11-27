@@ -12,12 +12,15 @@ const destinations = [
   ["/crm/viewings", "Viewings", "calendar"],
   ["/crm/tasks", "Tasks", "tasks"],
   ["/crm/reports/agents", "Reports", "overview"],
+  ["/crm/activity-log", "Activity log", "tasks"],
 ] as const;
 
 export function WorkspaceNavigation({
   showLabels = false,
+  auditAccess = false,
 }: {
   showLabels?: boolean;
+  auditAccess?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -27,6 +30,7 @@ export function WorkspaceNavigation({
       className={cn("flex gap-2", showLabels ? "flex-col" : "lg:flex-col")}
     >
       {destinations.map(([href, label, icon]) => {
+        if (href === "/crm/activity-log" && !auditAccess) return null;
         const active =
           href === "/crm"
             ? pathname === href

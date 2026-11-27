@@ -2,6 +2,7 @@ import { expect, test, type Cookie, type Page } from "@playwright/test";
 
 type StaffRole = "admin" | "manager" | "agent";
 type Namespace =
+  | "activity-log"
   | "csv-export"
   | "lead-import"
   | "property-import"

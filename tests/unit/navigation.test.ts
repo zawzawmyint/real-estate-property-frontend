@@ -9,8 +9,21 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams({ purpose: location.purpose }),
 }));
 
+import { canReadAudit } from "@/lib/auth/roles";
 import { WorkspaceNavigation } from "@/components/layout/workspace-navigation";
 import { PublicHeader } from "@/components/layout/public-header";
+
+it.each(["admin", "manager", "agent", undefined] as const)(
+  "limits activity log navigation for %s",
+  (role) => {
+    const html = renderToStaticMarkup(
+      createElement(WorkspaceNavigation, { auditAccess: canReadAudit(role) }),
+    );
+    expect(html.includes('href="/crm/activity-log"')).toBe(
+      role === "admin" || role === "manager",
+    );
+  },
+);
 
 beforeEach(() => {
   location.pathname = "/crm";

@@ -6,9 +6,11 @@ import { cn } from "@/lib/utils";
 
 export function WorkspaceSidebar({
   compact = false,
+  auditAccess,
   account,
 }: {
   compact?: boolean;
+  auditAccess: boolean;
   account: ReactNode;
 }) {
   return (
@@ -20,7 +22,7 @@ export function WorkspaceSidebar({
     >
       <div className="flex-1">
         <p className="sr-only">Workspace</p>
-        <WorkspaceNavigation showLabels={!compact} />
+        <WorkspaceNavigation showLabels={!compact} auditAccess={auditAccess} />
       </div>
       <div
         className={cn(

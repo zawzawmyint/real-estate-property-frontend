@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useStaffAccount } from "@/features/auth/staff-account";
+import { canReadAudit } from "@/lib/auth/roles";
 import { Brand } from "@/components/layout/brand";
 import { WorkspaceSidebar } from "@/components/layout/workspace-sidebar";
 import { WorkspaceMenu } from "@/components/layout/workspace-menu";
@@ -22,6 +24,8 @@ export function WorkspaceShell({
 }) {
   const [expanded, setExpanded] = useState(false);
   const ready = useClientReady();
+  const { identity } = useStaffAccount();
+  const auditAccess = canReadAudit(identity?.role);
   const label = expanded ? "Collapse sidebar" : "Expand sidebar";
 
   return (
@@ -62,6 +66,7 @@ export function WorkspaceShell({
         <div className="flex min-h-0 flex-1 flex-col px-3 py-4">
           <WorkspaceSidebar
             compact={!expanded}
+            auditAccess={auditAccess}
             account={expanded ? account : compactAccount}
           />
         </div>
@@ -73,7 +78,7 @@ export function WorkspaceShell({
           className="flex min-h-14 items-center justify-between gap-2 border-b border-border px-4 sm:px-6 lg:px-8"
         >
           <div className="lg:hidden">
-            <WorkspaceMenu account={account} />
+            <WorkspaceMenu account={account} auditAccess={auditAccess} />
           </div>
           <span className="hidden text-sm font-medium text-muted-foreground lg:inline">
             Workspace
